@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "About us";
+}
+
+@await Html.PartialAsync("Partials/_Breadcrumb.cshtml")
+<div class="container">
+    <div class="row">
+        @await Html.PartialAsync("Partials/_Slider.cshtml")
+        @await Html.PartialAsync("Partials/_About.cshtml")
+        @await Html.PartialAsync("Partials/_Services.cshtml")
+        @await Html.PartialAsync("Partials/_Destination.cshtml")
+    </div>
+</div>

@@ -78,6 +78,9 @@
                                 <li class="@(action == "Index" && controller == "Home" ? "active" : "")">
                                     <a href="@Url.Action("Index", "Home", new { area = "Customer" })">HOMEPAGE</a>
                                 </li>
+                                <li class="@(action == "About" && controller == "Home" ? "active" : "")">
+                                    <a href="@Url.Action("About", "Home", new { area = "Customer" })">ABOUT US</a>
+                                </li>
                                 <li class="parent-menu @(controller == "Features" ? "active" : "")">
                                     <a href="#">FEATURES</a>
                                     <ul style="display: none; visibility: hidden">
