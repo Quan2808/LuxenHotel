@@ -1,3 +1,8 @@
+@{
+    var action = ViewContext.RouteData.Values["Action"] as string;
+    var controller = ViewContext.RouteData.Values["Controller"] as string;
+}
+
 <div class="header">
     <!-- Header Section -->
     <div class="pre-header">
@@ -70,12 +75,10 @@
                     <div class="pull-left">
                         <nav class="nav">
                             <ul id="navigate" class="sf-menu navigate superfish">
-                                <li
-                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Index" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                <li class="@(action == "Index" && controller == "Home" ? "active" : "")">
                                     <a href="@Url.Action("Index", "Home", new { area = "Customer" })">HOMEPAGE</a>
                                 </li>
-                                <li
-                                    class="parent-menu @(ViewContext.RouteData.Values["Controller"].ToString() == "Features" ? "active" : "")">
+                                <li class="parent-menu @(controller == "Features" ? "active" : "")">
                                     <a href="#">FEATURES</a>
                                     <ul style="display: none; visibility: hidden">
                                         <li><a href="#">2 Homepages</a></li>
@@ -89,8 +92,7 @@
                                                 Page</a></li>
                                     </ul>
                                 </li>
-                                <li
-                                    class="parent-menu @(ViewContext.RouteData.Values["Controller"].ToString() == "Pages" ? "active" : "")">
+                                <li class="parent-menu @(controller == "Pages" ? "active" : "")">
                                     <a href="#">PAGES</a>
                                     <ul style="display: none; visibility: hidden">
                                         <li><a href="@Url.Action("About", "Home", new { area = "Customer" })">About</a>
@@ -128,20 +130,18 @@
                                                 Page</a></li>
                                     </ul>
                                 </li>
-                                <li
-                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Blog" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                <li class="@(action == "Blog" && controller == "Home" ? "active" : "")">
                                     <a href="@Url.Action("Blog", "Home", new { area = "Customer" })">NEWS</a>
                                 </li>
-                                <li
-                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Contact" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                <li class="@(action == "Contact" && controller == "Home" ? "active" : "")">
                                     <a href="@Url.Action("Contact", "Home", new { area = "Customer" })">CONTACT</a>
                                 </li>
-                                <li
-                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "SignIn" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                <li class="@(action == "SignIn" && controller == "Home" ? "active" : "")">
                                     <a href="@Url.Action("SignIn", "Home", new { area = "Customer" })">SIGN IN</a>
                                 </li>
                             </ul>
                         </nav>
+
                     </div>
                     <div class="pull-right">
                         <div class="button-style-1 margint45">
