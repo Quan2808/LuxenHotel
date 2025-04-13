@@ -63,62 +63,83 @@
             <div class="row">
                 <div class="pull-left">
                     <div class="logo">
-                        <a href="index.html"><img alt="Logo" src="assets/images/logo.png" class="img-responsive" /></a>
+                        <a href="index.html"><img alt="Logo" src="~/images/logo.png" class="img-responsive" /></a>
                     </div>
                 </div>
                 <div class="pull-right">
                     <div class="pull-left">
                         <nav class="nav">
                             <ul id="navigate" class="sf-menu navigate superfish">
-                                <li><a href="index.html">HOMEPAGE</a></li>
-                                <li class="parent-menu">
+                                <li
+                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Index" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                    <a href="@Url.Action("Index", "Home", new { area = "Customer" })">HOMEPAGE</a>
+                                </li>
+                                <li
+                                    class="parent-menu @(ViewContext.RouteData.Values["Controller"].ToString() == "Features" ? "active" : "")">
                                     <a href="#">FEATURES</a>
                                     <ul style="display: none; visibility: hidden">
                                         <li><a href="#">2 Homepages</a></li>
                                         <li><a href="#">Ajax/PHP Booking Form</a></li>
                                         <li><a href="#">Ultra Responsive</a></li>
-                                        <li>
-                                            <a href="under-construction.html">Countdown Page</a>
-                                        </li>
+                                        <li><a
+                                                href="@Url.Action("UnderConstruction", "Home", new { area = "Customer" })">Countdown
+                                                Page</a></li>
                                         <li><a href="#">2 Category Pages</a></li>
-                                        <li><a href="404.html">404 Page</a></li>
+                                        <li><a href="@Url.Action("NotFound", "Home", new { area = "Customer" })">404
+                                                Page</a></li>
                                     </ul>
                                 </li>
-                                <li class="parent-menu">
+                                <li
+                                    class="parent-menu @(ViewContext.RouteData.Values["Controller"].ToString() == "Pages" ? "active" : "")">
                                     <a href="#">PAGES</a>
                                     <ul style="display: none; visibility: hidden">
-                                        <li><a href="about.html">About</a></li>
-                                        <li><a href="team.html">Team</a></li>
-                                        <li>
-                                            <a href="category-grid.html">Category Grid</a>
+                                        <li><a href="@Url.Action("About", "Home", new { area = "Customer" })">About</a>
                                         </li>
-                                        <li><a href="room-single.html">Room Details</a></li>
-                                        <li><a href="portfolio.html">Portfolio</a></li>
-                                        <li>
-                                            <a href="reservation-form-dark.html">Dark Reservation Form</a>
+                                        <li><a href="@Url.Action("Team", "Home", new { area = "Customer" })">Team</a>
                                         </li>
-
-                                        <li>
-                                            <a href="reservation-form-light.html">Light Reservation Form</a>
+                                        <li><a href="@Url.Action("CategoryGrid", "Home", new { area = "Customer" })">Category
+                                                Grid</a></li>
+                                        <li><a href="@Url.Action("RoomSingle", "Home", new { area = "Customer" })">Room
+                                                Details</a></li>
+                                        <li><a
+                                                href="@Url.Action("Portfolio", "Home", new { area = "Customer" })">Portfolio</a>
                                         </li>
-                                        <li><a href="gallery.html">Gallery</a></li>
-                                        <li><a href="blog.html">Blog</a></li>
-                                        <li><a href="blog-details.html">Blog Single</a></li>
-                                        <li>
-                                            <a href="left-sidebar-page.html">Left Sidebar Page</a>
+                                        <li><a
+                                                href="@Url.Action("ReservationFormDark", "Home", new { area = "Customer" })">Dark
+                                                Reservation Form</a></li>
+                                        <li><a
+                                                href="@Url.Action("ReservationFormLight", "Home", new { area = "Customer" })">Light
+                                                Reservation Form</a></li>
+                                        <li><a
+                                                href="@Url.Action("Gallery", "Home", new { area = "Customer" })">Gallery</a>
                                         </li>
-                                        <li>
-                                            <a href="right-sidebar-page.html">Right Sidebar Page</a>
+                                        <li><a href="@Url.Action("Blog", "Home", new { area = "Customer" })">Blog</a>
                                         </li>
-                                        <li>
-                                            <a href="under-construction.html">Under Construction</a>
-                                        </li>
-                                        <li><a href="404.html">404 Page</a></li>
+                                        <li><a href="@Url.Action("BlogDetails", "Home", new { area = "Customer" })">Blog
+                                                Single</a></li>
+                                        <li><a href="@Url.Action("LeftSidebar", "Home", new { area = "Customer" })">Left
+                                                Sidebar Page</a></li>
+                                        <li><a href="@Url.Action("RightSidebar", "Home", new { area = "Customer" })">Right
+                                                Sidebar Page</a></li>
+                                        <li><a
+                                                href="@Url.Action("UnderConstruction", "Home", new { area = "Customer" })">Under
+                                                Construction</a></li>
+                                        <li><a href="@Url.Action("NotFound", "Home", new { area = "Customer" })">404
+                                                Page</a></li>
                                     </ul>
                                 </li>
-                                <li><a href="blog.html">NEWS</a></li>
-                                <li><a href="contact.html">CONTACT</a></li>
-                                <li><a href="contact.html">SIGN IN</a></li>
+                                <li
+                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Blog" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                    <a href="@Url.Action("Blog", "Home", new { area = "Customer" })">NEWS</a>
+                                </li>
+                                <li
+                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "Contact" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                    <a href="@Url.Action("Contact", "Home", new { area = "Customer" })">CONTACT</a>
+                                </li>
+                                <li
+                                    class="@(ViewContext.RouteData.Values["Action"].ToString() == "SignIn" && ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")">
+                                    <a href="@Url.Action("SignIn", "Home", new { area = "Customer" })">SIGN IN</a>
+                                </li>
                             </ul>
                         </nav>
                     </div>
