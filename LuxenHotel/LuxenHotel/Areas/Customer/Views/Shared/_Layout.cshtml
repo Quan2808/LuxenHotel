@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Luxen Premium Hotel</title>
 
-    <link rel=“icon” href="~/images/favicon.ico" type=“image/x-icon”>
+    <link rel="icon" href="/favicon.ico" sizes="64x64" type="image/png" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/flexslider/css/flexslider.css" />
     <link rel="stylesheet" href="~/lib/prettyphoto/css/prettyPhoto.css" />
     <link rel="stylesheet" href="~/lib/datepicker/css/datepicker.css" />
     <link rel="stylesheet" href="~/lib/selectordie/css/selectordie.css" />
     <link rel="stylesheet" href="~/css/main.css" />
-    <link rel="stylesheet" href="~/css/2035.responsive.css" />
+    <link rel="stylesheet" href="~/css/responsive.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/7.3.2/css/flag-icons.min.css" />
 </head>
 
@@ -21,10 +21,9 @@
     <div id="wrapper">
         @await Html.PartialAsync("_Header")
 
-        <div class="container">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
+        <div class="content">
+            @RenderBody()
+            @await Html.PartialAsync("_Footer")
         </div>
     </div>
     <script src="~/lib/jquery/jquery-1.11.1.min.js"></script>
