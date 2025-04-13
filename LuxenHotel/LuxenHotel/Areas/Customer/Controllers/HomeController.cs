@@ -8,7 +8,7 @@ namespace LuxenHotel.Areas.Customer.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return View("~/Areas/Customer/Views/Home/Index/Index.cshtml");
         }
 
         public IActionResult Privacy()

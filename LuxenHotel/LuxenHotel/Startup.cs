@@ -56,37 +56,38 @@ namespace LuxenHotel
 
             app.UseEndpoints(endpoints =>
             {
-                // Route mặc định cho Customer Area (không chứa "Customer")
+                // Route ngắn cho tất cả action trong HomeController (Customer Area)
                 endpoints.MapAreaControllerRoute(
-                    name: "customer_default",
+                    name: "customer_pages",
                     areaName: "Customer",
-                    pattern: "",
-                    defaults: new { controller = "Home", action = "Index" });
+                    pattern: "{action=Index}/{id?}",
+                    defaults: new { controller = "Home" });
 
-                // Route cho các controller khác trong Customer Area
+                // Route mặc định fallback cho các controller khác trong Customer Area
                 endpoints.MapAreaControllerRoute(
                     name: "customer_area",
                     areaName: "Customer",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-                // Route cho Admin Area
+                // Admin Area
                 endpoints.MapAreaControllerRoute(
                     name: "admin_area",
                     areaName: "Admin",
                     pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}");
 
-                // Route cho Staff Area
+                // Staff Area
                 endpoints.MapAreaControllerRoute(
                     name: "staff_area",
                     areaName: "Staff",
                     pattern: "Staff/{controller=Task}/{action=Index}/{id?}");
 
-                // Route cho Identity Area (nếu có)
+                // Identity Area
                 endpoints.MapAreaControllerRoute(
                     name: "identity_area",
                     areaName: "Identity",
                     pattern: "Identity/{controller=Account}/{action=Login}/{id?}");
             });
+
         }
     }
 }
