@@ -45,9 +45,6 @@
 │       │   │   └── Create.cshtml
 │       └── 📂 Data
 │           └── CustomerRepository.cs
-├── 📂 Controllers
-│   ├── HomeController.cs
-│   └── AccountController.cs
 ├── 📂 Models
 │   ├── 📂 Entities
 │   │   ├── User.cs
