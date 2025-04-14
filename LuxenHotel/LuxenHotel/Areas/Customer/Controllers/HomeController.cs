@@ -11,6 +11,16 @@ namespace LuxenHotel.Areas.Customer.Controllers
             return View("~/Areas/Customer/Views/Home/Index/Index.cshtml");
         }
 
+        public IActionResult About()
+        {
+            return View("~/Areas/Customer/Views/Home/About/Index.cshtml");
+        }
+
+        public IActionResult Contact()
+        {
+            return View("~/Areas/Customer/Views/Home/Contact/Index.cshtml");
+        }
+
         public IActionResult Privacy()
         {
             return View();
