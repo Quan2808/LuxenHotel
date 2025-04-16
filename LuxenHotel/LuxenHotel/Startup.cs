@@ -1,6 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using LuxenHotel.Data;
+﻿using LuxenHotel.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Threading.Tasks;
 
 namespace LuxenHotel
 {
@@ -15,32 +23,63 @@ namespace LuxenHotel
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Configure DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Configure Identity
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
-                options.User.RequireUniqueEmail = true; // Yêu cầu Email duy nhất
-                options.SignIn.RequireConfirmedEmail = false; // Tùy chọn
+                options.User.RequireUniqueEmail = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+
+                options.Lockout.AllowedForNewUsers = false;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            services.AddControllersWithViews();
+            // Configure Claims Identity
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserIdClaimType = null;
+                options.ClaimsIdentity.UserNameClaimType = null;
+                options.ClaimsIdentity.RoleClaimType = null;
+            });
 
-            // Cấu hình RouteOptions để bỏ qua phân biệt chữ hoa/thường
+            // Configure routing
             services.Configure<RouteOptions>(options =>
             {
-                options.LowercaseUrls = true; // Chuyển URL thành chữ thường
-                options.LowercaseQueryStrings = true; // (Tùy chọn) Chuyển query string thành chữ thường
+                options.LowercaseUrls = true;
+                options.LowercaseQueryStrings = true;
             });
 
-            // Cấu hình cookie để chuyển hướng khi chưa đăng nhập
+            // Configure authentication cookies
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Account/Login"; // Đảm bảo đường dẫn đăng nhập phù hợp
-                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.LoginPath = "/Account/Login";
+                // options.AccessDeniedPath = "/Account/AccessDenied";
             });
+
+            services.Configure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
+            // Configure Logging
+            services.AddLogging(logging =>
+            {
+                logging.AddConsole();
+                logging.AddDebug();
+                logging.SetMinimumLevel(LogLevel.Debug);
+            });
+
+            services.AddControllersWithViews();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -59,16 +98,22 @@ namespace LuxenHotel
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Seed data
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                SeedData.InitializeAsync(scope.ServiceProvider).GetAwaiter().GetResult();
+            }
+
             app.UseEndpoints(endpoints =>
             {
-                // Route ngắn cho tất cả action trong HomeController (Customer Area)
+                // Customer Area: Short route for HomeController
                 endpoints.MapAreaControllerRoute(
                     name: "customer_pages",
                     areaName: "Customer",
                     pattern: "{action=Index}/{id?}",
                     defaults: new { controller = "Home" });
 
-                // Route mặc định fallback cho các controller khác trong Customer Area
+                // Customer Area: Default route
                 endpoints.MapAreaControllerRoute(
                     name: "customer_area",
                     areaName: "Customer",
@@ -92,7 +137,6 @@ namespace LuxenHotel
                     areaName: "Identity",
                     pattern: "Identity/{controller=Account}/{action=Login}/{id?}");
             });
-
         }
     }
 }

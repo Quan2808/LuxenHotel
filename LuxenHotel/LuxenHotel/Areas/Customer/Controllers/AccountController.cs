@@ -1,7 +1,7 @@
+using LuxenHotel.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-
 namespace LuxenHotel.Controllers
 {
     [Area("Customer")]
@@ -19,33 +19,40 @@ namespace LuxenHotel.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View("~/Areas/Customer/Views/Account/Login/Index.cshtml");
+            return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string password, bool rememberMe)
+        public async Task<IActionResult> Login(string username, string password, bool rememberMe)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            var model = new LoginViewModel
             {
-                ModelState.AddModelError("", "Email and password are required.");
-                return View();
+                Username = username,
+                Password = password,
+                RememberMe = rememberMe
+            };
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                ModelState.AddModelError("", "Username and password are required.");
+                return View(model);
             }
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByNameAsync(username);
             if (user == null)
             {
                 ModelState.AddModelError("", "Invalid login attempt.");
-                return View();
+                return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, rememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, password, rememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
                 return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError("", "Invalid login attempt.");
-            return View();
+            return View(model);
         }
 
         [HttpGet]
@@ -55,23 +62,27 @@ namespace LuxenHotel.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string email, string password)
+        public async Task<IActionResult> Register(string username, string password, string phoneNumber, string email = null)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(phoneNumber))
             {
-                ModelState.AddModelError("", "Email and password are required.");
+                ModelState.AddModelError("", "Username, password, and phone number are required.");
                 return View();
             }
 
             var user = new IdentityUser
             {
+                UserName = username,
+                NormalizedUserName = username.ToUpper(),
+                PhoneNumber = phoneNumber,
                 Email = email,
-                NormalizedEmail = email.ToUpper()
+                NormalizedEmail = email?.ToUpper()
             };
 
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Customer");
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
