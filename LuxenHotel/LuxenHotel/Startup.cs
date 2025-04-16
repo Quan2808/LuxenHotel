@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using LuxenHotel.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace LuxenHotel
 {
@@ -17,9 +18,13 @@ namespace LuxenHotel
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // services.AddIdentity<IdentityUser, IdentityRole>()
-            //     .AddEntityFrameworkStores<ApplicationDbContext>()
-            //     .AddDefaultTokenProviders();
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true; // Yêu cầu Email duy nhất
+                options.SignIn.RequireConfirmedEmail = false; // Tùy chọn
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             services.AddControllersWithViews();
 
@@ -33,8 +38,8 @@ namespace LuxenHotel
             // Cấu hình cookie để chuyển hướng khi chưa đăng nhập
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Identity/Account/Login"; // Đảm bảo đường dẫn đăng nhập phù hợp
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.LoginPath = "/Account/Login"; // Đảm bảo đường dẫn đăng nhập phù hợp
+                options.AccessDeniedPath = "/Account/AccessDenied";
             });
         }
 

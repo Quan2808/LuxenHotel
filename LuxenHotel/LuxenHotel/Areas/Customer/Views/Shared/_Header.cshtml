@@ -96,8 +96,8 @@
                                     </ul>
                                 </li>
 
-                                <li class="@(action == "SignIn" && controller == "Home" ? "active" : "")">
-                                    <a href="@Url.Action("SignIn", "Home", new { area = "Customer" })">SIGN IN</a>
+                                <li class="@(action == "Login" && controller == "Account" ? "active" : "")">
+                                    <a href="@Url.Action("Login", "Account", new { area = "Customer" })">SIGN IN</a>
                                 </li>
                             </ul>
                         </nav>
