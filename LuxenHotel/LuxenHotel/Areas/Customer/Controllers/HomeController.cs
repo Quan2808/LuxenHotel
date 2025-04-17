@@ -8,17 +8,17 @@ namespace LuxenHotel.Areas.Customer.Controllers
     {
         public IActionResult Index()
         {
-            return View("~/Areas/Customer/Views/Home/Index/Index.cshtml");
+            return View();
         }
 
         public IActionResult About()
         {
-            return View("~/Areas/Customer/Views/Home/About/Index.cshtml");
+            return View();
         }
 
         public IActionResult Contact()
         {
-            return View("~/Areas/Customer/Views/Home/Contact/Index.cshtml");
+            return View();
         }
 
         public IActionResult Privacy()
