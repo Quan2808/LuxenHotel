@@ -1,14 +1,9 @@
 ﻿using LuxenHotel.Data;
+using LuxenHotel.Models.Entities.Identity;
+using LuxenHotel.Services.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading.Tasks;
 
 namespace LuxenHotel
 {
@@ -27,29 +22,27 @@ namespace LuxenHotel
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Configure Identity
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
-            {
-                options.User.RequireUniqueEmail = false;
-                options.SignIn.RequireConfirmedEmail = false;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;
+            // Register custom user store
+            services.AddTransient<IUserStore<User>, CustomUserStore>();
+            services.AddTransient<IRoleStore<Role>, CustomRoleStore>();
 
+            // Configure Identity
+            services.AddIdentity<User, Role>(options =>
+            {
+                // Configure Identity options as needed
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+
+                // Disable features we don't need
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.Lockout.AllowedForNewUsers = false;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            // .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-
-            // Configure Claims Identity
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.ClaimsIdentity.UserIdClaimType = null;
-                options.ClaimsIdentity.UserNameClaimType = null;
-                options.ClaimsIdentity.RoleClaimType = null;
-            });
 
             // Configure routing
             services.Configure<RouteOptions>(options =>
@@ -99,10 +92,7 @@ namespace LuxenHotel
             app.UseAuthorization();
 
             // Seed data
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                SeedData.InitializeAsync(scope.ServiceProvider).GetAwaiter().GetResult();
-            }
+            SeedData.InitializeAsync(app.ApplicationServices).GetAwaiter().GetResult();
 
             app.UseEndpoints(endpoints =>
             {

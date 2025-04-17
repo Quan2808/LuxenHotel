@@ -1,28 +1,34 @@
-@using LuxenHotel.Models.ViewModels
-@model LoginViewModel
+@model LuxenHotel.Models.ViewModels.Identity.LoginViewModel;
 
+@{
+    ViewData["Title"] = "Log in";
+}
 @await Html.PartialAsync("Partials/Login/_Breadcrumb.cshtml")
 
-<div class="container">
-    <div class="row">
+<h1>@ViewData["Title"]</h1>
 
+<div class="row">
+    <div class="col-md-6">
         <form asp-action="Login" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Username">Username</label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Password">Password</label>
-                <input asp-for="Password" class="form-control" type="password" />
+                <label asp-for="Password"></label>
+                <input asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="RememberMe">Remember me?</label>
-                <input asp-for="RememberMe" />
-                <span asp-validation-for="RememberMe" class="text-danger"></span>
+                <div class="checkbox">
+                    <label>
+                        <input asp-for="RememberMe" /> @Html.DisplayNameFor(m => m.RememberMe)
+                    </label>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary">Log in</button>
         </form>
     </div>
 </div>
