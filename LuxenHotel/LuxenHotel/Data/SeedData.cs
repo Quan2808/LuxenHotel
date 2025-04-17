@@ -1,36 +1,60 @@
+using LuxenHotel.Models.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LuxenHotel.Data
 {
+    /// <summary>
+    /// Class to seed initial data such as roles and admin user.
+    /// </summary>
     public static class SeedData
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
-            using var scope = serviceProvider.CreateScope();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
-            string[] roles = { "Admin", "Staff", "Customer" };
-
-            foreach (var role in roles)
+            using (var scope = serviceProvider.CreateScope())
             {
-                if (!await roleManager.RoleExistsAsync(role))
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+
+                // Apply migrations
+                dbContext.Database.Migrate();
+
+                // Define roles
+                string[] roles = { "Admin", "Staff", "Customer" };
+
+                // Seed roles
+                foreach (var roleName in roles)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    if (!await roleManager.RoleExistsAsync(roleName))
+                    {
+                        var role = new Role(roleName);
+                        await roleManager.CreateAsync(role);
+                    }
                 }
-            }
 
-            // Seed an admin user
-            var adminUser = new IdentityUser
-            {
-                UserName = "admin@example.com",
-                Email = "admin@example.com"
-            };
+                // Seed admin user
+                var adminEmail = "admin@example.com";
+                if (await userManager.FindByEmailAsync(adminEmail) == null)
+                {
+                    var adminUser = new User
+                    {
+                        UserName = adminEmail,
+                        Email = adminEmail,
+                        FullName = "Admin",
+                        PhoneNumber = "0123456789"
+                    };
 
-            if (await userManager.FindByEmailAsync(adminUser.Email) == null)
-            {
-                await userManager.CreateAsync(adminUser, "Admin@123");
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+                    var result = await userManager.CreateAsync(adminUser, "Admin@123456");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                    }
+                }
             }
         }
     }
