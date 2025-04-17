@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Luxen Premium Hotel</title>
+    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} - " : "")Luxen Premium Hotel</title>
 
     <link rel="icon" href="/favicon.ico" sizes="64x64" type="image/png" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
@@ -24,6 +24,10 @@
         @await Html.PartialAsync("_Header")
 
         <div class="content">
+            @if (@ViewData["Title"] != null)
+            {
+                @await Html.PartialAsync("Partials/_Breadcrumb")
+            }
             @RenderBody()
             @await Html.PartialAsync("_Footer")
         </div>
