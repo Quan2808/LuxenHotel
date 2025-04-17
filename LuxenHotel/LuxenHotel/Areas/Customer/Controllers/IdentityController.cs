@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace LuxenHotel.Areas.Customer.Controllers;
 
 [Area("Customer")]
-public class AccountController : Controller
+public class IdentityController : Controller
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<Role> _roleManager;
 
-    public AccountController(
+    public IdentityController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         RoleManager<Role> roleManager)
@@ -70,14 +70,14 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    public IActionResult Login(string returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+    public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
 

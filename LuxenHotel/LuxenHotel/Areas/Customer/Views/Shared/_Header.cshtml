@@ -103,18 +103,18 @@
 
                                 @if (SignInManager.IsSignedIn(User))
                                 {
-                                    <li class="parent-menu @(controller == "Account" ? "active" : "")">
+                                    <li class="parent-menu @(controller == "Identity" ? "active" : "")">
                                         <a class="text-uppercase" href="#">
                                             Account
                                         </a>
                                         <ul class="text-uppercase" style="display: none; visibility: hidden">
                                             <li>
-                                                <a href="@Url.Action("Profile", "Account", new { area = "Customer" })">
+                                                <a href="@Url.Action("Profile", "Identity", new { area = "Customer" })">
                                                     Profile
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="@Url.Action("Orders", "Account", new { area = "Customer" })">
+                                                <a href="@Url.Action("Orders", "Identity", new { area = "Customer" })">
                                                     My Orders
                                                 </a>
                                             </li>
@@ -125,7 +125,7 @@
                                                     <i class="fas fa-sign-out-alt"></i> Sign Out
                                                 </a>
 
-                                                <form id="logout-form" asp-area="Customer" asp-controller="Account"
+                                                <form id="logout-form" asp-area="Customer" asp-controller="Identity"
                                                     asp-action="Logout" method="post" style="display: none;">
                                                     @Html.AntiForgeryToken()
                                                 </form>
@@ -136,8 +136,8 @@
                                 }
                                 else
                                 {
-                                    <li class="@(action == "Login" && controller == "Account" ? "active" : "")">
-                                        <a href="@Url.Action("Login", "Account", new { area = "Customer" })">
+                                    <li class="@(action == "Login" && controller == "Identity" ? "active" : "")">
+                                        <a href="@Url.Action("Login", "Identity", new { area = "Customer" })">
                                             SIGN IN
                                         </a>
                                     </li>

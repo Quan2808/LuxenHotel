@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxenHotel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250417091106_InitialIdentity")]
+    [Migration("20250417143030_InitialIdentity")]
     partial class InitialIdentity
     {
         /// <inheritdoc />
