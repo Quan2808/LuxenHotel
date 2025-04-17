@@ -738,13 +738,6 @@ h6 {
   width: 75px;
 }
 
-label {
-  width: 100%;
-  color: #fff;
-  font-size: 10px;
-  letter-spacing: 0.0725em;
-}
-
 ::-webkit-input-placeholder {
   color: #fff;
   font-size: 11px;
@@ -1731,15 +1724,6 @@ table tr.table-products-list {
   width: 100%;
 }
 
-label {
-  margin-top: 10px;
-  width: 100%;
-  color: #fff;
-  font-family: Varela Round;
-  font-size: 10px;
-  letter-spacing: 0.0725em;
-}
-
 .quick-reservation .children {
   width: 45%;
 }
@@ -2226,4 +2210,10 @@ ul.tabbed-area li.active a {
   -moz-transition: all 0.4s;
   transition: all 0.4s;
   border: 1px solid red !important;
+}
+
+.text-white {
+  --bs-white-rgb: 255, 255, 255;
+  --bs-text-opacity: 1;
+  color: rgba(var(--bs-white-rgb), var(--bs-text-opacity)) !important;
 }

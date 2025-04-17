@@ -43,7 +43,7 @@ namespace LuxenHotel.Data
                 {
                     var adminUser = new User
                     {
-                        UserName = adminEmail,
+                        UserName = "admin",
                         Email = adminEmail,
                         FullName = "Admin",
                         PhoneNumber = "0123456789"

@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace LuxenHotel.Areas.Customer.Controllers;
 
 [Area("Customer")]
-public class AccountController : Controller
+public class IdentityController : Controller
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<Role> _roleManager;
 
-    public AccountController(
+    public IdentityController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         RoleManager<Role> roleManager)
@@ -90,6 +90,12 @@ public class AccountController : Controller
             {
                 // Check if the user has a role
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "User not found.");
+                    return View(model);
+                }
+
                 var roles = await _userManager.GetRolesAsync(user);
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
