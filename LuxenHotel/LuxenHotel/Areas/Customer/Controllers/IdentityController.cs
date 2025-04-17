@@ -33,9 +33,16 @@ public class IdentityController : Controller
     {
         if (ModelState.IsValid)
         {
+            var existingUser = await _userManager.FindByNameAsync(model.Username);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Username", "This username is already taken.");
+                return View(model);
+            }
+
             var user = new User
             {
-                UserName = model.Email,
+                UserName = model.Username,
                 Email = model.Email,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber
@@ -83,19 +90,40 @@ public class IdentityController : Controller
 
         if (ModelState.IsValid)
         {
+            // Determine if LoginInput is an email or username
+            string loginInput = model.UsernameOrEmail;
+            User? user = null;
+
+            // Check if the input contains '@' to treat it as an email
+            if (loginInput.Contains("@"))
+            {
+                user = await _userManager.FindByEmailAsync(loginInput);
+            }
+            else
+            {
+                user = await _userManager.FindByNameAsync(loginInput);
+            }
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "The username/email or password you entered is incorrect. Please try again.");
+                return View(model);
+            }
+
+            // Check if UserName is null or empty
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                ModelState.AddModelError(string.Empty, "User account is misconfigured. Please contact support.");
+                return View(model);
+            }
+
+            // Sign in using the username
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                // Check if the user has a role
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "User not found.");
-                    return View(model);
-                }
-
+                // Check roles
                 var roles = await _userManager.GetRolesAsync(user);
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -112,13 +140,13 @@ public class IdentityController : Controller
                 {
                     return RedirectToAction("Index", "Dashboard", new { area = "Staff" });
                 }
-                else // Customer or default
+                else
                 {
                     return RedirectToAction("Index", "Home", new { area = "Customer" });
                 }
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, "The username/email or password you entered is incorrect. Please try again.");
         }
 
         return View(model);
