@@ -1,5 +1,6 @@
 using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Models.ViewModels.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,9 +34,16 @@ public class IdentityController : Controller
     {
         if (ModelState.IsValid)
         {
+            var existingUser = await _userManager.FindByNameAsync(model.Username);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Username", "This username is already taken.");
+                return View(model);
+            }
+
             var user = new User
             {
-                UserName = model.Email,
+                UserName = model.Username,
                 Email = model.Email,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber
@@ -83,19 +91,40 @@ public class IdentityController : Controller
 
         if (ModelState.IsValid)
         {
+            // Determine if LoginInput is an email or username
+            string loginInput = model.UsernameOrEmail;
+            User? user = null;
+
+            // Check if the input contains '@' to treat it as an email
+            if (loginInput.Contains("@"))
+            {
+                user = await _userManager.FindByEmailAsync(loginInput);
+            }
+            else
+            {
+                user = await _userManager.FindByNameAsync(loginInput);
+            }
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "The username/email or password you entered is incorrect. Please try again.");
+                return View(model);
+            }
+
+            // Check if UserName is null or empty
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                ModelState.AddModelError(string.Empty, "User account is misconfigured. Please contact support.");
+                return View(model);
+            }
+
+            // Sign in using the username
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                // Check if the user has a role
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "User not found.");
-                    return View(model);
-                }
-
+                // Check roles
                 var roles = await _userManager.GetRolesAsync(user);
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -112,13 +141,13 @@ public class IdentityController : Controller
                 {
                     return RedirectToAction("Index", "Dashboard", new { area = "Staff" });
                 }
-                else // Customer or default
+                else
                 {
                     return RedirectToAction("Index", "Home", new { area = "Customer" });
                 }
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, "The username/email or password you entered is incorrect. Please try again.");
         }
 
         return View(model);
@@ -135,5 +164,130 @@ public class IdentityController : Controller
     public IActionResult AccessDenied()
     {
         return View();
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Profile()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        }
+
+        var model = new ProfileViewModel
+        {
+            Username = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            FullName = user.FullName ?? string.Empty,
+            PhoneNumber = user.PhoneNumber
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Profile(ProfileViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        }
+
+        // Update user properties
+        user.FullName = model.FullName;
+        user.PhoneNumber = model.PhoneNumber;
+
+        // Email change requires more careful handling since it's used for login
+        if (user.Email != model.Email)
+        {
+            var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
+            if (!setEmailResult.Succeeded)
+            {
+                foreach (var error in setEmailResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            // Also update the username to match the email
+            var setUsernameResult = await _userManager.SetUserNameAsync(user, model.Email);
+            if (!setUsernameResult.Succeeded)
+            {
+                foreach (var error in setUsernameResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+        }
+
+        // Save the changes
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            foreach (var error in updateResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
+        // Refresh sign-in if email changed
+        if (user.Email != model.Email)
+        {
+            await _signInManager.RefreshSignInAsync(user);
+        }
+
+        TempData["StatusMessage"] = "Your profile has been updated successfully.";
+        return RedirectToAction(nameof(Profile));
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult ChangePassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        }
+
+        var changePasswordResult = await _userManager.ChangePasswordAsync(user,
+            model.CurrentPassword, model.NewPassword);
+
+        if (!changePasswordResult.Succeeded)
+        {
+            foreach (var error in changePasswordResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+        TempData["StatusMessage"] = "Your password has been changed successfully.";
+        return RedirectToAction(nameof(Profile));
     }
 }
