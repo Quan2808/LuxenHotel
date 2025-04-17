@@ -17,9 +17,6 @@ namespace LuxenHotel.Data
             base.OnModelCreating(builder);
 
             // Rename Identity tables for clarity
-            // builder.Entity<IdentityUser>(entity => entity.ToTable("Users"));
-            // builder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
-            // builder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
             builder.Entity<User>().ToTable("Users");
             builder.Entity<Role>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
@@ -34,7 +31,7 @@ namespace LuxenHotel.Data
             builder.Entity<User>(entity =>
             {
                 // Required properties
-                // entity.Property(u => u.PasswordHash).HasColumnName("Password");
+                entity.Property(u => u.PasswordHash).HasColumnName("Password");
 
                 // Ignored properties
                 entity.Ignore(e => e.PhoneNumberConfirmed);

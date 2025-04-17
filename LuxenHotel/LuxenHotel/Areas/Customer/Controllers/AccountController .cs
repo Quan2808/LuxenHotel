@@ -70,14 +70,17 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = returnUrl;
+
         if (ModelState.IsValid)
         {
             var result = await _signInManager.PasswordSignInAsync(
@@ -85,12 +88,31 @@ public class AccountController : Controller
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                // Check if the user has a role
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                // Redirect based on role
+                if (roles.Contains("Admin"))
+                {
+                    return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                }
+                else if (roles.Contains("Staff"))
+                {
+                    return RedirectToAction("Index", "Dashboard", new { area = "Staff" });
+                }
+                else // Customer or default
+                {
+                    return RedirectToAction("Index", "Home", new { area = "Customer" });
+                }
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         }
 
         return View(model);
@@ -100,6 +122,12 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Home", new { area = "Customer" });
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 }

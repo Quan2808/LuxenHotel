@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxenHotel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250417085053_InitialIdentity")]
+    [Migration("20250417091106_InitialIdentity")]
     partial class InitialIdentity
     {
         /// <inheritdoc />
@@ -76,7 +76,8 @@ namespace LuxenHotel.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Password");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");

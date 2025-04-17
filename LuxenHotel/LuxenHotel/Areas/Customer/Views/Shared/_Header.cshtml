@@ -1,3 +1,8 @@
+@using Microsoft.AspNetCore.Identity
+@using LuxenHotel.Models.Entities.Identity;
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
 @{
     var action = ViewContext.RouteData.Values["Action"] as string;
     var controller = ViewContext.RouteData.Values["Controller"] as string;
@@ -96,9 +101,47 @@
                                     </ul>
                                 </li>
 
-                                <li class="@(action == "Login" && controller == "Account" ? "active" : "")">
-                                    <a href="@Url.Action("Login", "Account", new { area = "Customer" })">SIGN IN</a>
-                                </li>
+                                @if (SignInManager.IsSignedIn(User))
+                                {
+                                    <li class="parent-menu @(controller == "Account" ? "active" : "")">
+                                        <a class="text-uppercase" href="#">
+                                            Account
+                                        </a>
+                                        <ul class="text-uppercase" style="display: none; visibility: hidden">
+                                            <li>
+                                                <a href="@Url.Action("Profile", "Account", new { area = "Customer" })">
+                                                    Profile
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="@Url.Action("Orders", "Account", new { area = "Customer" })">
+                                                    My Orders
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#"
+                                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                                    class="dropdown-item">
+                                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                                </a>
+
+                                                <form id="logout-form" asp-area="Customer" asp-controller="Account"
+                                                    asp-action="Logout" method="post" style="display: none;">
+                                                    @Html.AntiForgeryToken()
+                                                </form>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="@(action == "Login" && controller == "Account" ? "active" : "")">
+                                        <a href="@Url.Action("Login", "Account", new { area = "Customer" })">
+                                            SIGN IN
+                                        </a>
+                                    </li>
+                                }
                             </ul>
                         </nav>
 
