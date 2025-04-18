@@ -671,7 +671,7 @@ h6 {
   width: 100%;
   height: 130px;
   padding: 30px 0;
-  background: url(../images/gallery/home/sliders/slider-book-now.png);
+  background: url(../images/static/sliders/slider-book-now.png);
 }
 
 .book-slider ul {
@@ -754,7 +754,7 @@ h6 {
   width: 100%;
   height: 60px;
   line-height: 60px;
-  background: url(../images/gallery/home/sliders/slider-book-now.png);
+  background: url(../images/static/sliders/slider-book-now.png);
   border-bottom: solid 3px #e4b248;
 }
 
@@ -1228,7 +1228,7 @@ h6 {
 }
 
 .parallax-one {
-  background: url("../images/parallax/parallax.jpg");
+  background: url("../images/static/parallax/parallax.jpg");
   height: 380px;
   padding: 100px 0;
 }
@@ -1664,7 +1664,7 @@ table tr.table-products-list {
 
 .title-table {
   text-align: left !important;
-  padding: 40px 0;
+  padding: 30px 0;
 }
 
 .list-room-icons {
@@ -1690,7 +1690,7 @@ table tr.table-products-list {
 /*-----------------------------------------------------------------------------------*/
 
 .quick-reservation-container {
-  background: url(../temp/quick-reservation.jpg);
+  background: url(../images/static/reservation/quick-reservation.jpg);
   padding: 7px;
   margin-bottom: 60px;
 }

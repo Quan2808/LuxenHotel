@@ -93,11 +93,20 @@
                                     <a href="@Url.Action("Contact", "Home", new { area = "Customer" })">CONTACT</a>
                                 </li>
 
-                                <li class="parent-menu @(controller == "Features" ? "active" : "")">
+                                <li class="parent-menu @(controller == "Booking" ? "active" : "")">
                                     <a href="#">ACCOMMODATIONS & SERVICES</a>
                                     <ul style="display: none; visibility: hidden">
-                                        <li><a href="#">ACCOMMODATIONS</a></li>
-                                        <li><a href="#">SERVICES</a></li>
+                                        <li>
+                                            <a
+                                                href="@Url.Action("ACCOMMODATIONS", "Booking", new { area = "Customer" })">
+                                                ACCOMMODATIONS
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="@Url.Action("SERVICES", "Booking", new { area = "Customer" })">
+                                                SERVICES
+                                            </a>
+                                        </li>
                                     </ul>
                                 </li>
 

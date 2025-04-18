@@ -1,0 +1,234 @@
+@{
+    ViewData["Title"] = "Accommodations";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <style>
+        #roomTable th,
+        #roomTable td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        #roomTable .table-products-image {
+            width: 20%;
+        }
+
+        #roomTable .table-products-name {
+            width: 50%;
+        }
+
+        #roomTable .table-products-price {
+            width: 15%;
+        }
+
+        #roomTable .table-products-total {
+            width: 15%;
+        }
+
+        #roomTable .img-responsive {
+            max-width: 100px;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        @* #roomTable tbody tr:hover {
+            all: unset;
+            cursor: default !important;
+        } *@
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#roomTable').DataTable({
+                paging: true, // Bật phân trang
+                searching: true, // Bật tìm kiếm
+                ordering: true, // Bật sắp xếp cột
+                info: true, // Hiển thị thông tin bảng
+                columnDefs: [
+                    {
+                        targets: [0, 3], // Cột IMAGE và PURCHASE
+                        orderable: false // Tắt sắp xếp cho các cột này
+                    }
+                ],
+                rowCallback: function (row, data, index) {
+                    $(row).removeClass('hover');
+                    $('table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd').css('background-color', '');
+                }
+            });
+        });
+    </script>
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-9"><!-- Explore Rooms -->
+            <table id="roomTable" class="display">
+                <thead>
+                    <tr class="products-title">
+                        <th class="table-products-image pos-center">Image</th>
+                        <th class="table-products-name pos-center">Accommodation</th>
+                        <th class="table-products-price pos-center">Price</th>
+                        <th class="table-products-total pos-center">Purchase</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-products-list pos-center">
+                        <td class="products-image-table">
+                            <img alt="Products Image 1" src="/images/static/room/room-image-1.jpg"
+                                class="img-responsive">
+                        </td>
+                        <td class="title-table">
+                            <div class="room-details-list clearfix">
+                                <div class="pull-left">
+                                    <h5>Suit Room</h5>
+                                </div>
+                                <div class="pull-left room-rating">
+                                    <ul>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star inactive"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="list-room-icons clearfix">
+                                <ul>
+                                    <li><i class="fa fa-calendar"></i></li>
+                                    <li><i class="fa fa-flask"></i></li>
+                                    <li><i class="fa fa-umbrella"></i></li>
+                                    <li><i class="fa fa-laptop"></i></li>
+                                </ul>
+                            </div>
+                            <p>Vestibulum id ligula porta felis euismod semper. Aenean eu leo quam. Pellentesque orla
+                                porta felis euismodnean eu at ero <a class="active-color" href="#">[...]</a></p>
+                        </td>
+                        <td>
+                            <h3>70$</h3>
+                        </td>
+                        <td>
+                            <div class="button-style-1">
+                                <a href="#">
+                                    <span class="mobile-visibility">
+                                        BOOK
+                                    </span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-3"><!-- Sidebar -->
+            <div class="quick-reservation-container">
+                <div class="quick-reservation clearfix">
+                    <div class="title-quick pos-center margint30">
+                        <h5>QUICK RESERVATIONS</h5>
+                        <div class="line"></div>
+                    </div>
+                    <div class="reserve-form-area">
+                        <form action="#" method="post" id="ajax-reservation-form">
+                            <label class="text-white">ARRIVAL</label>
+                            <input type="text" id="dpd1" name="dpd1" class="date-selector" placeholder="">
+                            <label class="text-white">RETURN</label>
+                            <input type="text" id="dpd2" name="dpd2" class="date-selector" placeholder="">
+                            <div class="pull-left children clearfix">
+                                <label class="text-white">ROOMS</label>
+                                <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
+                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                        class="sod_label">1</span><span class="sod_list_wrapper"><span
+                                            class="sod_list"><span class="sod_option  selected active " title="1"
+                                                data-value="1">1</span><span class="sod_option " title="2"
+                                                data-value="2">2</span><span class="sod_option " title="3"
+                                                data-value="3">3</span><span class="sod_option " title="4"
+                                                data-value="4">4</span><span class="sod_option " title="5"
+                                                data-value="5">5</span></span></span><select name="rooms"
+                                        class="pretty-select">
+                                        <option selected="selected" value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select></span>
+                            </div>
+                            <div class="pull-left type clearfix">
+                                <label class="text-white">ADULT</label>
+                                <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
+                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                        class="sod_label">1</span><span class="sod_list_wrapper"><span
+                                            class="sod_list"><span class="sod_option  selected active " title="1"
+                                                data-value="1">1</span><span class="sod_option " title="2"
+                                                data-value="2">2</span><span class="sod_option " title="3"
+                                                data-value="3">3</span><span class="sod_option " title="4"
+                                                data-value="4">4</span><span class="sod_option " title="5"
+                                                data-value="5">5</span></span></span><select name="adult"
+                                        class="pretty-select">
+                                        <option selected="selected" value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select></span>
+                            </div>
+                            <div class="pull-left rooms clearfix">
+                                <label class="text-white">CHILDREN</label>
+                                <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
+                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                        class="sod_label">0</span><span class="sod_list_wrapper"><span
+                                            class="sod_list"><span class="sod_option  selected active " title="0"
+                                                data-value="0">0</span><span class="sod_option " title="1"
+                                                data-value="1">1</span><span class="sod_option " title="2"
+                                                data-value="2">2</span><span class="sod_option " title="3"
+                                                data-value="3">3</span><span class="sod_option " title="4"
+                                                data-value="4">4</span><span class="sod_option " title="5"
+                                                data-value="5">5</span></span></span><select name="children"
+                                        class="pretty-select">
+                                        <option selected="selected" value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select></span>
+                            </div>
+                            <div class="pull-left search-button clearfix">
+                                <div class="button-style-1">
+                                    <a id="res-submit" href="#">SEARCH</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="luxen-widget news-widget">
+                <div class="title-quick marginb20">
+                    <h5>HOTEL INFORMATION</h5>
+                </div>
+                <p>Curabitur blandit tempus porttitor. Nulla vitae elit libero, a pharetra augue. Lorem ipsumero, a
+                    pharetra augue. Lorem ipsum dolor sit amet, consectedui.</p>
+            </div>
+            <div class="luxen-widget news-widget">
+                <div class="title">
+                    <h5>CONTACT</h5>
+                </div>
+                <ul class="footer-links">
+                    <li>
+                        <p><i class="fa fa-map-marker"></i> Lorem ipsum dolor sit amet lorem Victoria 8011 Australia
+                        </p>
+                    </li>
+                    <li>
+                        <p><i class="fa fa-phone"></i> +61 3 8376 6284 </p>
+                    </li>
+                    <li>
+                        <p><i class="fa fa-envelope"></i> info@2035themes.com</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
