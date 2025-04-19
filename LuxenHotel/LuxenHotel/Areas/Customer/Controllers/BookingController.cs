@@ -1,22 +1,96 @@
+using LuxenHotel.Data;
+using LuxenHotel.Models.Entities.Booking;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LuxenHotel.Areas.Customer.Controllers;
 
 [Area("Customer")]
 public class BookingController : Controller
 {
+
+    private readonly ApplicationDbContext _context;
+    private readonly IWebHostEnvironment _environment;
+
+    public BookingController(ApplicationDbContext context, IWebHostEnvironment environment)
+    {
+        _context = context;
+        _environment = environment;
+    }
+
     // Action hiển thị danh sách chỗ ở hoặc giao diện đặt phòng
     [HttpGet]
-    public ActionResult Accommodations()
+    public async Task<IActionResult> Accommodations()
     {
-        return View();
+        var accommodations = await _context.Accommodations
+                .Include(a => a.Combos)
+                .Include(a => a.AccommodationServices)
+                .ToListAsync();
+        return View(accommodations);
     }
 
     // Action hiển thị thông tin chỗ ở
     [HttpGet]
-    public ActionResult AccommodationDetails()
+    public async Task<IActionResult> AccommodationDetails(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var accommodation = await _context!.Accommodations
+            .Include(a => a.AccommodationServices)
+            .ThenInclude(acs => acs.Service)
+            .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
+
+        if (accommodation == null)
+        {
+            return NotFound();
+        }
+
+        return View(accommodation);
+    }
+
+    // GET: Accommodation/Create
+    public IActionResult Create()
     {
         return View();
+    }
+
+    // POST: Accommodation/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Name,Price,Description")] Accommodation accommodation, List<IFormFile> MediaFiles)
+    {
+        if (ModelState.IsValid)
+        {
+            var mediaPaths = new List<string>();
+            if (MediaFiles != null && MediaFiles.Any())
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "media");
+                Directory.CreateDirectory(uploadsFolder); // Tạo thư mục nếu chưa tồn tại
+
+                foreach (var file in MediaFiles)
+                {
+                    if (file.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        mediaPaths.Add($"/media/{fileName}");
+                    }
+                }
+            }
+
+            accommodation.UpdateMedia(mediaPaths);
+            _context.Add(accommodation);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Accommodations));
+        }
+        return View(accommodation);
     }
 
     // Action xử lý đặt chỗ ở
@@ -38,5 +112,10 @@ public class BookingController : Controller
     public ActionResult BookServices()
     {
         return View();
+    }
+
+    private bool AccommodationExists(int id)
+    {
+        return _context.Accommodations.Any(e => e.Id == id);
     }
 }

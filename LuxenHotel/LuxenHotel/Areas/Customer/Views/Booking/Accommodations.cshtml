@@ -1,3 +1,5 @@
+@model IEnumerable<LuxenHotel.Models.Entities.Booking.Accommodation>
+
 @{
     ViewData["Title"] = "Accommodations";
 }
@@ -77,50 +79,43 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="table-products-list pos-center">
-                        <td class="products-image-table">
-                            <img alt="Products Image 1" src="/images/static/room/room-image-1.jpg"
-                                class="img-responsive">
-                        </td>
-                        <td class="title-table">
-                            <div class="room-details-list clearfix">
-                                <div class="pull-left">
-                                    <h5>Suit Room</h5>
+                    @foreach (var room in Model)
+                    {
+                        <tr class="table-products-list pos-center">
+                            <td class="products-image-table">
+                                @if (room.Media != null && room.Media.Any())
+                                {
+                                    <img src="@room.Media.First()" alt="@room.Name" class="img-responsive" />
+                                }
+                                else
+                                {
+                                    <img src="/images/static/room/placeholder.jpg" alt="No Image" class="img-responsive" />
+                                }
+                            </td>
+                            <td class="title-table">
+                                <div class="room-details-list clearfix">
+                                    <div class="pull-left">
+                                        <h5>@room.Name</h5>
+                                    </div>
                                 </div>
-                                <div class="pull-left room-rating">
-                                    <ul>
-                                        <li><i class="fa fa-star"></i></li>
-                                        <li><i class="fa fa-star"></i></li>
-                                        <li><i class="fa fa-star"></i></li>
-                                        <li><i class="fa fa-star"></i></li>
-                                        <li><i class="fa fa-star inactive"></i></li>
-                                    </ul>
+                                <p>
+                                    @(room.Description != null && room.Description.Length > 100
+                                        ? room.Description.Substring(0, 100) + "..."
+                                        : room.Description ?? "No description available")
+                                </p>
+                            </td>
+                            <td>
+                                <h3>$@room.Price.ToString("F2")</h3>
+                            </td>
+                            <td>
+                                <div class="button-style-1">
+                                    <a href="@Url.Action("Accommodations", "Book", new { id = room.Id })">
+                                        <span class="mobile-visibility">BOOK</span>
+                                    </a>
                                 </div>
-                            </div>
-                            <div class="list-room-icons clearfix">
-                                <ul>
-                                    <li><i class="fa fa-calendar"></i></li>
-                                    <li><i class="fa fa-flask"></i></li>
-                                    <li><i class="fa fa-umbrella"></i></li>
-                                    <li><i class="fa fa-laptop"></i></li>
-                                </ul>
-                            </div>
-                            <p>Vestibulum id ligula porta felis euismod semper. Aenean eu leo quam. Pellentesque orla
-                                porta felis euismodnean eu at ero <a class="active-color" href="#">[...]</a></p>
-                        </td>
-                        <td>
-                            <h3>70$</h3>
-                        </td>
-                        <td>
-                            <div class="button-style-1">
-                                <a href="#">
-                                    <span class="mobile-visibility">
-                                        BOOK
-                                    </span>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -204,30 +199,6 @@
                         </form>
                     </div>
                 </div>
-            </div>
-            <div class="luxen-widget news-widget">
-                <div class="title-quick marginb20">
-                    <h5>HOTEL INFORMATION</h5>
-                </div>
-                <p>Curabitur blandit tempus porttitor. Nulla vitae elit libero, a pharetra augue. Lorem ipsumero, a
-                    pharetra augue. Lorem ipsum dolor sit amet, consectedui.</p>
-            </div>
-            <div class="luxen-widget news-widget">
-                <div class="title">
-                    <h5>CONTACT</h5>
-                </div>
-                <ul class="footer-links">
-                    <li>
-                        <p><i class="fa fa-map-marker"></i> Lorem ipsum dolor sit amet lorem Victoria 8011 Australia
-                        </p>
-                    </li>
-                    <li>
-                        <p><i class="fa fa-phone"></i> +61 3 8376 6284 </p>
-                    </li>
-                    <li>
-                        <p><i class="fa fa-envelope"></i> info@2035themes.com</p>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>

@@ -1,0 +1,54 @@
+@model LuxenHotel.Models.Entities.Booking.Accommodation
+
+@{
+    ViewData["Title"] = "Accommodation Details";
+}
+
+<h1>Accommodation Details</h1>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            Media
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Media.Any())
+            {
+                <ul>
+                    @foreach (var media in Model.Media)
+                    {
+                        <li><img src="@media" alt="@Html.DisplayNameFor(model => model.Name)"></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span>No media available</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

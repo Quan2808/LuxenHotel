@@ -26,6 +26,8 @@ namespace LuxenHotel
             services.AddTransient<IUserStore<User>, CustomUserStore>();
             services.AddTransient<IRoleStore<Role>, CustomRoleStore>();
 
+            // services.AddScoped<AccommodationStore>();
+
             // Configure Identity
             services.AddIdentity<User, Role>(options =>
             {
@@ -79,7 +81,15 @@ namespace LuxenHotel
         {
             if (!env.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error");
+                // app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected error occurred. Please try again later.");
+                    });
+                });
                 app.UseHsts();
             }
 

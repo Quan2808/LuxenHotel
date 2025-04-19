@@ -24,7 +24,13 @@ namespace LuxenHotel.Data
         {
             base.OnModelCreating(builder);
 
-            // IdentityContext configurations
+            // Call the separated configuration methods
+            ConfigureIdentity(builder);
+            ConfigureBooking(builder);
+        }
+
+        private void ConfigureIdentity(ModelBuilder builder)
+        {
             // Rename Identity tables for clarity
             builder.Entity<User>().ToTable("Users");
             builder.Entity<Role>().ToTable("Roles");
@@ -50,8 +56,10 @@ namespace LuxenHotel.Data
                 entity.Ignore(e => e.AccessFailedCount);
                 entity.Ignore(e => e.TwoFactorEnabled);
             });
+        }
 
-            // BookingContext configurations
+        private void ConfigureBooking(ModelBuilder builder)
+        {
             // Configure composite keys
             builder.Entity<ComboService>()
                 .HasKey(cs => new { cs.ComboId, cs.ServiceId });

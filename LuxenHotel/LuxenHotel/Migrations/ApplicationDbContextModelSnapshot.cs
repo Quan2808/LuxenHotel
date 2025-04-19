@@ -24,20 +24,25 @@ namespace LuxenHotel.Migrations
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Accommodation", b =>
                 {
-                    b.Property<int>("AccommodationId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccommodationId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("MediaJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Media");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -47,10 +52,10 @@ namespace LuxenHotel.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(8,2)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("AccommodationId");
+                    b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -80,16 +85,16 @@ namespace LuxenHotel.Migrations
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
                 {
-                    b.Property<int>("ComboId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ComboId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AccommodationId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -106,10 +111,10 @@ namespace LuxenHotel.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(8,2)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ComboId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AccommodationId");
 
@@ -138,13 +143,13 @@ namespace LuxenHotel.Migrations
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
                 {
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -161,10 +166,10 @@ namespace LuxenHotel.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(8,2)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ServiceId");
+                    b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
