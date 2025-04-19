@@ -1,3 +1,4 @@
+using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,10 +13,18 @@ namespace LuxenHotel.Data
         {
         }
 
+        // DbSets from BookingContext
+        public DbSet<Accommodation> Accommodations { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Combo> Combos { get; set; }
+        public DbSet<ComboService> ComboServices { get; set; }
+        public DbSet<AccommodationService> AccommodationServices { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
+            // IdentityContext configurations
             // Rename Identity tables for clarity
             builder.Entity<User>().ToTable("Users");
             builder.Entity<Role>().ToTable("Roles");
@@ -41,6 +50,58 @@ namespace LuxenHotel.Data
                 entity.Ignore(e => e.AccessFailedCount);
                 entity.Ignore(e => e.TwoFactorEnabled);
             });
+
+            // BookingContext configurations
+            // Configure composite keys
+            builder.Entity<ComboService>()
+                .HasKey(cs => new { cs.ComboId, cs.ServiceId });
+
+            builder.Entity<AccommodationService>()
+                .HasKey(acs => new { acs.AccommodationId, acs.ServiceId });
+
+            // Configure unique constraints
+            builder.Entity<Accommodation>()
+                .HasIndex(a => a.Name)
+                .IsUnique();
+
+            builder.Entity<Service>()
+                .HasIndex(s => s.Name)
+                .IsUnique();
+
+            builder.Entity<Combo>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+
+            // Configure relationships
+            builder.Entity<Combo>()
+                .HasOne(c => c.Accommodation)
+                .WithMany(a => a.Combos)
+                .HasForeignKey(c => c.AccommodationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ComboService>()
+                .HasOne(cs => cs.Combo)
+                .WithMany(c => c.ComboServices)
+                .HasForeignKey(cs => cs.ComboId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ComboService>()
+                .HasOne(cs => cs.Service)
+                .WithMany(s => s.ComboServices)
+                .HasForeignKey(cs => cs.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<AccommodationService>()
+                .HasOne(acs => acs.Accommodation)
+                .WithMany(a => a.AccommodationServices)
+                .HasForeignKey(acs => acs.AccommodationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<AccommodationService>()
+                .HasOne(acs => acs.Service)
+                .WithMany(s => s.AccommodationServices)
+                .HasForeignKey(acs => acs.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
