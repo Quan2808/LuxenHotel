@@ -54,7 +54,7 @@
   .js .slicknav_menu {
     display: block;
   }
-  .header .button-style-1 {
+  .header .book-button {
     display: none;
   }
   .slider-home .flex-viewport {
@@ -160,7 +160,7 @@
   .big-error-number {
     font-size: 90px;
   }
-  .error-page-container .button-style-1 {
+  .error-page-container .book-button {
     margin-top: 60px;
   }
   .children li {
@@ -194,7 +194,7 @@
   table td.table-products-name {
     width: 65%;
   }
-  table td .button-style-1 {
+  table td .book-button {
     text-indent: 0 !important;
   }
   .mobile-visibility {

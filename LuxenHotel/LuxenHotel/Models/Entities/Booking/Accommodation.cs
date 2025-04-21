@@ -19,9 +19,9 @@ public class Accommodation
     public required string Name { get; set; }
 
     [Required]
-    [Column(TypeName = "decimal(8,2)")]
-    [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
-    public decimal Price { get; set; }
+    [Column(TypeName = "int")]
+    [Range(0, int.MaxValue, ErrorMessage = "Price must be non-negative")]
+    public int Price { get; set; }
 
     [Column(TypeName = "nvarchar(max)")]
     public string? Description { get; set; }

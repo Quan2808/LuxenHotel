@@ -6,40 +6,6 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <style>
-        #roomTable th,
-        #roomTable td {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        #roomTable .table-products-image {
-            width: 20%;
-        }
-
-        #roomTable .table-products-name {
-            width: 50%;
-        }
-
-        #roomTable .table-products-price {
-            width: 15%;
-        }
-
-        #roomTable .table-products-total {
-            width: 15%;
-        }
-
-        #roomTable .img-responsive {
-            max-width: 100px;
-            height: auto;
-            margin: 0 auto;
-        }
-
-        @* #roomTable tbody tr:hover {
-            all: unset;
-            cursor: default !important;
-        } *@
-    </style>
 }
 
 @section Scripts {
@@ -71,51 +37,56 @@
         <div class="col-lg-9"><!-- Explore Rooms -->
             <table id="roomTable" class="display">
                 <thead>
-                    <tr class="products-title">
-                        <th class="table-products-image pos-center">Image</th>
-                        <th class="table-products-name pos-center">Accommodation</th>
-                        <th class="table-products-price pos-center">Price</th>
-                        <th class="table-products-total pos-center">Purchase</th>
-                    </tr>
+                <tr class="products-title">
+                    <th class="table-products-image pos-center">Image</th>
+                    <th class="table-products-name pos-center">Accommodation</th>
+                    <th class="table-products-price pos-center">Price</th>
+                    <th class="table-products-total pos-center">Purchase</th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var room in Model)
-                    {
-                        <tr class="table-products-list pos-center">
-                            <td class="products-image-table">
-                                @if (room.Media != null && room.Media.Any())
-                                {
-                                    <img src="@room.Media.First()" alt="@room.Name" class="img-responsive" />
-                                }
-                                else
-                                {
-                                    <img src="https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg" alt="No Image" class="img-responsive" />
-                                }
-                            </td>
-                            <td class="title-table">
-                                <div class="room-details-list clearfix">
-                                    <div class="pull-left">
-                                        <h5>@room.Name</h5>
-                                    </div>
+                @foreach (var room in Model)
+                {
+                    <tr class="table-products-list pos-center">
+                        <td class="products-image-table">
+                            @if (room.Media != null && room.Media.Any())
+                            {
+                                <img src="@room.Media.First()" alt="@room.Name" class="img-responsive"/>
+                            }
+                            else
+                            {
+                                <img
+                                    src="https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
+                                    alt="No Image" class="img-responsive"/>
+                            }
+                        </td>
+                        <td class="title-table">
+                            <div class="room-details-list clearfix">
+                                <div class="pull-left">
+                                    <h5>@room.Name</h5>
                                 </div>
-                                <p>
-                                    @(room.Description != null && room.Description.Length > 100
-                                        ? room.Description.Substring(0, 100) + "..."
-                                        : room.Description ?? "No description available")
-                                </p>
-                            </td>
-                            <td>
-                                <h3>$@room.Price.ToString("F2")</h3>
-                            </td>
-                            <td>
-                                <div class="button-style-1">
-                                    <a href="@Url.Action("AccommodationDetails", "Booking", new { id = room.Id })">
-                                        <span class="mobile-visibility">BOOK</span>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
+                            </div>
+                            <p>
+                                @(room.Description != null && room.Description.Length > 100
+                                    ? room.Description.Substring(0, 100) + "..."
+                                    : room.Description ?? "No description available")
+                            </p>
+                        </td>
+                        <td>
+                            <h3>
+                                @room.Price.ToString("#,##0 ")
+                                <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
+                            </h3>
+                        </td>
+                        <td>
+                            <div class="book-button">
+                                <a href="@Url.Action("AccommodationDetails", "Booking", new { id = room.Id })">
+                                    <span class="mobile-visibility">BOOK</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -135,15 +106,18 @@
                             <div class="pull-left children clearfix">
                                 <label class="text-white">ROOMS</label>
                                 <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
-                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                      data-links-external="false" data-placeholder-option="false" data-filter=""><span
                                         class="sod_label">1</span><span class="sod_list_wrapper"><span
                                             class="sod_list"><span class="sod_option  selected active " title="1"
-                                                data-value="1">1</span><span class="sod_option " title="2"
-                                                data-value="2">2</span><span class="sod_option " title="3"
+                                                                   data-value="1">1</span><span class="sod_option "
+                                                                                                title="2"
+                                                                                                data-value="2">2</span><span
+                                                class="sod_option " title="3"
                                                 data-value="3">3</span><span class="sod_option " title="4"
-                                                data-value="4">4</span><span class="sod_option " title="5"
+                                                                             data-value="4">4</span><span
+                                                class="sod_option " title="5"
                                                 data-value="5">5</span></span></span><select name="rooms"
-                                        class="pretty-select">
+                                                                                             class="pretty-select">
                                         <option selected="selected" value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
@@ -154,15 +128,18 @@
                             <div class="pull-left type clearfix">
                                 <label class="text-white">ADULT</label>
                                 <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
-                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                      data-links-external="false" data-placeholder-option="false" data-filter=""><span
                                         class="sod_label">1</span><span class="sod_list_wrapper"><span
                                             class="sod_list"><span class="sod_option  selected active " title="1"
-                                                data-value="1">1</span><span class="sod_option " title="2"
-                                                data-value="2">2</span><span class="sod_option " title="3"
+                                                                   data-value="1">1</span><span class="sod_option "
+                                                                                                title="2"
+                                                                                                data-value="2">2</span><span
+                                                class="sod_option " title="3"
                                                 data-value="3">3</span><span class="sod_option " title="4"
-                                                data-value="4">4</span><span class="sod_option " title="5"
+                                                                             data-value="4">4</span><span
+                                                class="sod_option " title="5"
                                                 data-value="5">5</span></span></span><select name="adult"
-                                        class="pretty-select">
+                                                                                             class="pretty-select">
                                         <option selected="selected" value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
@@ -173,15 +150,19 @@
                             <div class="pull-left rooms clearfix">
                                 <label class="text-white">CHILDREN</label>
                                 <span class="sod_select " tabindex="0" data-cycle="false" data-links="false"
-                                    data-links-external="false" data-placeholder-option="false" data-filter=""><span
+                                      data-links-external="false" data-placeholder-option="false" data-filter=""><span
                                         class="sod_label">0</span><span class="sod_list_wrapper"><span
                                             class="sod_list"><span class="sod_option  selected active " title="0"
-                                                data-value="0">0</span><span class="sod_option " title="1"
-                                                data-value="1">1</span><span class="sod_option " title="2"
+                                                                   data-value="0">0</span><span class="sod_option "
+                                                                                                title="1"
+                                                                                                data-value="1">1</span><span
+                                                class="sod_option " title="2"
                                                 data-value="2">2</span><span class="sod_option " title="3"
-                                                data-value="3">3</span><span class="sod_option " title="4"
+                                                                             data-value="3">3</span><span
+                                                class="sod_option " title="4"
                                                 data-value="4">4</span><span class="sod_option " title="5"
-                                                data-value="5">5</span></span></span><select name="children"
+                                                                             data-value="5">5</span></span></span><select
+                                        name="children"
                                         class="pretty-select">
                                         <option selected="selected" value="0">0</option>
                                         <option value="1">1</option>
@@ -192,7 +173,7 @@
                                     </select></span>
                             </div>
                             <div class="pull-left search-button clearfix">
-                                <div class="button-style-1">
+                                <div class="book-button">
                                     <a id="res-submit" href="#">SEARCH</a>
                                 </div>
                             </div>

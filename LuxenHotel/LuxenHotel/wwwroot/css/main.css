@@ -490,7 +490,7 @@ textarea:focus {
 }
 /* Alternative Menu */
 
-.button-style-1 a {
+.book-button a {
   background: #e4b248;
   padding: 12px 20px;
   font-family: Varela Round;
@@ -502,11 +502,11 @@ textarea:focus {
   transition: all 0.4s;
 }
 
-.button-style-1 i {
+.book-button i {
   padding-right: 12px;
 }
 
-.button-style-1 a:hover {
+.book-button a:hover {
   background: #0c242e;
 }
 
@@ -695,7 +695,7 @@ textarea:focus {
   font-size: 11px;
 }
 
-.book-slider .button-style-1 {
+.book-slider .book-button {
   margin-top: 28px;
   padding: 1px 20px;
 }
@@ -1695,12 +1695,12 @@ table tr.table-products-list {
   margin-left: 10%;
 }
 
-.quick-reservation .button-style-1 {
+.quick-reservation .book-button {
   margin-top: 40px;
   width: 100%;
 }
 
-.quick-reservation .button-style-1 a {
+.quick-reservation .book-button a {
   font-size: 11px !important;
   padding: 8px 15px;
 }
@@ -1780,7 +1780,7 @@ ul.tabbed-area li.active a {
   font-size: 180px;
 }
 
-.error-page-container .button-style-1 {
+.error-page-container .book-button {
   margin-top: 100px;
   margin-bottom: 15%;
 }
@@ -2491,4 +2491,72 @@ ul.tabbed-area li.active a {
 }
 .ls-2 {
   letter-spacing: 2px !important;
+}
+
+
+#roomTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#roomTable th, #roomTable td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+}
+
+#roomTable th.table-products-image,
+#roomTable td.products-image-table {
+  width: 20%;
+}
+
+#roomTable th.table-products-name,
+#roomTable td.title-table {
+  width: 35%;
+}
+
+#roomTable th.table-products-price,
+#roomTable td.table-products-price {
+  width: 25%;
+  font-weight: bold;
+}
+
+#roomTable th.table-products-total,
+#roomTable td.book-button {
+  width: 20%;
+}
+
+.products-image-table img {
+  max-width: 100px;
+  height: auto;
+  object-fit: cover;
+}
+
+@media screen and (max-width: 768px) {
+  #roomTable th, #roomTable td {
+    padding: 5px;
+  }
+
+  #roomTable th.table-products-price,
+  #roomTable td.table-products-price {
+    width: 30%;
+  }
+
+  #roomTable th.table-products-name,
+  #roomTable td.title-table {
+    width: 30%;
+  }
+
+  .products-image-table img {
+    max-width: 80px;
+  }
+}
+
+.dataTable thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.dataTable tbody tr:hover {
+  background-color: #f1f1f1;
 }

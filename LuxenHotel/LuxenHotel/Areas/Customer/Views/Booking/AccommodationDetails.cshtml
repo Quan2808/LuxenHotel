@@ -66,8 +66,6 @@
             $(".owl-carousel").owlCarousel({
                 items: 1,
                 loop: true,
-                nav: true,
-                dots: true,
                 autoplay: true,
                 autoplayTimeout: 5000
             });
@@ -111,13 +109,25 @@
             }
             <h1 class="accommodation-title">@Model.Name</h1>
             <hr>
-            <p class="accommodation-title-price">
-                Price per Night:
-                <span style="color: #114a6d"> @Model.Price.ToString("C")</span>
-            </p>
 
-            <p class="area" style=" margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Area m²</p>
-            <p class="occupancy"><strong>Max Occupancy:</strong> @Model.MaxOccupancy guest(s)</p>
+            <div class="row" style="display: flex; align-items: center;">
+                <div class="col-md-8">
+                    <p class="accommodation-title-price">
+                        Price per Night:
+                        <span style="color: #114a6d">
+                            @Model.Price.ToString("#,##0 ")
+                            <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
+                        </span>
+                    </p>
+                    <p class="area" style="margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Area m²</p>
+                    <p class="occupancy"><strong>Max Occupancy:</strong> @Model.MaxOccupancy guest(s)</p>
+                </div>
+                <div class="col-md-4 book-button" style="display: flex; justify-content: center;">
+                    <a href="reservation-form-dark.html">
+                        <i class="fa fa-calendar"></i> BOOK NOW
+                    </a>
+                </div>
+            </div>
 
             @if (!string.IsNullOrEmpty(Model.Description))
             {
