@@ -15,6 +15,6 @@ public class ComboService
     [ForeignKey("Service")]
     public int ServiceId { get; set; }
 
-    public Combo Combo { get; set; }
-    public Service Service { get; set; }
+    public required Combo Combo { get; set; }
+    public required Service Service { get; set; }
 }

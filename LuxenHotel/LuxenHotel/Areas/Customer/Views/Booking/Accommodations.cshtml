@@ -1,4 +1,4 @@
-@model IEnumerable<LuxenHotel.Models.Entities.Booking.Accommodation>
+@model IEnumerable<LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel>
 
 @{
     ViewData["Title"] = "Accommodations";
@@ -89,7 +89,7 @@
                                 }
                                 else
                                 {
-                                    <img src="/images/static/room/placeholder.jpg" alt="No Image" class="img-responsive" />
+                                    <img src="https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg" alt="No Image" class="img-responsive" />
                                 }
                             </td>
                             <td class="title-table">
@@ -109,7 +109,7 @@
                             </td>
                             <td>
                                 <div class="button-style-1">
-                                    <a href="@Url.Action("Accommodations", "Book", new { id = room.Id })">
+                                    <a href="@Url.Action("AccommodationDetails", "Booking", new { id = room.Id })">
                                         <span class="mobile-visibility">BOOK</span>
                                     </a>
                                 </div>

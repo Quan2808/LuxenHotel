@@ -19,6 +19,6 @@ public class AccommodationService
     [Column(TypeName = "decimal(8,2)")]
     public decimal? AdditionalPrice { get; set; }
 
-    public Accommodation Accommodation { get; set; }
-    public Service Service { get; set; }
+    public required Accommodation Accommodation { get; set; }
+    public required Service Service { get; set; }
 }

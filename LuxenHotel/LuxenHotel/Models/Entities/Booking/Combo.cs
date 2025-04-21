@@ -13,7 +13,7 @@ public class Combo : BaseEntity
 
     [Required]
     [StringLength(100)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(8,2)")]

@@ -19,7 +19,7 @@ public class Accommodation : BaseEntity
 
     [Required]
     [StringLength(100)]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(8,2)")]
@@ -27,7 +27,7 @@ public class Accommodation : BaseEntity
     public decimal Price { get; set; }
 
     [Column(TypeName = "nvarchar(max)")]
-    public string Description { get; set; }
+    public required string Description { get; set; }
 
     [NotMapped]
     public List<string> Media

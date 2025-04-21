@@ -1,5 +1,6 @@
 using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
+using LuxenHotel.Models.ViewModels.Booking;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,32 +24,46 @@ public class BookingController : Controller
     public async Task<IActionResult> Accommodations()
     {
         var accommodations = await _context.Accommodations
-                .Include(a => a.Combos)
-                .Include(a => a.AccommodationServices)
-                .ToListAsync();
-        return View(accommodations);
+        .Include(a => a.Combos)
+        .Include(a => a.AccommodationServices)
+        .ToListAsync();
+
+        var viewModel = accommodations.Select(a => new AccommodationViewModel
+        {
+            Id = a.Id,
+            Name = a.Name,
+            Price = a.Price,
+            Description = a.Description,
+            Media = a.Media
+        }).ToList();
+
+        return View(viewModel);
     }
 
     // Action hiển thị thông tin chỗ ở
     [HttpGet]
+    [Route("Accommodations/{id}")]
     public async Task<IActionResult> AccommodationDetails(int? id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
+        if (id == null) return NotFound();
 
-        var accommodation = await _context!.Accommodations
+        var accommodation = await _context.Accommodations
+            .Include(a => a.Combos)
             .Include(a => a.AccommodationServices)
-            .ThenInclude(acs => acs.Service)
-            .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
+            .FirstOrDefaultAsync(m => m.Id == id);
 
-        if (accommodation == null)
+        if (accommodation == null) return NotFound();
+
+        var viewModel = new AccommodationViewModel
         {
-            return NotFound();
-        }
+            Id = accommodation.Id,
+            Name = accommodation.Name,
+            Price = accommodation.Price,
+            Description = accommodation.Description,
+            Media = accommodation.Media
+        };
 
-        return View(accommodation);
+        return View(viewModel);
     }
 
     // GET: Accommodation/Create
