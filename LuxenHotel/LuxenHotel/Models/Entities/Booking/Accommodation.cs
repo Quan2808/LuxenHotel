@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LuxenHotel.Models.Entities.Booking;
 
-public class Accommodation : BaseEntity
+public class Accommodation
 {
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -14,11 +14,8 @@ public class Accommodation : BaseEntity
     };
 
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-
     [Required]
-    [StringLength(100)]
     public required string Name { get; set; }
 
     [Required]
@@ -27,7 +24,7 @@ public class Accommodation : BaseEntity
     public decimal Price { get; set; }
 
     [Column(TypeName = "nvarchar(max)")]
-    public required string Description { get; set; }
+    public string? Description { get; set; }
 
     [NotMapped]
     public List<string> Media
@@ -43,8 +40,21 @@ public class Accommodation : BaseEntity
     [Column("Media", TypeName = "nvarchar(max)")]
     public string? MediaJson { get; private set; }
 
-    public List<Combo> Combos { get; set; } = new List<Combo>();
-    public List<AccommodationService> AccommodationServices { get; set; } = new List<AccommodationService>();
+    public bool IsAvailable { get; set; } = true; // Có sẵn mặc định 
+
+    [Required]
+    public int MaxOccupancy { get; set; } // Số khách tối đa 
+
+    [Column(TypeName = "decimal(10,0)")]
+    [Required]
+    public decimal Area { get; set; } // Diện tích (m²) 
+
+    public DateTime? CreatedAt { get; set; } = DateTime.Now;
+
+    public List<AccommodationService> AccommodationServices { get; set; }
+    public List<Combo> Combos { get; set; }
+    public List<Booking> Bookings { get; set; }
+
 
     // Helper method to safely update Media
     public void UpdateMedia(List<string> media)

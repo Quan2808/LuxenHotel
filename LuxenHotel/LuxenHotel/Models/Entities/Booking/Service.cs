@@ -4,13 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LuxenHotel.Models.Entities.Booking;
 
-public class Service : BaseEntity
+public class Service
 {
     [Key]
     public int Id { get; set; }
 
     [Required]
-    [StringLength(100)]
     public required string Name { get; set; }
 
     [Required]
@@ -18,7 +17,8 @@ public class Service : BaseEntity
     public decimal Price { get; set; }
 
     public string? Description { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public List<ComboService> ComboServices { get; set; } = new List<ComboService>();
-    public List<AccommodationService> AccommodationServices { get; set; } = new List<AccommodationService>();
+    public List<AccommodationService> AccommodationServices { get; set; }
+    public List<ComboService> ComboServices { get; set; }
 }

@@ -60,7 +60,22 @@ public class BookingController : Controller
             Name = accommodation.Name,
             Price = accommodation.Price,
             Description = accommodation.Description,
-            Media = accommodation.Media
+            Media = accommodation.Media,
+            IsAvailable = accommodation.IsAvailable,
+            MaxOccupancy = accommodation.MaxOccupancy,
+            Area = accommodation.Area,
+            CreatedAt = accommodation.CreatedAt,
+
+            Services = accommodation.AccommodationServices?
+                .Select(s => s.Service.Name)
+                .ToList() ?? new List<string>(),
+
+            Combos = accommodation.Combos?
+                .Select(c => new ComboViewModel
+                {
+                    Name = c.Name,
+                    DiscountPercent = c.DiscountPercent
+                }).ToList() ?? new List<ComboViewModel>()
         };
 
         return View(viewModel);

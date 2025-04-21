@@ -1346,6 +1346,7 @@ input[type="submit"]:hover {
 }
 
 .main-footer {
+  background: #f4f4f4;
   padding: 60px;
   font-size: 12px;
   border-bottom: solid 1px #eeeeee;

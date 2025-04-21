@@ -16,9 +16,10 @@ namespace LuxenHotel.Data
         // DbSets from BookingContext
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<Service> Services { get; set; }
+        public DbSet<AccommodationService> AccommodationServices { get; set; }
         public DbSet<Combo> Combos { get; set; }
         public DbSet<ComboService> ComboServices { get; set; }
-        public DbSet<AccommodationService> AccommodationServices { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -58,58 +59,37 @@ namespace LuxenHotel.Data
             });
         }
 
-        private void ConfigureBooking(ModelBuilder builder)
+        private void ConfigureBooking(ModelBuilder modelBuilder)
         {
-            // Configure composite keys
-            builder.Entity<ComboService>()
-                .HasKey(cs => new { cs.ComboId, cs.ServiceId });
-
-            builder.Entity<AccommodationService>()
+            // Cấu hình khóa chính cho AccommodationService
+            modelBuilder.Entity<AccommodationService>()
                 .HasKey(acs => new { acs.AccommodationId, acs.ServiceId });
 
-            // Configure unique constraints
-            builder.Entity<Accommodation>()
-                .HasIndex(a => a.Name)
-                .IsUnique();
-
-            builder.Entity<Service>()
-                .HasIndex(s => s.Name)
-                .IsUnique();
-
-            builder.Entity<Combo>()
-                .HasIndex(c => c.Name)
-                .IsUnique();
-
-            // Configure relationships
-            builder.Entity<Combo>()
-                .HasOne(c => c.Accommodation)
-                .WithMany(a => a.Combos)
-                .HasForeignKey(c => c.AccommodationId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<ComboService>()
-                .HasOne(cs => cs.Combo)
-                .WithMany(c => c.ComboServices)
-                .HasForeignKey(cs => cs.ComboId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<ComboService>()
-                .HasOne(cs => cs.Service)
-                .WithMany(s => s.ComboServices)
-                .HasForeignKey(cs => cs.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<AccommodationService>()
+            // Cấu hình mối quan hệ cho AccommodationService
+            modelBuilder.Entity<AccommodationService>()
                 .HasOne(acs => acs.Accommodation)
                 .WithMany(a => a.AccommodationServices)
-                .HasForeignKey(acs => acs.AccommodationId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(acs => acs.AccommodationId);
 
-            builder.Entity<AccommodationService>()
+            modelBuilder.Entity<AccommodationService>()
                 .HasOne(acs => acs.Service)
                 .WithMany(s => s.AccommodationServices)
-                .HasForeignKey(acs => acs.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(acs => acs.ServiceId);
+
+            // Cấu hình khóa chính cho ComboService
+            modelBuilder.Entity<ComboService>()
+                .HasKey(cs => new { cs.ComboId, cs.ServiceId });
+
+            // Cấu hình mối quan hệ cho ComboService
+            modelBuilder.Entity<ComboService>()
+                .HasOne(cs => cs.Combo)
+                .WithMany(c => c.ComboServices)
+                .HasForeignKey(cs => cs.ComboId);
+
+            modelBuilder.Entity<ComboService>()
+                .HasOne(cs => cs.Service)
+                .WithMany(s => s.ComboServices)
+                .HasForeignKey(cs => cs.ServiceId);
         }
     }
 }

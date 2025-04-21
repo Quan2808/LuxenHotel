@@ -17,13 +17,14 @@ namespace LuxenHotel.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Media = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    MaxOccupancy = table.Column<int>(type: "int", nullable: false),
+                    Area = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -50,12 +51,10 @@ namespace LuxenHotel.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,13 +87,10 @@ namespace LuxenHotel.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AccommodationId = table.Column<int>(type: "int", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccommodationId = table.Column<int>(type: "int", nullable: false),
+                    DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,8 +108,7 @@ namespace LuxenHotel.Migrations
                 columns: table => new
                 {
                     AccommodationId = table.Column<int>(type: "int", nullable: false),
-                    ServiceId = table.Column<int>(type: "int", nullable: false),
-                    AdditionalPrice = table.Column<decimal>(type: "decimal(8,2)", nullable: true)
+                    ServiceId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -157,6 +152,36 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccommodationId = table.Column<int>(type: "int", nullable: false),
+                    ComboId = table.Column<int>(type: "int", nullable: true),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Accommodations_AccommodationId",
+                        column: x => x.AccommodationId,
+                        principalTable: "Accommodations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Combos_ComboId",
+                        column: x => x.ComboId,
+                        principalTable: "Combos",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ComboServices",
                 columns: table => new
                 {
@@ -181,26 +206,24 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accommodations_Name",
-                table: "Accommodations",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AccommodationServices_ServiceId",
                 table: "AccommodationServices",
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Combos_AccommodationId",
-                table: "Combos",
+                name: "IX_Bookings_AccommodationId",
+                table: "Bookings",
                 column: "AccommodationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Combos_Name",
+                name: "IX_Bookings_ComboId",
+                table: "Bookings",
+                column: "ComboId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Combos_AccommodationId",
                 table: "Combos",
-                column: "Name",
-                unique: true);
+                column: "AccommodationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComboServices_ServiceId",
@@ -213,12 +236,6 @@ namespace LuxenHotel.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Services_Name",
-                table: "Services",
-                column: "Name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
@@ -243,6 +260,9 @@ namespace LuxenHotel.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AccommodationServices");
+
+            migrationBuilder.DropTable(
+                name: "Bookings");
 
             migrationBuilder.DropTable(
                 name: "ComboServices");

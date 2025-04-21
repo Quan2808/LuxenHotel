@@ -31,6 +31,29 @@
             transform: translateY(-50%);
             padding: 0 15px;
         }
+
+        .accommodation-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 10px;
+            line-height: initial;
+        }
+
+        .accommodation-title-price {
+            font-size: 18px;
+            opacity: .92;
+            font-weight: bold;
+            color: #f94c43;
+        }
+
+        .availability {
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 17px;
+            margin: 0 0 10px 0;
+            line-height: 21px;
+            display: block;
+        }
     </style>
 }
 
@@ -62,71 +85,46 @@
 }
 
 <div class="container">
-    <div class="row">
-        @if (Model.Media.Any())
-        {
-            <div class="owl-carousel">
-                @foreach (var media in Model.Media)
-                {
-                    <div class="item">
-                        <a href="@media" class="image-popup">
-                            <img src="@media" alt="@Model.Name">
-                        </a>
-                    </div>
-                }
-            </div>
-        }
-    </div>
-
-    @await Html.PartialAsync("Partials/_AmenitiesFacilities")
-
-</div>
-
-<h1>Accommodation Details</h1>
-
-<div>
-    <h4>@Model.Name</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            Media
-        </dt>
-        <dd class="col-sm-10">
+    <div class="row accommodation-details mb-20">
+        <div class="col-md-6">
             @if (Model.Media.Any())
             {
-                <ul>
+                <div class="owl-carousel image-carousel">
                     @foreach (var media in Model.Media)
                     {
-                        <li><img src="@media" alt="@Html.DisplayNameFor(model => model.Name)"></li>
+                        <div class="item">
+                            <a href="@media" class="image-popup">
+                                <img src="@media" alt="@Model.Name" class="img-responsive img-rounded">
+                            </a>
+                        </div>
                     }
-                </ul>
+                </div>
             }
-            else
+        </div>
+
+        <div class="col-md-6">
+            @if (!Model.IsAvailable)
             {
-                <span>No media available</span>
+                <p class="availability text-danger">
+                    Fully Booked
+                </p>
             }
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+            <h1 class="accommodation-title">@Model.Name</h1>
+            <hr>
+            <p class="accommodation-title-price">
+                Price per Night:
+                <span style="color: #114a6d"> @Model.Price.ToString("C")</span>
+            </p>
+
+            <p class="area" style=" margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Area m²</p>
+            <p class="occupancy"><strong>Max Occupancy:</strong> @Model.MaxOccupancy guest(s)</p>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="description">@Model.Description</p>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("Partials/_AmenitiesFacilities")
+
 </div>
