@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <NoWarn>$(NoWarn);CS8618</NoWarn>
+        <NoWarn>$(NoWarn);CS8603</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

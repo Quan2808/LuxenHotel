@@ -1,4 +1,5 @@
 ﻿using LuxenHotel.Data;
+using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Services.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -26,7 +27,10 @@ namespace LuxenHotel
             services.AddTransient<IUserStore<User>, CustomUserStore>();
             services.AddTransient<IRoleStore<Role>, CustomRoleStore>();
 
-            // services.AddScoped<AccommodationStore>();
+            // Register AccommodationService
+            services.AddScoped<
+                LuxenHotel.Services.Booking.Interfaces.IAccommodationService,
+                LuxenHotel.Services.Booking.Implementations.AccommodationService>();
 
             // Configure Identity
             services.AddIdentity<User, Role>(options =>
@@ -73,6 +77,7 @@ namespace LuxenHotel
                 logging.AddDebug();
                 logging.SetMinimumLevel(LogLevel.Debug);
             });
+
 
             services.AddControllersWithViews();
         }
