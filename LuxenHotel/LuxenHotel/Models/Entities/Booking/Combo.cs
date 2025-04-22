@@ -7,14 +7,26 @@ public class Combo
 {
     [Key]
     public int Id { get; set; }
-    [Required]
-    public string Name { get; set; }
-    public int AccommodationId { get; set; }
-    public Accommodation Accommodation { get; set; }
-    [Column(TypeName = "decimal(5,2)")]
-    public decimal DiscountPercent { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public List<ComboService> ComboServices { get; set; }
-    public List<Booking> Bookings { get; set; }
+    [Required]
+    [StringLength(255, ErrorMessage = "Name cannot exceed 255 characters")]
+    public required string Name { get; set; }
+
+    [Required]
+    [Column(TypeName = "int")]
+    [Range(0, 50000000, ErrorMessage = "Price must be between 0 and 50,000,000")]
+    public int Price { get; set; }
+
+    [Column(TypeName = "nvarchar(max)")]
+    public string? Description { get; set; }
+
+    [Column(TypeName = "decimal(5,2)")]
+    [Range(0, 100, ErrorMessage = "Discount must be between 0 and 100%")]
+    public decimal? Discount { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+
+    public List<ComboService> ComboServices { get; set; } = new();
+    public List<Accommodation> Accommodations { get; set; } = new();
 }

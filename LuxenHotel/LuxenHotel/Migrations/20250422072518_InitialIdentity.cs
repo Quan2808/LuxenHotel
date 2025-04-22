@@ -17,18 +17,37 @@ namespace LuxenHotel.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Media = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     MaxOccupancy = table.Column<int>(type: "int", nullable: false),
-                    Area = table.Column<decimal>(type: "decimal(10,0)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Area = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Accommodations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Combos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Discount = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Combos", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -43,22 +62,6 @@ namespace LuxenHotel.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Services",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Services", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,21 +85,23 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Combos",
+                name: "Services",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccommodationId = table.Column<int>(type: "int", nullable: false),
-                    DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Combos", x => x.Id);
+                    table.PrimaryKey("PK_Services", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Combos_Accommodations_AccommodationId",
+                        name: "FK_Services_Accommodations_AccommodationId",
                         column: x => x.AccommodationId,
                         principalTable: "Accommodations",
                         principalColumn: "Id",
@@ -104,27 +109,62 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AccommodationServices",
+                name: "AccommodationCombo",
                 columns: table => new
                 {
-                    AccommodationId = table.Column<int>(type: "int", nullable: false),
-                    ServiceId = table.Column<int>(type: "int", nullable: false)
+                    AccommodationsId = table.Column<int>(type: "int", nullable: false),
+                    CombosId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AccommodationServices", x => new { x.AccommodationId, x.ServiceId });
+                    table.PrimaryKey("PK_AccommodationCombo", x => new { x.AccommodationsId, x.CombosId });
                     table.ForeignKey(
-                        name: "FK_AccommodationServices_Accommodations_AccommodationId",
-                        column: x => x.AccommodationId,
+                        name: "FK_AccommodationCombo_Accommodations_AccommodationsId",
+                        column: x => x.AccommodationsId,
                         principalTable: "Accommodations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AccommodationServices_Services_ServiceId",
-                        column: x => x.ServiceId,
-                        principalTable: "Services",
+                        name: "FK_AccommodationCombo_Combos_CombosId",
+                        column: x => x.CombosId,
+                        principalTable: "Combos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccommodationId = table.Column<int>(type: "int", nullable: true),
+                    ComboId = table.Column<int>(type: "int", nullable: true),
+                    ServicesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ServiceQuantitiesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CheckInDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    CheckOutDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    TotalPrice = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    GuestName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    GuestContact = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Accommodations_AccommodationId",
+                        column: x => x.AccommodationId,
+                        principalTable: "Accommodations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Bookings_Combos_ComboId",
+                        column: x => x.ComboId,
+                        principalTable: "Combos",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -152,41 +192,13 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bookings",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AccommodationId = table.Column<int>(type: "int", nullable: false),
-                    ComboId = table.Column<int>(type: "int", nullable: true),
-                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bookings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Bookings_Accommodations_AccommodationId",
-                        column: x => x.AccommodationId,
-                        principalTable: "Accommodations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Bookings_Combos_ComboId",
-                        column: x => x.ComboId,
-                        principalTable: "Combos",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ComboServices",
                 columns: table => new
                 {
                     ComboId = table.Column<int>(type: "int", nullable: false),
-                    ServiceId = table.Column<int>(type: "int", nullable: false)
+                    ServiceId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -206,9 +218,9 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AccommodationServices_ServiceId",
-                table: "AccommodationServices",
-                column: "ServiceId");
+                name: "IX_AccommodationCombo_CombosId",
+                table: "AccommodationCombo",
+                column: "CombosId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_AccommodationId",
@@ -221,11 +233,6 @@ namespace LuxenHotel.Migrations
                 column: "ComboId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Combos_AccommodationId",
-                table: "Combos",
-                column: "AccommodationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ComboServices_ServiceId",
                 table: "ComboServices",
                 column: "ServiceId");
@@ -236,6 +243,11 @@ namespace LuxenHotel.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Services_AccommodationId",
+                table: "Services",
+                column: "AccommodationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
@@ -259,7 +271,7 @@ namespace LuxenHotel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AccommodationServices");
+                name: "AccommodationCombo");
 
             migrationBuilder.DropTable(
                 name: "Bookings");

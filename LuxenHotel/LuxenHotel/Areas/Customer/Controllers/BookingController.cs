@@ -25,7 +25,6 @@ public class BookingController : Controller
     {
         var accommodations = await _context.Accommodations
         .Include(a => a.Combos)
-        .Include(a => a.AccommodationServices)
         .ToListAsync();
 
         var viewModel = accommodations.Select(a => new AccommodationViewModel
@@ -49,7 +48,6 @@ public class BookingController : Controller
 
         var accommodation = await _context.Accommodations
             .Include(a => a.Combos)
-            .Include(a => a.AccommodationServices)
             .FirstOrDefaultAsync(m => m.Id == id);
 
         if (accommodation == null) return NotFound();
@@ -66,15 +64,11 @@ public class BookingController : Controller
             Area = accommodation.Area,
             CreatedAt = accommodation.CreatedAt,
 
-            Services = accommodation.AccommodationServices?
-                .Select(s => s.Service.Name)
-                .ToList() ?? new List<string>(),
 
             Combos = accommodation.Combos?
                 .Select(c => new ComboViewModel
                 {
                     Name = c.Name,
-                    DiscountPercent = c.DiscountPercent
                 }).ToList() ?? new List<ComboViewModel>()
         };
 

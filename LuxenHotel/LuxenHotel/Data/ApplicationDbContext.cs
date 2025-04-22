@@ -16,7 +16,6 @@ namespace LuxenHotel.Data
         // DbSets from BookingContext
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<Service> Services { get; set; }
-        public DbSet<AccommodationService> AccommodationServices { get; set; }
         public DbSet<Combo> Combos { get; set; }
         public DbSet<ComboService> ComboServices { get; set; }
         public DbSet<Booking> Bookings { get; set; }
@@ -61,20 +60,12 @@ namespace LuxenHotel.Data
 
         private void ConfigureBooking(ModelBuilder modelBuilder)
         {
-            // Cấu hình khóa chính cho AccommodationService
-            modelBuilder.Entity<AccommodationService>()
-                .HasKey(acs => new { acs.AccommodationId, acs.ServiceId });
-
-            // Cấu hình mối quan hệ cho AccommodationService
-            modelBuilder.Entity<AccommodationService>()
-                .HasOne(acs => acs.Accommodation)
-                .WithMany(a => a.AccommodationServices)
-                .HasForeignKey(acs => acs.AccommodationId);
-
-            modelBuilder.Entity<AccommodationService>()
-                .HasOne(acs => acs.Service)
-                .WithMany(s => s.AccommodationServices)
-                .HasForeignKey(acs => acs.ServiceId);
+            // Cấu hình mối quan hệ một-nhiều giữa Accommodation và Service
+            modelBuilder.Entity<Service>()
+                .HasOne(s => s.Accommodation)
+                .WithMany(a => a.Services)
+                .HasForeignKey(s => s.AccommodationId)
+                .OnDelete(DeleteBehavior.Cascade); // Xóa các Service khi Accommodation bị xóa
 
             // Cấu hình khóa chính cho ComboService
             modelBuilder.Entity<ComboService>()

@@ -15,12 +15,14 @@ public class Accommodation
 
     [Key]
     public int Id { get; set; }
+
     [Required]
+    [StringLength(255, ErrorMessage = "Name cannot exceed 255 characters")]
     public required string Name { get; set; }
 
     [Required]
     [Column(TypeName = "int")]
-    [Range(0, int.MaxValue, ErrorMessage = "Price must be non-negative")]
+    [Range(0, 50000000, ErrorMessage = "Price must be between 0 and 50,000,000")]
     public int Price { get; set; }
 
     [Column(TypeName = "nvarchar(max)")]
@@ -40,23 +42,24 @@ public class Accommodation
     [Column("Media", TypeName = "nvarchar(max)")]
     public string? MediaJson { get; private set; }
 
-    public bool IsAvailable { get; set; } = true; // Có sẵn mặc định 
+    public bool IsAvailable { get; set; } = true;
 
     [Required]
-    public int MaxOccupancy { get; set; } // Số khách tối đa 
+    [Range(1, 50, ErrorMessage = "Max occupancy must be between 1 and 50")]
+    public int MaxOccupancy { get; set; }
 
-    [Column(TypeName = "decimal(10,0)")]
+    [Column(TypeName = "decimal(10,2)")]
     [Required]
-    public decimal Area { get; set; } // Diện tích (m²) 
+    [Range(0, 10000, ErrorMessage = "Area must be between 0 and 10,000 m²")]
+    public decimal Area { get; set; }
 
-    public DateTime? CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 
-    public List<AccommodationService> AccommodationServices { get; set; }
-    public List<Combo> Combos { get; set; }
-    public List<Booking> Bookings { get; set; }
+    public List<Service> Services { get; set; } = new();
+    public List<Combo> Combos { get; set; } = new();
+    public List<Booking> Bookings { get; set; } = new();
 
-
-    // Helper method to safely update Media
     public void UpdateMedia(List<string> media)
     {
         Media = media ?? new List<string>();

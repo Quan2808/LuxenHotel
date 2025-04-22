@@ -5,9 +5,14 @@ namespace LuxenHotel.Models.Entities.Booking;
 
 public class ComboService
 {
-    [Key]
     public int ComboId { get; set; }
-    public Combo Combo { get; set; }
+
+    public Combo? Combo { get; set; }
+
     public int ServiceId { get; set; }
-    public Service Service { get; set; }
+
+    public Service? Service { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }
