@@ -23,7 +23,6 @@ public class Service
 
     [Required]
     public int AccommodationId { get; set; }
-
     public Accommodation? Accommodation { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -65,10 +65,22 @@ public class AccommodationService : IAccommodationService
 
     public async Task CreateAccommodationAsync(Accommodation accommodation, List<IFormFile> mediaFiles)
     {
+        if (accommodation == null)
+            throw new ArgumentNullException(nameof(accommodation));
+
         var mediaPaths = await FileUploadUtility.UploadFilesAsync(mediaFiles, _environment);
         accommodation.UpdateMedia(mediaPaths);
 
-        _context.Add(accommodation);
+        if (accommodation.CreatedAt == default)
+            accommodation.CreatedAt = DateTime.UtcNow;
+
+        foreach (var service in accommodation.Services)
+        {
+            service.Accommodation = accommodation;
+            service.CreatedAt = DateTime.UtcNow;
+        }
+
+        _context.Accommodations.Add(accommodation);
         await _context.SaveChangesAsync();
     }
 }

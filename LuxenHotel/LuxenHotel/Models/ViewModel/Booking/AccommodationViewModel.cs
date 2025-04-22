@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace LuxenHotel.Models.ViewModels.Booking;
 
 public class AccommodationViewModel
@@ -16,10 +19,4 @@ public class AccommodationViewModel
     public List<string> Services { get; set; } = new();
 
     public List<ComboViewModel> Combos { get; set; } = new();
-}
-
-public class ComboViewModel
-{
-    public string Name { get; set; }
-    public decimal DiscountPercent { get; set; }
 }

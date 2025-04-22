@@ -45,16 +45,41 @@ public class BookingController : Controller
     // POST: Accommodation/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(
-        [Bind("Name,Price,Description")] Accommodation accommodation,
-        List<IFormFile> MediaFiles)
+    public async Task<IActionResult> Create(AccommodationCreateViewModel viewModel, List<IFormFile> MediaFiles)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
+            return View(viewModel);
+        }
+
+        try
+        {
+            var accommodation = new Accommodation
+            {
+                Name = viewModel.Name,
+                Price = viewModel.Price,
+                Description = viewModel.Description,
+                MaxOccupancy = viewModel.MaxOccupancy,
+                Area = viewModel.Area,
+                IsAvailable = viewModel.IsAvailable,
+                Services = viewModel.Services?.Select(s => new Service
+                {
+                    Name = s.Name,
+                    Price = s.Price,
+                    Description = s.Description,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList() ?? new List<Service>()
+            };
+
             await _accommodationService.CreateAccommodationAsync(accommodation, MediaFiles);
+            TempData["SuccessMessage"] = "Accommodation and services created successfully!";
             return RedirectToAction(nameof(Accommodations));
         }
-        return View(accommodation);
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"An error occurred: {ex.Message}");
+            return View(viewModel);
+        }
     }
 
     // Action xử lý đặt chỗ ở
