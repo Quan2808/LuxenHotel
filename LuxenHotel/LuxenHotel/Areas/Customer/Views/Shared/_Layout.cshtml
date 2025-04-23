@@ -21,15 +21,15 @@
 
 <body>
     <div id="wrapper">
-        @await Html.PartialAsync("_Header")
+        @await Html.PartialAsyncFromArea("Customer", "Partials/_Header")
 
         <div class="content">
             @if (@ViewData["Title"] != null)
             {
-                @await Html.PartialAsync("Partials/_Breadcrumb")
+                @await Html.PartialAsyncFromArea("Customer", "Partials/_Breadcrumb")
             }
             @RenderBody()
-            @await Html.PartialAsync("_Footer")
+            @await Html.PartialAsyncFromArea("Customer", "Partials/_Footer")
         </div>
     </div>
     <script src="~/lib/jquery/jquery-1.11.1.min.js"></script>
