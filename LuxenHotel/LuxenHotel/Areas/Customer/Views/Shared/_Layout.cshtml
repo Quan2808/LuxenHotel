@@ -4,7 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} - " : "")Luxen Premium Hotel</title>
+    <title>
+        @(ViewData["Title"] != null ? $"{ViewData["Title"]} - " : "")Luxen Premium Hotel
+    </title>
 
     @Html.Favicon("/favicon.ico")
     @Html.LibStyle("bootstrap/css/bootstrap.min.css")
