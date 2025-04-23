@@ -85,10 +85,10 @@
 <div class="container">
     <div class="row accommodation-details mb-20">
         <div class="col-md-6">
-            @if (Model.Media.Any())
+            @if (Model.ExistingMedia.Any())
             {
                 <div class="owl-carousel image-carousel">
-                    @foreach (var media in Model.Media)
+                    @foreach (var media in Model.ExistingMedia)
                     {
                         <div class="item">
                             <a href="@media" class="image-popup">

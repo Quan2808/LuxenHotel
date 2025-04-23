@@ -30,7 +30,7 @@ public class AccommodationService : IAccommodationService
             Name = a.Name,
             Price = a.Price,
             Description = a.Description,
-            Media = a.Media
+            ExistingMedia = a.Media
         }).ToList();
     }
 
@@ -52,14 +52,14 @@ public class AccommodationService : IAccommodationService
             Name = accommodation.Name,
             Price = accommodation.Price,
             Description = accommodation.Description,
-            Media = accommodation.Media,
+            ExistingMedia = accommodation.Media,
             IsAvailable = accommodation.IsAvailable,
             MaxOccupancy = accommodation.MaxOccupancy,
             Area = accommodation.Area,
             CreatedAt = accommodation.CreatedAt,
-            Combos = accommodation.Combos?
-                .Select(c => new ComboViewModel { Name = c.Name })
-                .ToList() ?? new List<ComboViewModel>()
+            // Combos = accommodation.Combos?
+            //     .Select(c => new ComboViewModel { Name = c.Name })
+            //     .ToList() ?? new List<ComboViewModel>()
         };
     }
 
