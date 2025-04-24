@@ -2,12 +2,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LuxenHotel.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    // [Authorize(Roles = "Admin")]
-    public class DashboardController : Controller
+    public class DashboardController : AdminBaseController
     {
+        public DashboardController(ILogger<AdminBaseController> logger) : base(logger)
+        {
+        }
+
         public IActionResult Index()
         {
+            // SetPageTitle("Bookings");
             return View();
         }
     }

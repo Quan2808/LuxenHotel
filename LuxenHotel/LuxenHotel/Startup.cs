@@ -1,4 +1,5 @@
 ﻿using LuxenHotel.Data;
+using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Services.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,6 +26,11 @@ namespace LuxenHotel
             // Register custom user store
             services.AddTransient<IUserStore<User>, CustomUserStore>();
             services.AddTransient<IRoleStore<Role>, CustomRoleStore>();
+
+            // Register AccommodationService
+            services.AddScoped<
+                LuxenHotel.Services.Booking.Interfaces.IAccommodationService,
+                LuxenHotel.Services.Booking.Implementations.AccommodationService>();
 
             // Configure Identity
             services.AddIdentity<User, Role>(options =>
@@ -72,6 +78,7 @@ namespace LuxenHotel
                 logging.SetMinimumLevel(LogLevel.Debug);
             });
 
+
             services.AddControllersWithViews();
         }
 
@@ -79,7 +86,15 @@ namespace LuxenHotel
         {
             if (!env.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error");
+                // app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected error occurred. Please try again later.");
+                    });
+                });
                 app.UseHsts();
             }
 

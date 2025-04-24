@@ -1,0 +1,140 @@
+@model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
+@{
+    ViewData["Title"] = @Model.Name;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/magnific-popup@1.1.0/dist/magnific-popup.css">
+
+    <style>
+        .owl-carousel .item {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .owl-carousel .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .owl-carousel .owl-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            padding: 0 15px;
+        }
+
+        .accommodation-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 10px;
+            line-height: initial;
+        }
+
+        .accommodation-title-price {
+            font-size: 18px;
+            opacity: .92;
+            font-weight: bold;
+            color: #f94c43;
+        }
+
+        .availability {
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 17px;
+            margin: 0 0 10px 0;
+            line-height: 21px;
+            display: block;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/magnific-popup@1.1.0/dist/jquery.magnific-popup.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".owl-carousel").owlCarousel({
+                items: 1,
+                loop: true,
+                autoplay: true,
+                autoplayTimeout: 5000
+            });
+
+            $('.image-popup').magnificPopup({
+                type: 'image',
+                gallery: {
+                    enabled: true
+                },
+                mainClass: 'mfp-fade',
+                removalDelay: 300
+            });
+        });
+    </script>
+}
+
+<div class="container">
+    <div class="row accommodation-details mb-20">
+        <div class="col-md-6">
+            @if (Model.ExistingMedia.Any())
+            {
+                <div class="owl-carousel image-carousel">
+                    @foreach (var media in Model.ExistingMedia)
+                    {
+                        <div class="item">
+                            <a href="@media" class="image-popup">
+                                <img src="@media" alt="@Model.Name" class="img-responsive img-rounded">
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-md-6">
+            @if (!Model.IsAvailable)
+            {
+                <p class="availability text-danger">
+                    Fully Booked
+                </p>
+            }
+            <h1 class="accommodation-title">@Model.Name</h1>
+            <hr>
+
+            <div class="row" style="display: flex; align-items: center;">
+                <div class="col-md-8">
+                    <p class="accommodation-title-price">
+                        Price per Night:
+                        <span style="color: #114a6d">
+                            @Model.Price.ToString("#,##0 ")
+                            <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
+                        </span>
+                    </p>
+                    <p class="area" style="margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Area m²</p>
+                    <p class="occupancy"><strong>Max Occupancy:</strong> @Model.MaxOccupancy guest(s)</p>
+                </div>
+                <div class="col-md-4 book-button" style="display: flex; justify-content: center;">
+                    <a href="reservation-form-dark.html">
+                        <i class="fa fa-calendar"></i> BOOK NOW
+                    </a>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="description">@Model.Description</p>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("Partials/_AmenitiesFacilities")
+
+</div>

@@ -105,54 +105,6 @@ textarea:focus {
   color: #e4b248;
 }
 
-h1 {
-  font-family: Varela Round;
-  font-size: 32px;
-  line-height: 44px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
-h2 {
-  font-family: Varela Round;
-  font-size: 26px;
-  line-height: 40px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
-h3 {
-  font-family: Varela Round;
-  font-size: 21px;
-  line-height: 36px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
-h4 {
-  font-family: Varela Round;
-  font-size: 18px;
-  line-height: 32px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
-h5 {
-  font-family: Varela Round;
-  font-size: 15px;
-  line-height: 28px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
-h6 {
-  font-family: Varela Round;
-  font-size: 12px;
-  line-height: 24px;
-  color: #000;
-  letter-spacing: 0.0825em;
-}
-
 .content {
   background: #fff;
   line-height: 25px;
@@ -538,7 +490,7 @@ h6 {
 }
 /* Alternative Menu */
 
-.button-style-1 a {
+.book-button a {
   background: #e4b248;
   padding: 12px 20px;
   font-family: Varela Round;
@@ -550,11 +502,11 @@ h6 {
   transition: all 0.4s;
 }
 
-.button-style-1 i {
+.book-button i {
   padding-right: 12px;
 }
 
-.button-style-1 a:hover {
+.book-button a:hover {
   background: #0c242e;
 }
 
@@ -671,7 +623,7 @@ h6 {
   width: 100%;
   height: 130px;
   padding: 30px 0;
-  background: url(../images/gallery/home/sliders/slider-book-now.png);
+  background: url(../images/static/sliders/slider-book-now.png);
 }
 
 .book-slider ul {
@@ -743,7 +695,7 @@ h6 {
   font-size: 11px;
 }
 
-.book-slider .button-style-1 {
+.book-slider .book-button {
   margin-top: 28px;
   padding: 1px 20px;
 }
@@ -754,7 +706,7 @@ h6 {
   width: 100%;
   height: 60px;
   line-height: 60px;
-  background: url(../images/gallery/home/sliders/slider-book-now.png);
+  background: url(../images/static/sliders/slider-book-now.png);
   border-bottom: solid 3px #e4b248;
 }
 
@@ -1228,7 +1180,7 @@ h6 {
 }
 
 .parallax-one {
-  background: url("../images/parallax/parallax.jpg");
+  background: url("../images/static/parallax/parallax.jpg");
   height: 380px;
   padding: 100px 0;
 }
@@ -1394,6 +1346,7 @@ input[type="submit"]:hover {
 }
 
 .main-footer {
+  background: #f4f4f4;
   padding: 60px;
   font-size: 12px;
   border-bottom: solid 1px #eeeeee;
@@ -1664,7 +1617,7 @@ table tr.table-products-list {
 
 .title-table {
   text-align: left !important;
-  padding: 40px 0;
+  padding: 30px 0;
 }
 
 .list-room-icons {
@@ -1690,7 +1643,7 @@ table tr.table-products-list {
 /*-----------------------------------------------------------------------------------*/
 
 .quick-reservation-container {
-  background: url(../temp/quick-reservation.jpg);
+  background: url(../images/static/reservation/quick-reservation.jpg);
   padding: 7px;
   margin-bottom: 60px;
 }
@@ -1742,12 +1695,12 @@ table tr.table-products-list {
   margin-left: 10%;
 }
 
-.quick-reservation .button-style-1 {
+.quick-reservation .book-button {
   margin-top: 40px;
   width: 100%;
 }
 
-.quick-reservation .button-style-1 a {
+.quick-reservation .book-button a {
   font-size: 11px !important;
   padding: 8px 15px;
 }
@@ -1827,7 +1780,7 @@ ul.tabbed-area li.active a {
   font-size: 180px;
 }
 
-.error-page-container .button-style-1 {
+.error-page-container .book-button {
   margin-top: 100px;
   margin-bottom: 15%;
 }
@@ -2282,4 +2235,328 @@ ul.tabbed-area li.active a {
   color: #a94442;
   border-radius: 4px;
   padding: 10px;
+}
+
+/* ========== Layout Utilities ========== */
+
+/* --- Spacing Utilities --- */
+.ms-0 {
+  margin-left: 0 !important;
+}
+.ms-5 {
+  margin-left: 5px !important;
+}
+.ms-10 {
+  margin-left: 10px !important;
+}
+.ms-20 {
+  margin-left: 20px !important;
+}
+
+.me-0 {
+  margin-right: 0 !important;
+}
+.me-5 {
+  margin-right: 5px !important;
+}
+.me-10 {
+  margin-right: 10px !important;
+}
+.me-20 {
+  margin-right: 20px !important;
+}
+
+.mt-0 {
+  margin-top: 0 !important;
+}
+.mt-10 {
+  margin-top: 10px !important;
+}
+.mt-20 {
+  margin-top: 20px !important;
+}
+.mt-30 {
+  margin-top: 30px !important;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+.mb-10 {
+  margin-bottom: 10px !important;
+}
+.mb-20 {
+  margin-bottom: 20px !important;
+}
+.mb-30 {
+  margin-bottom: 30px !important;
+}
+
+.ml-10 {
+  margin-left: 10px !important;
+}
+.mr-10 {
+  margin-right: 10px !important;
+}
+
+/* Padding */
+.ps-0 {
+  padding-left: 0 !important;
+}
+.ps-5 {
+  padding-left: 5px !important;
+}
+.ps-10 {
+  padding-left: 10px !important;
+}
+.ps-20 {
+  padding-left: 20px !important;
+}
+
+.pe-0 {
+  padding-right: 0 !important;
+}
+.pe-5 {
+  padding-right: 5px !important;
+}
+.pe-10 {
+  padding-right: 10px !important;
+}
+.pe-20 {
+  padding-right: 20px !important;
+}
+
+.pt-10 {
+  padding-top: 10px !important;
+}
+.pt-20 {
+  padding-top: 20px !important;
+}
+.pb-10 {
+  padding-bottom: 10px !important;
+}
+.pb-20 {
+  padding-bottom: 20px !important;
+}
+.pl-10 {
+  padding-left: 10px !important;
+}
+.pr-10 {
+  padding-right: 10px !important;
+}
+
+/* --- Text alignment --- */
+.text-left {
+  text-align: left !important;
+}
+.text-center {
+  text-align: center !important;
+}
+.text-right {
+  text-align: right !important;
+}
+
+/* --- Display utilities --- */
+.d-block {
+  display: block !important;
+}
+.d-inline {
+  display: inline !important;
+}
+.d-inline-block {
+  display: inline-block !important;
+}
+.d-none {
+  display: none !important;
+}
+
+/* --- Flex utilities --- */
+.flex {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+}
+.flex-row {
+  flex-direction: row !important;
+}
+.flex-column {
+  flex-direction: column !important;
+}
+.justify-center {
+  justify-content: center !important;
+}
+.align-center {
+  align-items: center !important;
+}
+
+/* --- Width / Height --- */
+.w-100 {
+  width: 100% !important;
+}
+.w-50 {
+  width: 50% !important;
+}
+.h-100 {
+  height: 100% !important;
+}
+
+/* --- Border / Radius --- */
+.rounded {
+  border-radius: 4px !important;
+}
+.rounded-sm {
+  border-radius: 2px !important;
+}
+.rounded-lg {
+  border-radius: 8px !important;
+}
+.border {
+  border: 1px solid #ddd !important;
+}
+
+/* --- Background colors --- */
+.bg-light {
+  background-color: #f9f9f9 !important;
+}
+.bg-dark {
+  background-color: #333 !important;
+  color: white !important;
+}
+.bg-primary {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+/* --- Utility Containers --- */
+.container-fluid-custom {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+/* ========== Typography Utilities ========== */
+
+/* Font weight */
+.fw-bold {
+  font-weight: bold !important;
+}
+.fw-normal {
+  font-weight: normal !important;
+}
+.fw-light {
+  font-weight: 300 !important;
+}
+
+/* Text transform */
+.text-uppercase {
+  text-transform: uppercase !important;
+}
+.text-lowercase {
+  text-transform: lowercase !important;
+}
+.text-capitalize {
+  text-transform: capitalize !important;
+}
+
+/* Font size */
+.fs-12 {
+  font-size: 12px !important;
+}
+.fs-14 {
+  font-size: 14px !important;
+}
+.fs-16 {
+  font-size: 16px !important;
+}
+.fs-18 {
+  font-size: 18px !important;
+}
+.fs-20 {
+  font-size: 20px !important;
+}
+
+/* Line height */
+.lh-1 {
+  line-height: 1 !important;
+}
+.lh-1-5 {
+  line-height: 1.5 !important;
+}
+.lh-2 {
+  line-height: 2 !important;
+}
+
+/* Letter spacing */
+.ls-1 {
+  letter-spacing: 1px !important;
+}
+.ls-2 {
+  letter-spacing: 2px !important;
+}
+
+
+#roomTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#roomTable th, #roomTable td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+}
+
+#roomTable th.table-products-image,
+#roomTable td.products-image-table {
+  width: 20%;
+}
+
+#roomTable th.table-products-name,
+#roomTable td.title-table {
+  width: 35%;
+}
+
+#roomTable th.table-products-price,
+#roomTable td.table-products-price {
+  width: 25%;
+  font-weight: bold;
+}
+
+#roomTable th.table-products-total,
+#roomTable td.book-button {
+  width: 20%;
+}
+
+.products-image-table img {
+  max-width: 100px;
+  height: auto;
+  object-fit: cover;
+}
+
+@media screen and (max-width: 768px) {
+  #roomTable th, #roomTable td {
+    padding: 5px;
+  }
+
+  #roomTable th.table-products-price,
+  #roomTable td.table-products-price {
+    width: 30%;
+  }
+
+  #roomTable th.table-products-name,
+  #roomTable td.title-table {
+    width: 30%;
+  }
+
+  .products-image-table img {
+    max-width: 80px;
+  }
+}
+
+.dataTable thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.dataTable tbody tr:hover {
+  background-color: #f1f1f1;
 }
