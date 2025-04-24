@@ -6,6 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <NoWarn>$(NoWarn);CS8618</NoWarn>
         <NoWarn>$(NoWarn);CS8603</NoWarn>
+        <NoWarn>$(NoWarn);CS8602</NoWarn>
+        <NoWarn>$(NoWarn);CS8625</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
