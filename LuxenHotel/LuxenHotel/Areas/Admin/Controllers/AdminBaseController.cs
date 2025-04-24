@@ -20,7 +20,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
         // Thiết lập tiêu đề trang
         protected void SetPageTitle(string title)
         {
-            ViewBag.Title = $"LuxenHotel Admin - {title}";
+            ViewBag.Title = $"{title}";
         }
 
         // Ghi log thông tin

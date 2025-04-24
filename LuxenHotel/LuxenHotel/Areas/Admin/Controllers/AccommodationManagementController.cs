@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
 {
-    // [Route("Accommodation")]
+    [Route("admin/accommodations")]
     public class AccommodationManagementController : AdminBaseController
     {
         private readonly ApplicationDbContext _dbContext;
@@ -20,7 +20,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             _dbContext = dbContext;
         }
 
-        // GET: /Admin/AccommodationManagement
+        // GET: /admin/accommodations
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             SetPageTitle("Accommodations");
@@ -32,14 +33,15 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(accommodations);
         }
 
-        // GET: /Admin/AccommodationManagement/Create
+        // GET: /admin/accommodations/create
+        [HttpGet("create")]
         public IActionResult Create()
         {
             SetPageTitle("Add New Accommodation");
             return View();
         }
 
-        // POST: /Admin/AccommodationManagement/Create
+        // POST: /admin/accommodations
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Accommodation model)
@@ -54,7 +56,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(model);
         }
 
-        // GET: /Admin/AccommodationManagement/Edit/1
+        // GET: /admin/accommodations/{id}/edit
+        [HttpGet("{id}/edit")]
         public async Task<IActionResult> Edit(int id)
         {
             SetPageTitle("Edit Accommodation");
@@ -69,8 +72,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(accommodation);
         }
 
-        // POST: /Admin/AccommodationManagement/Edit/1
-        [HttpPost]
+        // PUT: /admin/accommodations/{id}
+        [HttpPut("{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Accommodation model)
         {
@@ -96,8 +99,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(model);
         }
 
-        // POST: /Admin/AccommodationManagement/Delete/1
-        [HttpPost]
+        // DELETE: /admin/accommodations/{id}
+        [HttpDelete("{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
@@ -113,7 +116,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: /Admin/AccommodationManagement/Services/1
+        // GET: /admin/accommodations/{accommodationId}/services
+        [HttpGet("{accommodationId}/services")]
         public async Task<IActionResult> Services(int accommodationId)
         {
             SetPageTitle("Services");
@@ -130,7 +134,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(accommodation);
         }
 
-        // GET: /Admin/AccommodationManagement/CreateService/1
+        // GET: /admin/accommodations/{accommodationId}/services/create
+        [HttpGet("{accommodationId}/services/create")]
         public IActionResult CreateService(int accommodationId)
         {
             SetPageTitle("Add New Service");
@@ -138,8 +143,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: /Admin/AccommodationManagement/CreateService/1
-        [HttpPost]
+        // POST: /admin/accommodations/{accommodationId}/services
+        [HttpPost("{accommodationId}/services")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateService(int accommodationId, Service model)
         {
@@ -161,7 +166,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(model);
         }
 
-        // GET: /Admin/AccommodationManagement/EditService/1
+        // GET: /admin/accommodations/services/{id}/edit
+        [HttpGet("services/{id}/edit")]
         public async Task<IActionResult> EditService(int id)
         {
             SetPageTitle("Edit Service");
@@ -177,8 +183,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(service);
         }
 
-        // POST: /Admin/AccommodationManagement/EditService/1
-        [HttpPost]
+        // PUT: /admin/accommodations/services/{id}
+        [HttpPut("services/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditService(int id, Service model)
         {
@@ -205,8 +211,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(model);
         }
 
-        // POST: /Admin/AccommodationManagement/DeleteService/1
-        [HttpPost]
+        // DELETE: /admin/accommodations/services/{id}
+        [HttpDelete("services/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteService(int id)
         {
