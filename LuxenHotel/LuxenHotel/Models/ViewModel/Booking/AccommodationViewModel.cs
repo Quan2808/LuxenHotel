@@ -31,9 +31,15 @@ public class AccommodationViewModel
     public List<IFormFile>? MediaFiles { get; set; }
 
     // To display existing media
-    public List<string> ExistingMedia { get; set; } = new List<string>();
+    public List<string> Media { get; set; } = new List<string>();
 
-    // List of services to create
+    // For file uploads
+    public IFormFile ThumbnailFile { get; set; }
+
+    // To display existing thumbnail
+    public string? Thumbnail { get; set; }
+
+    // List of services
     public List<ServiceViewModel> Services { get; set; } = new List<ServiceViewModel>();
 
     public DateTime? CreatedAt { get; set; }

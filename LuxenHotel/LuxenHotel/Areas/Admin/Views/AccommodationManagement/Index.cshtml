@@ -1,13 +1,20 @@
 @model IEnumerable<LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel>
 
 <h1>Accommodations</h1>
-<a asp-action="Create" class="btn btn-primary">Add New Accommodation</a>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
 <table class="table">
     <thead>
         <tr>
+            <th>Thumbnail</th>
             <th>Name</th>
             <th>Price</th>
+            <th>Max Occupancy</th>
+            <th>Area</th>
             <th>Services</th>
+            <th>Available</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -15,18 +22,26 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.Thumbnail))
+                    {
+                        <img src="@item.Thumbnail" alt="Thumbnail" style="max-width: 100px;" />
+                    }
+                    else
+                    {
+                        <span>No thumbnail</span>
+                    }
+                </td>
                 <td>@item.Name</td>
                 <td>@item.Price</td>
+                <td>@item.MaxOccupancy</td>
+                <td>@item.Area</td>
+                <td>@item.Services.Count service(s)</td>
+                <td>@(item.IsAvailable ? "Yes" : "No")</td>
                 <td>
-                    <a asp-action="Services" asp-route-accommodationId="@item.Id">
-                        @item.Services.Count Services
-                    </a>
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-link">Delete</button>
-                    </form>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }

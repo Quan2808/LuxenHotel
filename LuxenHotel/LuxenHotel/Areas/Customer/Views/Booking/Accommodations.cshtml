@@ -49,9 +49,9 @@
                     {
                         <tr class="table-products-list pos-center">
                             <td class="products-image-table">
-                                @if (room.ExistingMedia != null && room.ExistingMedia.Any())
+                                @if (room.Media != null && room.Media.Any())
                                 {
-                                    <img src="@room.ExistingMedia.First()" alt="@room.Name" class="img-responsive" />
+                                    <img src="@room.Media.First()" alt="@room.Name" class="img-responsive" />
                                 }
                                 else
                                 {

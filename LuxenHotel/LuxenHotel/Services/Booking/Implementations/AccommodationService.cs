@@ -21,6 +21,7 @@ public class AccommodationService : IAccommodationService
     public async Task<List<AccommodationViewModel>> ListAsync()
     {
         var accommodations = await _context.Accommodations
+            .Include(a => a.Services)
             .Include(a => a.Combos)
             .ToListAsync();
 
@@ -30,7 +31,19 @@ public class AccommodationService : IAccommodationService
             Name = a.Name,
             Price = a.Price,
             Description = a.Description,
-            ExistingMedia = a.Media
+            Media = a.Media,
+            Thumbnail = a.Thumbnail,
+            Services = a.Services.Select(s => new ServiceViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                Description = s.Description
+            }).ToList(),
+            IsAvailable = a.IsAvailable,
+            MaxOccupancy = a.MaxOccupancy,
+            Area = a.Area,
+            CreatedAt = a.CreatedAt,
         }).ToList();
     }
 
@@ -40,6 +53,7 @@ public class AccommodationService : IAccommodationService
             return null;
 
         var accommodation = await _context.Accommodations
+            .Include(a => a.Services)
             .Include(a => a.Combos)
             .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -52,14 +66,19 @@ public class AccommodationService : IAccommodationService
             Name = accommodation.Name,
             Price = accommodation.Price,
             Description = accommodation.Description,
-            ExistingMedia = accommodation.Media,
+            Media = accommodation.Media,
+            Thumbnail = accommodation.Thumbnail,
+            Services = accommodation.Services.Select(s => new ServiceViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                Description = s.Description
+            }).ToList(),
             IsAvailable = accommodation.IsAvailable,
             MaxOccupancy = accommodation.MaxOccupancy,
             Area = accommodation.Area,
             CreatedAt = accommodation.CreatedAt,
-            // Combos = accommodation.Combos?
-            //     .Select(c => new ComboViewModel { Name = c.Name })
-            //     .ToList() ?? new List<ComboViewModel>()
         };
     }
 
@@ -79,12 +98,24 @@ public class AccommodationService : IAccommodationService
             CreatedAt = DateTime.UtcNow
         };
 
+        // Handle media uploads
         if (viewModel.MediaFiles != null && viewModel.MediaFiles.Any())
         {
             var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
             accommodation.UpdateMedia(mediaPaths);
         }
 
+        // Handle thumbnail upload
+        if (viewModel.ThumbnailFile != null && viewModel.ThumbnailFile.Length > 0)
+        {
+            var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
+            if (thumbnailPath != null)
+            {
+                accommodation.Thumbnail = thumbnailPath;
+            }
+        }
+
+        // Handle services
         if (viewModel.Services != null && viewModel.Services.Any())
         {
             foreach (var serviceViewModel in viewModel.Services)
