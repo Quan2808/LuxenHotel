@@ -18,7 +18,7 @@ public class AccommodationService : IAccommodationService
         _environment = environment;
     }
 
-    public async Task<List<AccommodationViewModel>> GetAllAccommodationsAsync()
+    public async Task<List<AccommodationViewModel>> ListAsync()
     {
         var accommodations = await _context.Accommodations
             .Include(a => a.Combos)
@@ -34,7 +34,7 @@ public class AccommodationService : IAccommodationService
         }).ToList();
     }
 
-    public async Task<AccommodationViewModel> GetAccommodationByIdAsync(int? id)
+    public async Task<AccommodationViewModel> GetAsync(int? id)
     {
         if (id == null)
             return null;
@@ -63,21 +63,45 @@ public class AccommodationService : IAccommodationService
         };
     }
 
-    public async Task CreateAccommodationAsync(Accommodation accommodation, List<IFormFile> mediaFiles)
+    public async Task CreateAsync(AccommodationViewModel viewModel)
     {
-        if (accommodation == null)
-            throw new ArgumentNullException(nameof(accommodation));
+        if (viewModel == null)
+            throw new ArgumentNullException(nameof(viewModel));
 
-        var mediaPaths = await FileUploadUtility.UploadFilesAsync(mediaFiles, _environment);
-        accommodation.UpdateMedia(mediaPaths);
-
-        if (accommodation.CreatedAt == default)
-            accommodation.CreatedAt = DateTime.UtcNow;
-
-        foreach (var service in accommodation.Services)
+        var accommodation = new Accommodation
         {
-            service.Accommodation = accommodation;
-            service.CreatedAt = DateTime.UtcNow;
+            Name = viewModel.Name,
+            Price = viewModel.Price,
+            Description = viewModel.Description,
+            MaxOccupancy = viewModel.MaxOccupancy,
+            Area = viewModel.Area,
+            IsAvailable = viewModel.IsAvailable,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        if (viewModel.MediaFiles != null && viewModel.MediaFiles.Any())
+        {
+            var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
+            accommodation.UpdateMedia(mediaPaths);
+        }
+
+        if (viewModel.Services != null && viewModel.Services.Any())
+        {
+            foreach (var serviceViewModel in viewModel.Services)
+            {
+                if (!string.IsNullOrEmpty(serviceViewModel.Name))
+                {
+                    var service = new Service
+                    {
+                        Name = serviceViewModel.Name,
+                        Price = serviceViewModel.Price,
+                        Description = serviceViewModel.Description,
+                        CreatedAt = DateTime.UtcNow,
+                        Accommodation = accommodation
+                    };
+                    accommodation.Services.Add(service);
+                }
+            }
         }
 
         _context.Accommodations.Add(accommodation);
