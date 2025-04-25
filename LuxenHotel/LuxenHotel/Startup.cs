@@ -60,7 +60,7 @@ namespace LuxenHotel
             // Configure authentication cookies
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Account/Login";
+                options.LoginPath = "/identity/login";
                 // options.AccessDeniedPath = "/Account/AccessDenied";
             });
 
