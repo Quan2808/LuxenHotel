@@ -4,63 +4,145 @@ using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
 using LuxenHotel.Utils;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace LuxenHotel.Services.Booking.Implementations;
-
-public class AccommodationService : IAccommodationService
+namespace LuxenHotel.Services.Booking.Implementations
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IWebHostEnvironment _environment;
-
-    public AccommodationService(ApplicationDbContext context, IWebHostEnvironment environment)
+    public class AccommodationService : IAccommodationService
     {
-        _context = context;
-        _environment = environment;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-    public async Task<List<AccommodationViewModel>> ListAsync()
-    {
-        var accommodations = await _context.Accommodations
-            .Include(a => a.Services)
-            .Include(a => a.Combos)
-            .ToListAsync();
-
-        return accommodations.Select(a => new AccommodationViewModel
+        public AccommodationService(ApplicationDbContext context, IWebHostEnvironment environment)
         {
-            Id = a.Id,
-            Name = a.Name,
-            Price = a.Price,
-            Description = a.Description,
-            Media = a.Media,
-            Thumbnail = a.Thumbnail,
-            Services = a.Services.Select(s => new ServiceViewModel
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        }
+
+        public async Task<List<AccommodationViewModel>> ListAsync()
+        {
+            var accommodations = await _context.Accommodations
+                .AsNoTracking()
+                .Include(a => a.Services)
+                .ToListAsync();
+
+            return accommodations.Select(ToViewModel).ToList();
+        }
+
+        public async Task<AccommodationViewModel?> GetAsync(int? id)
+        {
+            if (!id.HasValue)
+                return null;
+
+            var accommodation = await _context.Accommodations
+                .AsNoTracking()
+                .Include(a => a.Services)
+                .FirstOrDefaultAsync(m => m.Id == id.Value);
+
+            return accommodation == null ? null : ToViewModel(accommodation);
+        }
+
+        public async Task CreateAsync(AccommodationViewModel viewModel)
+        {
+            if (viewModel == null)
+                throw new ArgumentNullException(nameof(viewModel));
+
+            var accommodation = new Accommodation
             {
-                Id = s.Id,
-                Name = s.Name,
-                Price = s.Price,
-                Description = s.Description
-            }).ToList(),
-            IsAvailable = a.IsAvailable,
-            MaxOccupancy = a.MaxOccupancy,
-            Area = a.Area,
-            CreatedAt = a.CreatedAt,
-        }).ToList();
-    }
+                Name = viewModel.Name,
+                Price = viewModel.Price,
+                Description = viewModel.Description,
+                MaxOccupancy = viewModel.MaxOccupancy,
+                Area = viewModel.Area,
+                IsAvailable = viewModel.IsAvailable,
+                CreatedAt = DateTime.UtcNow
+            };
 
-    public async Task<AccommodationViewModel> GetAsync(int? id)
-    {
-        if (id == null)
-            return null;
+            await UpdateMediaAsync(accommodation, viewModel);
+            UpdateServices(accommodation, viewModel.Services);
 
-        var accommodation = await _context.Accommodations
-            .Include(a => a.Services)
-            .Include(a => a.Combos)
-            .FirstOrDefaultAsync(m => m.Id == id);
+            _context.Accommodations.Add(accommodation);
+            await _context.SaveChangesAsync();
+        }
 
-        if (accommodation == null)
-            return null;
+        public async Task EditAsync(int id, AccommodationViewModel viewModel)
+        {
+            if (viewModel == null)
+                throw new ArgumentNullException(nameof(viewModel));
 
-        return new AccommodationViewModel
+            var accommodation = await _context.Accommodations
+                .Include(a => a.Services)
+                .FirstOrDefaultAsync(a => a.Id == id)
+                ?? throw new InvalidOperationException($"Accommodation with ID {id} not found.");
+
+            // Update basic properties
+            accommodation.Name = viewModel.Name;
+            accommodation.Price = viewModel.Price;
+            accommodation.Description = viewModel.Description;
+            accommodation.MaxOccupancy = viewModel.MaxOccupancy;
+            accommodation.Area = viewModel.Area;
+            accommodation.IsAvailable = viewModel.IsAvailable;
+            accommodation.UpdatedAt = DateTime.UtcNow;
+
+            await UpdateMediaAsync(accommodation, viewModel);
+            UpdateServices(accommodation, viewModel.Services);
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task UpdateMediaAsync(Accommodation accommodation, AccommodationViewModel viewModel)
+        {
+            // Handle media uploads
+            if (viewModel.MediaFiles?.Any() == true)
+            {
+                var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
+                accommodation.UpdateMedia(mediaPaths);
+            }
+
+            // Handle thumbnail upload
+            if (viewModel.ThumbnailFile?.Length > 0)
+            {
+                var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
+                if (thumbnailPath != null)
+                {
+                    if (!string.IsNullOrEmpty(accommodation.Thumbnail))
+                    {
+                        var oldFilePath = Path.Combine(_environment.WebRootPath, accommodation.Thumbnail.TrimStart('/'));
+                        if (File.Exists(oldFilePath))
+                            File.Delete(oldFilePath);
+                    }
+                    accommodation.Thumbnail = thumbnailPath;
+                }
+            }
+        }
+
+        private void UpdateServices(Accommodation accommodation, IList<ServiceViewModel>? services)
+        {
+            accommodation.Services.Clear();
+            if (services?.Any() != true)
+                return;
+
+            foreach (var serviceViewModel in services)
+            {
+                if (!string.IsNullOrEmpty(serviceViewModel.Name))
+                {
+                    accommodation.Services.Add(new Service
+                    {
+                        Name = serviceViewModel.Name,
+                        Price = serviceViewModel.Price,
+                        Description = serviceViewModel.Description,
+                        CreatedAt = DateTime.UtcNow,
+                        Accommodation = accommodation
+                    });
+                }
+            }
+        }
+
+        private AccommodationViewModel ToViewModel(Accommodation accommodation) => new()
         {
             Id = accommodation.Id,
             Name = accommodation.Name,
@@ -78,64 +160,36 @@ public class AccommodationService : IAccommodationService
             IsAvailable = accommodation.IsAvailable,
             MaxOccupancy = accommodation.MaxOccupancy,
             Area = accommodation.Area,
-            CreatedAt = accommodation.CreatedAt,
-        };
-    }
-
-    public async Task CreateAsync(AccommodationViewModel viewModel)
-    {
-        if (viewModel == null)
-            throw new ArgumentNullException(nameof(viewModel));
-
-        var accommodation = new Accommodation
-        {
-            Name = viewModel.Name,
-            Price = viewModel.Price,
-            Description = viewModel.Description,
-            MaxOccupancy = viewModel.MaxOccupancy,
-            Area = viewModel.Area,
-            IsAvailable = viewModel.IsAvailable,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = accommodation.CreatedAt
         };
 
-        // Handle media uploads
-        if (viewModel.MediaFiles != null && viewModel.MediaFiles.Any())
+        public async Task DeleteAsync(int id)
         {
-            var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
-            accommodation.UpdateMedia(mediaPaths);
-        }
+            var accommodation = await _context.Accommodations
+                .Include(a => a.Services)
+                .FirstOrDefaultAsync(a => a.Id == id)
+                ?? throw new InvalidOperationException($"Accommodation with ID {id} not found.");
 
-        // Handle thumbnail upload
-        if (viewModel.ThumbnailFile != null && viewModel.ThumbnailFile.Length > 0)
-        {
-            var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
-            if (thumbnailPath != null)
+            // Delete associated media files
+            if (!string.IsNullOrEmpty(accommodation.Thumbnail))
             {
-                accommodation.Thumbnail = thumbnailPath;
+                var thumbnailPath = Path.Combine(_environment.WebRootPath, accommodation.Thumbnail.TrimStart('/'));
+                if (File.Exists(thumbnailPath))
+                    File.Delete(thumbnailPath);
             }
-        }
 
-        // Handle services
-        if (viewModel.Services != null && viewModel.Services.Any())
-        {
-            foreach (var serviceViewModel in viewModel.Services)
+            if (accommodation.Media?.Any() == true)
             {
-                if (!string.IsNullOrEmpty(serviceViewModel.Name))
+                foreach (var mediaPath in accommodation.Media)
                 {
-                    var service = new Service
-                    {
-                        Name = serviceViewModel.Name,
-                        Price = serviceViewModel.Price,
-                        Description = serviceViewModel.Description,
-                        CreatedAt = DateTime.UtcNow,
-                        Accommodation = accommodation
-                    };
-                    accommodation.Services.Add(service);
+                    var fullPath = Path.Combine(_environment.WebRootPath, mediaPath.TrimStart('/'));
+                    if (File.Exists(fullPath))
+                        File.Delete(fullPath);
                 }
             }
-        }
 
-        _context.Accommodations.Add(accommodation);
-        await _context.SaveChangesAsync();
+            _context.Accommodations.Remove(accommodation);
+            await _context.SaveChangesAsync();
+        }
     }
 }

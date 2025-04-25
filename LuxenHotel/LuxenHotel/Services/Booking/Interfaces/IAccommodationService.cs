@@ -8,4 +8,6 @@ public interface IAccommodationService
     Task<List<AccommodationViewModel>> ListAsync();
     Task<AccommodationViewModel> GetAsync(int? id);
     Task CreateAsync(AccommodationViewModel viewModel);
+    Task EditAsync(int id, AccommodationViewModel viewModel);
+    Task DeleteAsync(int id);
 }
