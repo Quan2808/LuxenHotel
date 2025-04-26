@@ -59,6 +59,10 @@ public class Accommodation
     public bool IsAvailable { get; set; } = true;
 
     [Required]
+    [Column(TypeName = "int")]
+    public AccommodationStatus Status { get; set; } = AccommodationStatus.Published;
+
+    [Required]
     [Range(1, 50, ErrorMessage = "Max occupancy must be between 1 and 50")]
     public int MaxOccupancy { get; set; }
 
@@ -77,5 +81,12 @@ public class Accommodation
     public void UpdateMedia(List<string> media)
     {
         Media = media ?? new List<string>();
+    }
+    public enum AccommodationStatus
+    {
+        Published,
+        Unpublished,
+        MaintenanceMode,
+        FullyBooked
     }
 }

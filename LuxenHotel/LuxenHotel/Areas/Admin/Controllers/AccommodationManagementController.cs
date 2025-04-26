@@ -1,6 +1,7 @@
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
+using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -157,6 +158,17 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 LogInfo($"Failed to delete accommodation ID: {id}, Error: {ex.Message}");
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        [HttpPost("upload-images")]
+        public async Task<IActionResult> UploadImages(List<IFormFile> files, [FromServices] IWebHostEnvironment environment)
+        {
+            if (files == null || !files.Any())
+                return BadRequest("No files uploaded");
+
+            var mediaPaths = await FileUploadUtility.UploadFilesAsync(files, environment);
+
+            return Ok(new { paths = mediaPaths });
         }
 
         private IActionResult RedirectWithError(string message)
