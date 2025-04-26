@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxenHotel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250425092940_InitialIdentity")]
+    [Migration("20250426165405_InitialIdentity")]
     partial class InitialIdentity
     {
         /// <inheritdoc />
@@ -57,9 +57,6 @@ namespace LuxenHotel.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<int>("MaxOccupancy")
                         .HasColumnType("int");
 
@@ -73,6 +70,9 @@ namespace LuxenHotel.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("ThumbnailJson")

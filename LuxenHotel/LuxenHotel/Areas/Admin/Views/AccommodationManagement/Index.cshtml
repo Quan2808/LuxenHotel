@@ -34,7 +34,6 @@
                             }
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // TODO: Gọi API xóa nếu cần
                                 dataTable.row($(row)).remove().draw();
 
                                 Swal.fire({
@@ -68,12 +67,7 @@
                                 render: function (data, type, row) {
                                     return data.toLocaleString('vi-VN') + ' <i class="fa-solid fa-dong-sign"></i>';
                                 },
-                                targets: 4
-                            },
-
-                            {
-                                orderable: false,
-                                targets: 0
+                                targets: 3
                             },
                             {
                                 orderable: false,
@@ -154,7 +148,6 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable" id="kt_ecommerce_products_table"
                     style="width: 100%">
                     <colgroup>
-                        <col data-dt-column="0" />
                         <col data-dt-column="1" />
                         <col data-dt-column="3" />
                         <col data-dt-column="4" />

@@ -58,7 +58,7 @@ namespace LuxenHotel.Services.Booking.Implementations
                 Description = viewModel.Description,
                 MaxOccupancy = viewModel.MaxOccupancy,
                 Area = viewModel.Area,
-                IsAvailable = viewModel.IsAvailable,
+                Status = viewModel.Status,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -85,7 +85,7 @@ namespace LuxenHotel.Services.Booking.Implementations
             accommodation.Description = viewModel.Description;
             accommodation.MaxOccupancy = viewModel.MaxOccupancy;
             accommodation.Area = viewModel.Area;
-            accommodation.IsAvailable = viewModel.IsAvailable;
+            accommodation.Status = viewModel.Status;
             accommodation.UpdatedAt = DateTime.UtcNow;
 
             await UpdateMediaAsync(accommodation, viewModel);
@@ -157,7 +157,7 @@ namespace LuxenHotel.Services.Booking.Implementations
                 Price = s.Price,
                 Description = s.Description
             }).ToList(),
-            IsAvailable = accommodation.IsAvailable,
+            Status = accommodation.Status,
             MaxOccupancy = accommodation.MaxOccupancy,
             Area = accommodation.Area,
             CreatedAt = accommodation.CreatedAt

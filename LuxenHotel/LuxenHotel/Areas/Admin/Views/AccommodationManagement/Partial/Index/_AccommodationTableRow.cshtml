@@ -1,9 +1,4 @@
 <tr>
-    <td>
-        <div class="form-check form-check-sm form-check-custom form-check-solid">
-            <input class="form-check-input" type="checkbox" value="@Model.Id" />
-        </div>
-    </td>
     <td data-kt-accommodation-filter="accommodation_name">
         <div class="d-flex align-items-center">
             @if (!string.IsNullOrEmpty(Model.Thumbnail))
@@ -24,9 +19,22 @@
     <td class="text-center">@Model.Price</td>
     <td class="text-center">N/A</td>
     <td class="text-center">
-        <span class="badge badge-light-@(Model.IsAvailable ? "success" : "danger")">
-            @(Model.IsAvailable ? "Published" : "Inactive")
-        </span>
+        @if (Model.Status == LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Published)
+        {
+            <span class="badge badge-light-success">Published</span>
+        }
+        else if (Model.Status == LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Unpublished)
+        {
+            <span class="badge badge-light-danger">Unpublished</span>
+        }
+        else if (Model.Status == LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.MaintenanceMode)
+        {
+            <span class="badge badge-light-warning">Maintenance</span>
+        }
+        else if (Model.Status == LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.FullyBooked)
+        {
+            <span class="badge badge-light-secondary">Fully Booked</span>
+        }
     </td>
     <td class="text-center">
         <a class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" data-kt-menu-trigger="click"

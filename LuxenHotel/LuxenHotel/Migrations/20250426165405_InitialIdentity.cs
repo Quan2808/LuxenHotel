@@ -22,7 +22,7 @@ namespace LuxenHotel.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Media = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Thumbnail = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     MaxOccupancy = table.Column<int>(type: "int", nullable: false),
                     Area = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),

@@ -56,11 +56,9 @@ public class Accommodation
     [Column("Thumbnail", TypeName = "nvarchar(max)")]
     public string? ThumbnailJson { get; private set; }
 
-    public bool IsAvailable { get; set; } = true;
-
     [Required]
     [Column(TypeName = "int")]
-    public AccommodationStatus Status { get; set; } = AccommodationStatus.Published;
+    public AccommodationStatus Status { get; set; } = new();
 
     [Required]
     [Range(1, 50, ErrorMessage = "Max occupancy must be between 1 and 50")]

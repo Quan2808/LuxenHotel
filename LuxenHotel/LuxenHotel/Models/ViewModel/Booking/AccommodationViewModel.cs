@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using LuxenHotel.Models.Entities.Booking;
 
 namespace LuxenHotel.Models.ViewModels.Booking;
 
@@ -25,7 +26,8 @@ public class AccommodationViewModel
     [Range(0, 10000, ErrorMessage = "Area must be between 0 and 10,000 m²")]
     public decimal Area { get; set; }
 
-    public bool IsAvailable { get; set; } = true;
+    [Required(ErrorMessage = "Status is required")]
+    public Accommodation.AccommodationStatus Status { get; set; }
 
     // For file uploads
     public List<IFormFile>? MediaFiles { get; set; }
@@ -43,4 +45,12 @@ public class AccommodationViewModel
     public List<ServiceViewModel> Services { get; set; } = new List<ServiceViewModel>();
 
     public DateTime? CreatedAt { get; set; }
+
+    public enum AccommodationStatus
+    {
+        Published,
+        Unpublished,
+        MaintenanceMode,
+        FullyBooked
+    }
 }
