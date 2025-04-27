@@ -111,6 +111,12 @@ namespace LuxenHotel
 
             app.UseEndpoints(endpoints =>
             {
+
+                endpoints.MapAreaControllerRoute(
+                    name: "vnpayReturn",
+                    areaName: "Customer",
+                    pattern: "vnpay/return",
+                    defaults: new { controller = "Product", action = "Return" });
                 // Customer Area: Short route for HomeController
                 endpoints.MapAreaControllerRoute(
                     name: "customer_pages",
