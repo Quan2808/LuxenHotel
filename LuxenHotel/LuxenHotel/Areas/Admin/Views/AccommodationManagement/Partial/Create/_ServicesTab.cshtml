@@ -1,3 +1,5 @@
+@model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
+
 <div class="tab-pane fade" id="services" role="tabpanel" aria-labelledby="services-tab">
     <div class="d-flex flex-column gap-7 gap-lg-10">
         <!--begin::Services Form-->
@@ -39,41 +41,39 @@
                     <div class="card-body pt-4">
                         <div class="row g-5">
                             <!-- Service Name -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 fv-row fv-plugins-icon-container">
                                 <label class="form-label required fw-medium" for="service_name_0">Service Name</label>
                                 <input type="text" class="form-control" id="service_name_0"
-                                    placeholder="e.g., Breakfast Buffet" required maxlength="255"
-                                    name="services[0].Name">
+                                    placeholder="e.g., Breakfast Buffet" maxlength="255" asp-for="Services[0].Name" />
                                 <div class="text-muted fs-7 mt-1">Specify the name of the service provided with the
                                     accommodation.</div>
-                                <div class="invalid-feedback">Please enter a service name (max 255 characters).</div>
+                                <span asp-validation-for="Services[0].Name" class="invalid-feedback"></span>
                             </div>
 
                             <!-- Service Price -->
-                            <div class="col-md-6">
+                            <div class="col-md-6 fv-row fv-plugins-icon-container">
                                 <label class="form-label required fw-medium" for="service_price_0">Service Price
                                     (VND)</label>
                                 <input type="number" class="form-control" id="service_price_0"
-                                    placeholder="e.g., 150000" required min="0" max="50000000" name="services[0].Price">
+                                    placeholder="e.g., 150000" min="0" max="50000000" asp-for="Services[0].Price" />
                                 <div class="text-muted fs-7 mt-1">Set the cost for this service in Vietnamese Dong
                                     (VND).</div>
-                                <div class="invalid-feedback">Please enter a valid price between 0 and 50,000,000 VND.
-                                </div>
+                                <span asp-validation-for="Services[0].Price" class="invalid-feedback"></span>
                             </div>
                         </div>
 
                         <!-- Description (Full Width) -->
-                        <div class="mt-5">
+                        <div class="mt-5 fv-row fv-plugins-icon-container">
                             <label class="form-label fw-medium" for="service_description_0">Description</label>
                             <textarea class="form-control" id="service_description_0" rows="4"
-                                name="services[0].Description"
+                                asp-for="Services[0].Description"
                                 placeholder="e.g., Includes a variety of local and international dishes served daily."></textarea>
                             <div class="text-muted fs-7 mt-1">
                                 Add details to help guests understand what the service includes.
                             </div>
+                            <span asp-validation-for="Services[0].Description" class="invalid-feedback"></span>
                         </div>
                     </div>
-
                 </div>
                 <!--end::Card body-->
             </div>

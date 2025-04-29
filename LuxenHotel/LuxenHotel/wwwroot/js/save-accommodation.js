@@ -16,58 +16,27 @@ FilePond.create(document.getElementById("filepond"), {
 var quill = new Quill("#accommodation-desc", {
   theme: "snow",
   placeholder: "Type your text here...",
+  modules: {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline"],
+      ["link", "image"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["clean"],
+    ],
+  },
 });
 
-var quill = new Quill("#service-desc", {
-  theme: "snow",
-  placeholder: "Enter service description (optional)",
+// Đồng bộ nội dung Quill với input ẩn
+const descriptionHidden = document.querySelector("#description-hidden");
+quill.on("text-change", function () {
+  descriptionHidden.value = quill.root.innerHTML;
 });
-// Status indicator
-document.addEventListener("DOMContentLoaded", function () {
-  const statusIndicator = document.getElementById(
-    "kt_ecommerce_add_product_status"
-  );
-  const statusRadios = document.querySelectorAll(
-    'input[name="product_status"]'
-  );
 
-  function updateStatusIndicator(value) {
-    statusIndicator.classList.remove(
-      "bg-success",
-      "bg-danger",
-      "bg-warning",
-      "bg-dark"
-    );
-
-    switch (value) {
-      case "published":
-        statusIndicator.classList.add("bg-success");
-        break;
-      case "unpublished":
-        statusIndicator.classList.add("bg-danger");
-        break;
-      case "maintenance":
-        statusIndicator.classList.add("bg-warning");
-        break;
-      case "fully_booked":
-        statusIndicator.classList.add("bg-dark");
-        break;
-    }
-  }
-
-  statusRadios.forEach(function (radio) {
-    radio.addEventListener("change", function () {
-      updateStatusIndicator(this.value);
-    });
-  });
-
-  const checkedRadio = document.querySelector(
-    'input[name="product_status"]:checked'
-  );
-  if (checkedRadio) {
-    updateStatusIndicator(checkedRadio.value);
-  }
-});
+// Set giá trị ban đầu nếu có (ví dụ khi edit)
+if (descriptionHidden.value) {
+  quill.root.innerHTML = descriptionHidden.value;
+}
 
 let serviceIndex = 0;
 

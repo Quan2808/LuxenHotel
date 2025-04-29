@@ -38,20 +38,30 @@
     };
   }
 
+  private string GetStatusDisplayName(Accommodation.AccommodationStatus status)
+  {
+    return status switch
+    {
+      Accommodation.AccommodationStatus.Published => "Available",
+      Accommodation.AccommodationStatus.Unpublished => "Hidden",
+      Accommodation.AccommodationStatus.MaintenanceMode => "Under Maintenance",
+      Accommodation.AccommodationStatus.FullyBooked => "Fully Booked",
+      _ => "Unknown"
+    };
+  }
+
   private string GetStatusDescription(Accommodation.AccommodationStatus status)
   {
     return status switch
     {
-      Accommodation.AccommodationStatus.Published => "Product is published and available",
-      Accommodation.AccommodationStatus.Unpublished => "Product is hidden and not available",
-      Accommodation.AccommodationStatus.MaintenanceMode => "Product is under maintenance",
-      Accommodation.AccommodationStatus.FullyBooked => "Product is fully booked",
-      _ => "Unknown status"
+      Accommodation.AccommodationStatus.Published => "Is available for booking.",
+      Accommodation.AccommodationStatus.Unpublished => "Is hidden and not bookable.",
+      Accommodation.AccommodationStatus.MaintenanceMode => "Is temporarily closed for maintenance.",
+      Accommodation.AccommodationStatus.FullyBooked => "No available slots for booking.",
+      _ => "Unknown status."
     };
   }
 }
-
-
 
 <div class="d-flex flex-column gap-7 gap-lg-10 w-100 w-lg-300px mb-7 me-lg-10">
   <!--begin::Thumbnail settings-->
@@ -119,36 +129,26 @@
         <label asp-for="Name" class="required form-label"></label>
         <input asp-for="Name" class="form-control mb-2" placeholder="Accommodation name" />
         <span asp-validation-for="Name" class="text-danger"></span>
-
-        <div class="text-muted fs-7">A name is required and should be unique to identify the accommodation.
-        </div>
+        <div class="text-muted fs-7">A name is required and should be unique to identify the accommodation.</div>
       </div>
 
       <!-- Price -->
       <div class="mb-10 fv-row fv-plugins-icon-container">
         <label asp-for="Price" class="required form-label"></label>
-        <input asp-for="Price" class="form-control mb-2" placeholder="Accommodation price per night" />
+        <input asp-for="Price" class="form-control mb-2" placeholder="Accommodation price per night" type="number" />
         <span asp-validation-for="Price" class="text-danger"></span>
-
         <div class="text-muted fs-7">Set the price per night for the accommodation.</div>
       </div>
-
-
     </div>
     <!--end::Card body-->
   </div>
   <!--end::General-->
-
 
   <!--begin::Status-->
   <div class="card card-flush py-4">
     <div class="card-header">
       <div class="card-title">
         <h2>Status</h2>
-      </div>
-
-      <div class="card-toolbar">
-        <div class="rounded-circle bg-success w-15px h-15px" id="kt_ecommerce_add_product_status"></div>
       </div>
     </div>
 
