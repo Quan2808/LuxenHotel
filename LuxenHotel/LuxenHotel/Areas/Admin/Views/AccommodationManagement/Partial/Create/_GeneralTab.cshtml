@@ -1,0 +1,88 @@
+@model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
+
+<div class="tab-pane fade show active" id="general" role="tab-panel">
+    <div class="d-flex flex-column gap-7 gap-lg-10">
+
+        <!--begin::Details-->
+        <div class="card card-flush py-4">
+            <!--begin::Card header-->
+            <div class="card-header">
+                <div class="card-title">
+                    <h2>Details</h2>
+                </div>
+            </div>
+            <!--end::Card header-->
+
+            <!--begin::Card body-->
+            <div class="card-body pt-0">
+                <!--begin::Input group-->
+                <div class="mb-10 fv-row fv-plugins-icon-container">
+                    <!--begin::Label-->
+                    <label class="required form-label">Max Occupancy</label>
+                    <!--end::Label-->
+
+                    <!--begin::Input-->
+                    <input type="number" name="max_occupancy" class="form-control mb-2"
+                        placeholder="Enter max number of guests" />
+                    <!--end::Input-->
+
+                    <!--begin::Description-->
+                    <div class="text-muted fs-7">Specify the maximum number of guests allowed in the room.</div>
+                    <!--end::Description-->
+                </div>
+                <!--end::Input group-->
+
+                <!--begin::Input group-->
+                <div class="mb-10 fv-row fv-plugins-icon-container">
+                    <!--begin::Label-->
+                    <label class="required form-label">Area (m²)</label>
+                    <!--end::Label-->
+
+                    <!--begin::Input-->
+                    <input type="number" name="area" class="form-control mb-2"
+                        placeholder="Enter room area in square meters" />
+                    <!--end::Input-->
+
+                    <!--begin::Description-->
+                    <div class="text-muted fs-7">Enter the total area of the room in square meters.</div>
+                    <!--end::Description-->
+                </div>
+                <!--end::Input group-->
+
+                <!-- Description -->
+                <div class="fv-row fv-plugins-icon-container">
+                    <label asp-for="Description" class="form-label"></label>
+
+                    <div id="accommodation-desc" class="mb-2" style="height: 300px;"></div>
+
+                    <div class="text-muted fs-7">
+                        Provide a detailed description of the accommodation to help guests understand what to expect.
+                    </div>
+                </div>
+            </div>
+            <!--end::Card body-->
+        </div>
+        <!--end::Details-->
+
+        <!--begin::Media-->
+        <div class="card card-flush py-4">
+            <!--begin::Card header-->
+            <div class="card-header">
+                <div class="card-title">
+                    <h2>Media</h2>
+                </div>
+            </div>
+            <!--end::Card header-->
+
+            <!--begin::Card body-->
+            <div class="card-body pt-0">
+                <div class="fv-row mb-2">
+                    <input type="file" asp-for="MediaFiles" id="filepond" multiple accept="image/*" />
+                </div>
+
+                <div class="text-muted fs-7">Set the product media gallery.</div>
+            </div>
+        </div>
+        <!--end::Media-->
+    </div>
+</div>

@@ -53,8 +53,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             {
                 Services = [new ServiceViewModel()]
             };
-            SetPageTitle("Create New Accommodation");
-            LogInfo("Accessed create accommodation page");
+            SetPageTitle("Add New Accommodation");
+            LogInfo("Accessed add accommodation page");
             return View(viewModel);
         }
 
