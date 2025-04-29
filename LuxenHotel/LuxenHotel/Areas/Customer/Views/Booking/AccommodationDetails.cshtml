@@ -85,10 +85,10 @@
 <div class="container">
     <div class="row accommodation-details mb-20">
         <div class="col-md-6">
-            @if (Model.ExistingMedia.Any())
+            @if (Model.Media.Any())
             {
                 <div class="owl-carousel image-carousel">
-                    @foreach (var media in Model.ExistingMedia)
+                    @foreach (var media in Model.Media)
                     {
                         <div class="item">
                             <a href="@media" class="image-popup">
@@ -101,12 +101,12 @@
         </div>
 
         <div class="col-md-6">
-            @if (!Model.IsAvailable)
+            @* @if (!Model.IsAvailable)
             {
                 <p class="availability text-danger">
                     Fully Booked
                 </p>
-            }
+            } *@
             <h1 class="accommodation-title">@Model.Name</h1>
             <hr>
 

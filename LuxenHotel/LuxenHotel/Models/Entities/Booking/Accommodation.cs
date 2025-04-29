@@ -42,7 +42,23 @@ public class Accommodation
     [Column("Media", TypeName = "nvarchar(max)")]
     public string? MediaJson { get; private set; }
 
-    public bool IsAvailable { get; set; } = true;
+    [NotMapped]
+    public string? Thumbnail
+    {
+        get => string.IsNullOrEmpty(ThumbnailJson)
+            ? null
+            : JsonSerializer.Deserialize<string>(ThumbnailJson, _jsonOptions);
+        set => ThumbnailJson = string.IsNullOrEmpty(value)
+            ? null
+            : JsonSerializer.Serialize(value, _jsonOptions);
+    }
+
+    [Column("Thumbnail", TypeName = "nvarchar(max)")]
+    public string? ThumbnailJson { get; private set; }
+
+    [Required]
+    [Column(TypeName = "int")]
+    public AccommodationStatus Status { get; set; } = new();
 
     [Required]
     [Range(1, 50, ErrorMessage = "Max occupancy must be between 1 and 50")]
@@ -63,5 +79,12 @@ public class Accommodation
     public void UpdateMedia(List<string> media)
     {
         Media = media ?? new List<string>();
+    }
+    public enum AccommodationStatus
+    {
+        Published,
+        Unpublished,
+        MaintenanceMode,
+        FullyBooked
     }
 }

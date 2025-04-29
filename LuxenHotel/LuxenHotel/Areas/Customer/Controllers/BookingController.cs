@@ -28,7 +28,7 @@ public class BookingController : Controller
     [HttpGet]
     public async Task<IActionResult> Accommodations()
     {
-        var viewModel = await _accommodationService.GetAllAccommodationsAsync();
+        var viewModel = await _accommodationService.ListAsync();
         return View(viewModel);
     }
 
@@ -36,7 +36,7 @@ public class BookingController : Controller
     [Route("Accommodations/{id}")]
     public async Task<IActionResult> AccommodationDetails(int? id)
     {
-        var viewModel = await _accommodationService.GetAccommodationByIdAsync(id);
+        var viewModel = await _accommodationService.GetAsync(id);
         if (viewModel == null)
             return NotFound();
 
@@ -63,46 +63,7 @@ public class BookingController : Controller
             return View(viewModel);
         }
 
-        var accommodation = new Accommodation
-        {
-            Name = viewModel.Name,
-            Price = viewModel.Price,
-            Description = viewModel.Description,
-            MaxOccupancy = viewModel.MaxOccupancy,
-            Area = viewModel.Area,
-            IsAvailable = viewModel.IsAvailable,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        // Handle file uploads
-        if (viewModel.MediaFiles != null && viewModel.MediaFiles.Any())
-        {
-            var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
-            accommodation.UpdateMedia(mediaPaths);
-        }
-
-        // Handle services
-        if (viewModel.Services != null && viewModel.Services.Any())
-        {
-            foreach (var serviceViewModel in viewModel.Services)
-            {
-                if (!string.IsNullOrEmpty(serviceViewModel.Name)) // Only add valid services
-                {
-                    var service = new Service
-                    {
-                        Name = serviceViewModel.Name,
-                        Price = serviceViewModel.Price,
-                        Description = serviceViewModel.Description,
-                        CreatedAt = DateTime.UtcNow,
-                        Accommodation = accommodation
-                    };
-                    accommodation.Services.Add(service);
-                }
-            }
-        }
-
-        _context.Accommodations.Add(accommodation);
-        await _context.SaveChangesAsync();
+        await _accommodationService.CreateAsync(viewModel);
 
         return RedirectToAction(nameof(Accommodations));
     }

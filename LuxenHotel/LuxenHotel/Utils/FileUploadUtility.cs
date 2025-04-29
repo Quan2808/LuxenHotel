@@ -29,4 +29,23 @@ public static class FileUploadUtility
 
         return mediaPaths;
     }
+
+    public static async Task<string?> UploadSingleFileAsync(IFormFile file, IWebHostEnvironment environment)
+    {
+        if (file == null || file.Length == 0)
+            return null;
+
+        var uploadsFolder = Path.Combine(environment.WebRootPath, "media");
+        Directory.CreateDirectory(uploadsFolder);
+
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        return $"/media/{fileName}";
+    }
 }

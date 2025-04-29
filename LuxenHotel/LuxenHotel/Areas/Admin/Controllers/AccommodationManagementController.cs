@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
-using LuxenHotel.Areas.Admin.Controllers;
+using LuxenHotel.Models.ViewModels.Booking;
+using LuxenHotel.Services.Booking.Interfaces;
+using LuxenHotel.Utils;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
@@ -12,221 +12,169 @@ namespace LuxenHotel.Areas.Admin.Controllers
     [Route("admin/accommodations")]
     public class AccommodationManagementController : AdminBaseController
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IAccommodationService _accommodationService;
 
-        public AccommodationManagementController(ILogger<AdminBaseController> logger, ApplicationDbContext dbContext)
+        public AccommodationManagementController(
+            ILogger<AdminBaseController> logger,
+            IAccommodationService accommodationService)
             : base(logger)
         {
-            _dbContext = dbContext;
+            _accommodationService = accommodationService ?? throw new ArgumentNullException(nameof(accommodationService));
         }
 
-        // GET: /admin/accommodations
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            SetPageTitle("Accommodations");
-            LogInfo("Accessed Accommodations list");
-
-            var accommodations = await _dbContext.Accommodations
-                .Include(a => a.Services)
-                .ToListAsync();
+            var accommodations = await _accommodationService.ListAsync();
+            SetPageTitle("Accommodations Management");
+            LogInfo("Viewed list of accommodations");
             return View(accommodations);
         }
 
-        // GET: /admin/accommodations/create
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (!id.HasValue)
+                return RedirectWithError("Invalid accommodation ID");
+
+            var viewModel = await _accommodationService.GetAsync(id.Value);
+            if (viewModel == null)
+                return RedirectWithError("Accommodation not found");
+
+            SetPageTitle($"Details of {viewModel.Name}");
+            LogInfo($"Viewed details of accommodation ID: {id}");
+            return View(viewModel);
+        }
+
         [HttpGet("create")]
         public IActionResult Create()
         {
+            var viewModel = new AccommodationViewModel
+            {
+                Services = [new ServiceViewModel()]
+            };
             SetPageTitle("Add New Accommodation");
-            return View();
+            LogInfo("Accessed add accommodation page");
+            return View(viewModel);
         }
 
-        // POST: /admin/accommodations
-        [HttpPost]
+        [HttpPost("create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Accommodation model)
+        public async Task<IActionResult> Create(AccommodationViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _dbContext.Accommodations.Add(model);
-                await _dbContext.SaveChangesAsync();
-                AddNotification("Accommodation created successfully.", NotificationType.Success);
-                return RedirectToAction("Index");
+                AddNotification("Invalid input data", NotificationType.Error);
+                LogInfo("Invalid input data for creating accommodation");
+                return View(viewModel);
             }
-            return View(model);
+
+            await _accommodationService.CreateAsync(viewModel);
+            AddNotification("Accommodation created successfully", NotificationType.Success);
+            LogInfo($"Created accommodation: {viewModel.Name}");
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: /admin/accommodations/{id}/edit
-        [HttpGet("{id}/edit")]
-        public async Task<IActionResult> Edit(int id)
+        [HttpGet("edit/{id}")]
+        public async Task<IActionResult> Edit(int? id)
         {
-            SetPageTitle("Edit Accommodation");
-            var accommodation = await _dbContext.Accommodations
-                .Include(a => a.Services)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            if (!id.HasValue)
+                return RedirectWithError("Invalid accommodation ID");
 
-            if (accommodation == null)
-            {
-                return HandleError("Accommodation not found.");
-            }
-            return View(accommodation);
+            var viewModel = await _accommodationService.GetAsync(id.Value);
+            if (viewModel == null)
+                return RedirectWithError("Accommodation not found");
+
+            if (!viewModel.Services.Any())
+                viewModel.Services.Add(new ServiceViewModel());
+
+            SetPageTitle($"Edit {viewModel.Name}");
+            LogInfo($"Accessed edit page for accommodation ID: {id}");
+            return View(viewModel);
         }
 
-        // PUT: /admin/accommodations/{id}
-        [HttpPut("{id}")]
+        [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Accommodation model)
+        public async Task<IActionResult> Edit(int id, AccommodationViewModel viewModel)
         {
-            if (id != model.Id)
+            if (id != viewModel.Id)
+                return RedirectWithError("Invalid accommodation ID");
+
+            if (!ModelState.IsValid)
             {
-                return HandleError("Invalid accommodation ID.");
+                AddNotification("Invalid input data", NotificationType.Error);
+                LogInfo($"Invalid input data for editing accommodation ID: {id}");
+                return View(viewModel);
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _dbContext.Update(model);
-                    await _dbContext.SaveChangesAsync();
-                    AddNotification("Accommodation updated successfully.", NotificationType.Success);
-                }
-                catch (DbUpdateException ex)
-                {
-                    return HandleError("Failed to update accommodation.", ex);
-                }
-                return RedirectToAction("Index");
+                await _accommodationService.EditAsync(id, viewModel);
+                AddNotification("Accommodation updated successfully", NotificationType.Success);
+                LogInfo($"Updated accommodation ID: {id}");
+                return RedirectToAction(nameof(Index));
             }
-            return View(model);
+            catch (InvalidOperationException ex)
+            {
+                AddNotification(ex.Message, NotificationType.Error);
+                LogInfo($"Failed to update accommodation ID: {id}, Error: {ex.Message}");
+                return View(viewModel);
+            }
         }
 
-        // DELETE: /admin/accommodations/{id}
-        [HttpDelete("{id}")]
+        [HttpGet("delete/{id}")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (!id.HasValue)
+                return RedirectWithError("Invalid accommodation ID");
+
+            var viewModel = await _accommodationService.GetAsync(id.Value);
+            if (viewModel == null)
+                return RedirectWithError("Accommodation not found");
+
+            SetPageTitle($"Delete {viewModel.Name}");
+            LogInfo($"Accessed delete page for accommodation ID: {id}");
+            return View(viewModel);
+        }
+
+        [HttpPost("delete/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var accommodation = await _dbContext.Accommodations.FindAsync(id);
-            if (accommodation == null)
+            try
             {
-                return HandleError("Accommodation not found.");
-            }
+                var viewModel = await _accommodationService.GetAsync(id);
+                if (viewModel == null)
+                    return RedirectWithError("Accommodation not found");
 
-            _dbContext.Accommodations.Remove(accommodation);
-            await _dbContext.SaveChangesAsync();
-            AddNotification("Accommodation deleted successfully.", NotificationType.Success);
-            return RedirectToAction("Index");
+                await _accommodationService.DeleteAsync(id);
+                AddNotification("Accommodation deleted successfully", NotificationType.Success);
+                LogInfo($"Deleted accommodation ID: {id}");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                AddNotification(ex.Message, NotificationType.Error);
+                LogInfo($"Failed to delete accommodation ID: {id}, Error: {ex.Message}");
+                return RedirectToAction(nameof(Index));
+            }
         }
 
-        // GET: /admin/accommodations/{accommodationId}/services
-        [HttpGet("{accommodationId}/services")]
-        public async Task<IActionResult> Services(int accommodationId)
+        [HttpPost("upload-images")]
+        public async Task<IActionResult> UploadImages(List<IFormFile> files, [FromServices] IWebHostEnvironment environment)
         {
-            SetPageTitle("Services");
-            LogInfo($"Accessed Services for Accommodation ID: {accommodationId}");
+            if (files == null || !files.Any())
+                return BadRequest("No files uploaded");
 
-            var accommodation = await _dbContext.Accommodations
-                .Include(a => a.Services)
-                .FirstOrDefaultAsync(a => a.Id == accommodationId);
+            var mediaPaths = await FileUploadUtility.UploadFilesAsync(files, environment);
 
-            if (accommodation == null)
-            {
-                return HandleError("Accommodation not found.");
-            }
-            return View(accommodation);
+            return Ok(new { paths = mediaPaths });
         }
 
-        // GET: /admin/accommodations/{accommodationId}/services/create
-        [HttpGet("{accommodationId}/services/create")]
-        public IActionResult CreateService(int accommodationId)
+        private IActionResult RedirectWithError(string message)
         {
-            SetPageTitle("Add New Service");
-            ViewBag.AccommodationId = accommodationId;
-            return View();
-        }
-
-        // POST: /admin/accommodations/{accommodationId}/services
-        [HttpPost("{accommodationId}/services")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateService(int accommodationId, Service model)
-        {
-            if (ModelState.IsValid)
-            {
-                var accommodation = await _dbContext.Accommodations.FindAsync(accommodationId);
-                if (accommodation == null)
-                {
-                    return HandleError("Accommodation not found.");
-                }
-
-                model.AccommodationId = accommodationId;
-                _dbContext.Services.Add(model);
-                await _dbContext.SaveChangesAsync();
-                AddNotification("Service created successfully.", NotificationType.Success);
-                return RedirectToAction("Services", new { accommodationId });
-            }
-            ViewBag.AccommodationId = accommodationId;
-            return View(model);
-        }
-
-        // GET: /admin/accommodations/services/{id}/edit
-        [HttpGet("services/{id}/edit")]
-        public async Task<IActionResult> EditService(int id)
-        {
-            SetPageTitle("Edit Service");
-            var service = await _dbContext.Services
-                .Include(s => s.Accommodation)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (service == null)
-            {
-                return HandleError("Service not found.");
-            }
-            ViewBag.AccommodationId = service.AccommodationId;
-            return View(service);
-        }
-
-        // PUT: /admin/accommodations/services/{id}
-        [HttpPut("services/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditService(int id, Service model)
-        {
-            if (id != model.Id)
-            {
-                return HandleError("Invalid service ID.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _dbContext.Update(model);
-                    await _dbContext.SaveChangesAsync();
-                    AddNotification("Service updated successfully.", NotificationType.Success);
-                }
-                catch (DbUpdateException ex)
-                {
-                    return HandleError("Failed to update service.", ex);
-                }
-                return RedirectToAction("Services", new { accommodationId = model.AccommodationId });
-            }
-            ViewBag.AccommodationId = model.AccommodationId;
-            return View(model);
-        }
-
-        // DELETE: /admin/accommodations/services/{id}
-        [HttpDelete("services/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteService(int id)
-        {
-            var service = await _dbContext.Services.FindAsync(id);
-            if (service == null)
-            {
-                return HandleError("Service not found.");
-            }
-
-            var accommodationId = service.AccommodationId;
-            _dbContext.Services.Remove(service);
-            await _dbContext.SaveChangesAsync();
-            AddNotification("Service deleted successfully.", NotificationType.Success);
-            return RedirectToAction("Services", new { accommodationId });
+            AddNotification(message, NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

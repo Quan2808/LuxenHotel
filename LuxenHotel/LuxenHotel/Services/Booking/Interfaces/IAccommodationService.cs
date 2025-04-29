@@ -5,7 +5,9 @@ namespace LuxenHotel.Services.Booking.Interfaces;
 
 public interface IAccommodationService
 {
-    Task<List<AccommodationViewModel>> GetAllAccommodationsAsync();
-    Task<AccommodationViewModel> GetAccommodationByIdAsync(int? id);
-    Task CreateAccommodationAsync(Accommodation accommodation, List<IFormFile> mediaFiles);
+    Task<List<AccommodationViewModel>> ListAsync();
+    Task<AccommodationViewModel> GetAsync(int? id);
+    Task CreateAsync(AccommodationViewModel viewModel);
+    Task EditAsync(int id, AccommodationViewModel viewModel);
+    Task DeleteAsync(int id);
 }

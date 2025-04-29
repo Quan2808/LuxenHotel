@@ -54,9 +54,6 @@ namespace LuxenHotel.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<int>("MaxOccupancy")
                         .HasColumnType("int");
 
@@ -71,6 +68,13 @@ namespace LuxenHotel.Migrations
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ThumbnailJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Thumbnail");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
