@@ -97,10 +97,10 @@
             <!--begin::Card body-->
             <div class="card-body pt-0">
                 <div class="fv-row mb-2">
-                    <input type="file" asp-for="MediaFiles" id="filepond" multiple accept="image/*" />
+                    <input type="file" asp-for="MediaFiles" id="realMediaFiles" multiple hidden />
+                    <input type="file" id="filepond" multiple accept="image/*" />
                     <span asp-validation-for="MediaFiles" class="text-danger"></span>
                 </div>
-
                 <div class="text-muted fs-7">Set the product media gallery. Only image files are accepted.</div>
             </div>
             <!--end::Media-->

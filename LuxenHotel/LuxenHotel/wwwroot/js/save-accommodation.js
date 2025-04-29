@@ -1,15 +1,30 @@
 // FilePond init
-FilePond.registerPlugin(FilePondPluginImagePreview);
+FilePond.registerPlugin(
+  FilePondPluginImagePreview,
+  FilePondPluginFileValidateType
+);
 
-FilePond.create(document.getElementById("filepond"), {
+const pond = FilePond.create(document.getElementById("filepond"), {
   allowMultiple: true,
   maxFiles: 10,
   acceptedFileTypes: ["image/*"],
   labelIdle: `<div class="ms-4">
-        <h3 class="fs-5 fw-bold text-gray-900 mb-1">Drop files here or click to upload.</h3>
-        <span class="fs-7 fw-semibold text-gray-500">Upload up to 10 files</span>
-    </div>`,
+  <h3 class="fs-5 fw-bold text-gray-900 mb-1">Drop files here or click to upload.</h3>
+  <span class="fs-7 fw-semibold text-gray-500">Upload up to 10 files</span>
+</div>`,
   imagePreviewHeight: 170,
+});
+
+const form = document.querySelector("form");
+form.addEventListener("submit", function () {
+  const realInput = document.getElementById("realMediaFiles");
+  const dataTransfer = new DataTransfer();
+
+  pond.getFiles().forEach((fileItem) => {
+    dataTransfer.items.add(fileItem.file);
+  });
+
+  realInput.files = dataTransfer.files;
 });
 
 // Quill init
@@ -27,13 +42,12 @@ var quill = new Quill("#accommodation-desc", {
   },
 });
 
-// Đồng bộ nội dung Quill với input ẩn
 const descriptionHidden = document.querySelector("#description-hidden");
 quill.on("text-change", function () {
   descriptionHidden.value = quill.root.innerHTML;
 });
 
-// Set giá trị ban đầu nếu có (ví dụ khi edit)
+// Use for edit
 if (descriptionHidden.value) {
   quill.root.innerHTML = descriptionHidden.value;
 }
@@ -53,11 +67,11 @@ function addServiceItem() {
 
   header.setAttribute("data-bs-target", `#${collapseId}`);
   header.setAttribute("aria-controls", collapseId);
-  header.setAttribute("aria-expanded", "true"); // Set expanded state
-  header.classList.remove("collapsed"); // Remove collapsed class to expand
+  header.setAttribute("aria-expanded", "true");
+  header.classList.remove("collapsed");
 
   collapse.id = collapseId;
-  collapse.classList.add("show"); // Add show class to expand the body
+  collapse.classList.add("show");
 
   // Update field names
   clone.querySelectorAll("[name]").forEach((input) => {
