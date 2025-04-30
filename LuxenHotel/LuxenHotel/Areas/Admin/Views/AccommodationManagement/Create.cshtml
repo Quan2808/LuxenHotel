@@ -26,8 +26,11 @@
             height: 170px;
             object-fit: cover;
         }
-    </style>
 
+        .filepond--credits {
+            display: none !important;
+        }
+    </style>
 }
 
 
@@ -132,7 +135,5 @@
     @Html.CdnScript("https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js")
     @Html.CdnScript("https://cdn.quilljs.com/1.3.6/quill.js")
 
-
     @Html.JsScript("save-accommodation.js")
-
 }

@@ -8,10 +8,15 @@ const pond = FilePond.create(document.getElementById("filepond"), {
   allowMultiple: true,
   maxFiles: 10,
   acceptedFileTypes: ["image/*"],
-  labelIdle: `<div class="ms-4">
-  <h3 class="fs-5 fw-bold text-gray-900 mb-1">Drop files here or click to upload.</h3>
-  <span class="fs-7 fw-semibold text-gray-500">Upload up to 10 files</span>
-</div>`,
+  labelIdle: `<div class="p-4 d-flex justify-content-between align-items-center">
+    <div class="me-5 fs-3x text-primary">
+      <i class="fa-solid fa-file-arrow-up"></i>
+    </div>
+    <div class="text-start">
+      <h3 class="fs-5 fw-bold text-dark mb-1">Drop files here or click to upload.</h3>
+      <span class="fs-7 text-muted">Upload up to 10 files</span>
+    </div>
+  </div>`,
   imagePreviewHeight: 170,
 });
 
