@@ -90,7 +90,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             SetPageTitle($"Edit {viewModel.Name}");
             LogInfo($"Accessed edit page for accommodation ID: {id}");
-            return View(viewModel);
+            return View("Create", viewModel);
         }
 
         [HttpPost("edit/{id}")]
