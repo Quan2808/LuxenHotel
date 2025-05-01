@@ -36,7 +36,7 @@ public class AccommodationViewModel
     public List<string> Media { get; set; } = new List<string>();
 
     // For file uploads
-    public IFormFile ThumbnailFile { get; set; }
+    public IFormFile? ThumbnailFile { get; set; }
 
     // To display existing thumbnail
     public string? Thumbnail { get; set; }

@@ -31,21 +31,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(accommodations);
         }
 
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (!id.HasValue)
-                return RedirectWithError("Invalid accommodation ID");
-
-            var viewModel = await _accommodationService.GetAsync(id.Value);
-            if (viewModel == null)
-                return RedirectWithError("Accommodation not found");
-
-            SetPageTitle($"Details of {viewModel.Name}");
-            LogInfo($"Viewed details of accommodation ID: {id}");
-            return View(viewModel);
-        }
-
         [HttpGet("create")]
         public IActionResult Create()
         {
@@ -158,17 +143,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 LogInfo($"Failed to delete accommodation ID: {id}, Error: {ex.Message}");
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        [HttpPost("upload-images")]
-        public async Task<IActionResult> UploadImages(List<IFormFile> files, [FromServices] IWebHostEnvironment environment)
-        {
-            if (files == null || !files.Any())
-                return BadRequest("No files uploaded");
-
-            var mediaPaths = await FileUploadUtility.UploadFilesAsync(files, environment);
-
-            return Ok(new { paths = mediaPaths });
         }
 
         private IActionResult RedirectWithError(string message)
