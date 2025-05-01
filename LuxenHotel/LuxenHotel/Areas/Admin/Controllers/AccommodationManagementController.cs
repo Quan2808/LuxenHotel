@@ -55,7 +55,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
             };
             SetPageTitle("Add New Accommodation");
             LogInfo("Accessed add accommodation page");
-            return View(viewModel);
+            return View("Save", viewModel);
         }
 
         [HttpPost("create")]
@@ -90,7 +90,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             SetPageTitle($"Edit {viewModel.Name}");
             LogInfo($"Accessed edit page for accommodation ID: {id}");
-            return View("Create", viewModel);
+            return View("Save", viewModel);
         }
 
         [HttpPost("edit/{id}")]
