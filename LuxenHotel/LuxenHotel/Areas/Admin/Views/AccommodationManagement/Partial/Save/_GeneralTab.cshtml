@@ -102,12 +102,12 @@
                 <div class="fv-row mb-2">
                     <input type="file" asp-for="MediaFiles" id="realMediaFiles" multiple hidden />
                     <input type="file" id="filepond" multiple accept="image/*" />
-                    <span asp-validation-for="MediaFiles" class="text-danger"></span>
                 </div>
                 <div class="text-muted fs-7">
                     Set the accommodation media gallery. Only image files are accepted and you can upload up to 10
                     files.
                 </div>
+                <span asp-validation-for="MediaFiles" class="text-danger"></span>
             </div>
             <!--end::Media-->
         </div>

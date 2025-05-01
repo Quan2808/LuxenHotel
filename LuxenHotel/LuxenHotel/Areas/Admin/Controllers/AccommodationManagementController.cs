@@ -66,7 +66,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
             {
                 AddNotification("Invalid input data", NotificationType.Error);
                 LogInfo("Invalid input data for creating accommodation");
-                return View(viewModel);
+                return View("Save", viewModel);
             }
 
             await _accommodationService.CreateAsync(viewModel);

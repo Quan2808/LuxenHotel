@@ -54,7 +54,8 @@
 
       <!--begin:Menu item-->
       <div class="menu-item">
-        <a class="menu-link" asp-area="Admin" asp-controller="AccommodationManagement" asp-action="Create">
+        <a class="menu-link  @(action == "Create" && controller == "AccommodationManagement" ? "active" : "")"
+          asp-area="Admin" asp-controller="AccommodationManagement" asp-action="Create">
           <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
           <span class="menu-title">Add New</span>
         </a>
