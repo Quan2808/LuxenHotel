@@ -91,6 +91,29 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 return View("Save", viewModel);
             }
 
+            // Process media to delete
+            ProcessMediaToDelete(viewModel);
+
+            // Process services to delete
+            ProcessServicesToDelete(viewModel);
+
+            try
+            {
+                await _accommodationService.EditAsync(id, viewModel);
+                AddNotification("Accommodation updated successfully", NotificationType.Success);
+                LogInfo($"Updated accommodation ID: {id}");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                AddNotification(ex.Message, NotificationType.Error);
+                LogInfo($"Failed to update accommodation ID: {id}, Error: {ex.Message}");
+                return View("save", viewModel);
+            }
+        }
+
+        private void ProcessMediaToDelete(AccommodationViewModel viewModel)
+        {
             // Process MediaToDelete if it's a JSON string
             if (Request.Form["MediaToDelete"].Count > 0)
             {
@@ -108,19 +131,20 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     }
                 }
             }
+        }
 
-            try
+        private void ProcessServicesToDelete(AccommodationViewModel viewModel)
+        {
+            // Get the services to delete from the form
+            var servicesToDelete = Request.Form["ServicesToDelete[]"].ToList();
+            if (servicesToDelete.Any())
             {
-                await _accommodationService.EditAsync(id, viewModel);
-                AddNotification("Accommodation updated successfully", NotificationType.Success);
-                LogInfo($"Updated accommodation ID: {id}");
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException ex)
-            {
-                AddNotification(ex.Message, NotificationType.Error);
-                LogInfo($"Failed to update accommodation ID: {id}, Error: {ex.Message}");
-                return View("save", viewModel);
+                viewModel.ServicesToDelete = servicesToDelete
+                    .Select(s => int.TryParse(s, out int id) ? id : 0)
+                    .Where(id => id > 0)
+                    .ToList();
+
+                LogInfo($"Services marked for deletion: {string.Join(", ", viewModel.ServicesToDelete)}");
             }
         }
 
@@ -135,18 +159,14 @@ namespace LuxenHotel.Areas.Admin.Controllers
             AddNotification("Invalid input data", NotificationType.Error);
             LogInfo("Invalid input data for creating accommodation");
 
-            foreach (var entry in ModelState)
-            {
-                var fieldName = entry.Key;
-                var state = entry.Value;
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
 
-                if (state != null && state.Errors.Count > 0)
-                {
-                    foreach (var error in state.Errors)
-                    {
-                        LogInfo($"Validation error in field '{fieldName}': {error.ErrorMessage}");
-                    }
-                }
+            foreach (var error in errors)
+            {
+                AddNotification(error, NotificationType.Error);
             }
         }
     }

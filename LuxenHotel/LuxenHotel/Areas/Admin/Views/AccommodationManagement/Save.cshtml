@@ -1,5 +1,15 @@
 @model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
 
+@{
+    var servicesJson = Json.Serialize(Model.Services.Select(s => new
+    {
+        id = s.Id,
+        name = s.Name,
+        price = s.Price,
+        description = s.Description
+    }).ToList());
+}
+
 @section Styles {
     @Html.CdnCss("https://unpkg.com/filepond/dist/filepond.min.css")
     @Html.CdnCss("https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css")
@@ -69,9 +79,14 @@
     </script>
 
     <script type="application/json" id="existingMedia">
-            @Html.Raw(Json.Serialize(Model.Media))
-        </script>
+                            @Html.Raw(Json.Serialize(Model.Media))
+                        </script>
+
+    <script>
+        window.existingServices = @Html.Raw(servicesJson);
+    </script>
 }
+
 
 <form asp-action="@((Model.Id == 0) ? "Create" : "Edit")" asp-route-id="@Model.Id" id="kt_ecommerce_add_product_form"
     class="form d-flex flex-column flex-lg-row fv-plugins-bootstrap5 fv-plugins-framework" method="post"

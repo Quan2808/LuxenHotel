@@ -220,6 +220,7 @@ if (descriptionHidden.value) {
 
 let serviceIndex = 0;
 
+// Function to add a new empty service item
 function addServiceItem() {
   const wrapper = document.getElementById("services-wrapper");
   const template = document.getElementById("service-template");
@@ -239,39 +240,162 @@ function addServiceItem() {
   collapse.id = collapseId;
   collapse.classList.add("show");
 
-  // Update field names
-  clone.querySelectorAll("[name]").forEach((input) => {
-    const baseName = input.getAttribute("name").split(".")[1];
-    input.setAttribute("name", `services[${index}].${baseName}`);
-  });
-
   // Update input IDs for accessibility
-  clone.querySelector("#service_name_0").id = `service_name_${index}`;
-  clone.querySelector("#service_price_0").id = `service_price_${index}`;
-  clone.querySelector(
-    "#service_description_0"
-  ).id = `service_description_${index}`;
-  clone
-    .querySelector(`label[for="service_name_0"]`)
-    .setAttribute("for", `service_name_${index}`);
-  clone
-    .querySelector(`label[for="service_price_0"]`)
-    .setAttribute("for", `service_price_${index}`);
-  clone
-    .querySelector(`label[for="service_description_0"]`)
-    .setAttribute("for", `service_description_${index}`);
+  updateInputIds(clone, index);
 
   // Update service index display
   clone.querySelector(".service-index").textContent = `Service #${index + 1}`;
   wrapper.appendChild(clone);
+
+  return index;
 }
 
+// Helper function to update all input IDs and names
+function updateInputIds(element, index) {
+  // Update name input
+  const nameInput = element.querySelector(`[id^="service_name_"]`);
+  nameInput.id = `service_name_${index}`;
+  nameInput.name = `Services[${index}].Name`;
+
+  // Update price input
+  const priceInput = element.querySelector(`[id^="service_price_"]`);
+  priceInput.id = `service_price_${index}`;
+  priceInput.name = `Services[${index}].Price`;
+
+  // Update description input
+  const descInput = element.querySelector(`[id^="service_description_"]`);
+  descInput.id = `service_description_${index}`;
+  descInput.name = `Services[${index}].Description`;
+
+  // Update labels
+  element
+    .querySelector(`label[for^="service_name_"]`)
+    .setAttribute("for", `service_name_${index}`);
+  element
+    .querySelector(`label[for^="service_price_"]`)
+    .setAttribute("for", `service_price_${index}`);
+  element
+    .querySelector(`label[for^="service_description_"]`)
+    .setAttribute("for", `service_description_${index}`);
+
+  // Update validation spans if present
+  const nameValidation = element.querySelector(
+    `[asp-validation-for="Services[0].Name"]`
+  );
+  if (nameValidation)
+    nameValidation.setAttribute(
+      "asp-validation-for",
+      `Services[${index}].Name`
+    );
+
+  const priceValidation = element.querySelector(
+    `[asp-validation-for="Services[0].Price"]`
+  );
+  if (priceValidation)
+    priceValidation.setAttribute(
+      "asp-validation-for",
+      `Services[${index}].Price`
+    );
+
+  const descValidation = element.querySelector(
+    `[asp-validation-for="Services[0].Description"]`
+  );
+  if (descValidation)
+    descValidation.setAttribute(
+      "asp-validation-for",
+      `Services[${index}].Description`
+    );
+}
+
+// Function to remove a service item
 function removeServiceItem(button) {
   const item = button.closest(".service-item");
+
+  // If this is an existing service (has a hidden ID field), add a deletion marker
+  const serviceIdInput = item.querySelector("input[name$='.Id']");
+  if (serviceIdInput && serviceIdInput.value) {
+    // Create a hidden field to track deleted services
+    const form = document.querySelector("form");
+    const hiddenField = document.createElement("input");
+    hiddenField.type = "hidden";
+    hiddenField.name = "ServicesToDelete[]"; // Use array notation
+    hiddenField.value = serviceIdInput.value;
+    form.appendChild(hiddenField);
+
+    console.log(`Marked service ID ${serviceIdInput.value} for deletion`);
+  }
+
   item.remove();
+
+  // Reorder service numbers if needed
+  updateServiceIndices();
 }
 
-// Initialize with one default service
+// Function to update the service indices (numbers) after deletion
+function updateServiceIndices() {
+  const serviceItems = document.querySelectorAll(".service-item");
+  serviceItems.forEach((item, idx) => {
+    item.querySelector(".service-index").textContent = `Service #${idx + 1}`;
+  });
+}
+
+// Function to add an existing service with values from the model
+function addExistingService(service) {
+  const index = addServiceItem();
+
+  // Set values from existing service
+  const nameField = document.getElementById(`service_name_${index}`);
+  const priceField = document.getElementById(`service_price_${index}`);
+  const descField = document.getElementById(`service_description_${index}`);
+
+  if (nameField) nameField.value = service.name || "";
+  if (priceField) priceField.value = service.price || 0;
+  if (descField) descField.value = service.description || "";
+
+  // Add hidden field for service ID to track existing services
+  if (service.id) {
+    const serviceItem = document
+      .querySelector(`#collapseService_${index}`)
+      .closest(".service-item");
+    const idField = document.createElement("input");
+    idField.type = "hidden";
+    idField.name = `Services[${index}].Id`;
+    idField.value = service.id;
+    serviceItem.appendChild(idField);
+  }
+}
+
+// Function to check if we're in edit mode and have existing services
+function loadExistingServices() {
+  // Check if window.existingServices exists and is properly populated
+  console.log("Checking for existing services:", window.existingServices);
+
+  if (
+    window.existingServices &&
+    Array.isArray(window.existingServices) &&
+    window.existingServices.length > 0
+  ) {
+    console.log(
+      `Found ${window.existingServices.length} existing services to load`
+    );
+
+    // Clear any default services first
+    document.querySelectorAll(".service-item").forEach((item) => item.remove());
+
+    // Load existing services
+    window.existingServices.forEach((service) => {
+      console.log("Loading service:", service);
+      addExistingService(service);
+    });
+  } else {
+    console.log("No existing services found, adding default empty service");
+    // Add one empty service for new accommodations
+    addServiceItem();
+  }
+}
+
+// Initialize when the DOM is fully loaded
 window.addEventListener("DOMContentLoaded", () => {
-  addServiceItem();
+  console.log("DOM loaded, initializing services management");
+  loadExistingServices();
 });

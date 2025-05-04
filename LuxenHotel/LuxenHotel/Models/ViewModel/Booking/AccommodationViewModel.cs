@@ -48,6 +48,8 @@ public class AccommodationViewModel
     // List of services
     public List<ServiceViewModel> Services { get; set; } = new List<ServiceViewModel>();
 
+    public List<int> ServicesToDelete { get; set; } = new List<int>();
+
     public DateTime? CreatedAt { get; set; }
 
     public enum AccommodationStatus
