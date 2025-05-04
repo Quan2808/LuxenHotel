@@ -1,35 +1,181 @@
-// FilePond init
-FilePond.registerPlugin(
-  FilePondPluginImagePreview,
-  FilePondPluginFileValidateType
-);
+// Place this code in a script tag at the bottom of your form view
+// or in a separate JS file referenced by the view
 
-const pond = FilePond.create(document.getElementById("filepond"), {
-  allowMultiple: true,
-  maxFiles: 10,
-  acceptedFileTypes: ["image/*"],
-  labelIdle: `<div class="p-4 d-flex justify-content-between align-items-center">
-    <div class="me-5 fs-3x text-primary">
-      <i class="fa-solid fa-file-arrow-up"></i>
-    </div>
-    <div class="text-start">
-      <h3 class="fs-5 fw-bold text-dark mb-1">Drop files here or click to upload.</h3>
-      <span class="fs-7 text-muted">Upload up to 10 files</span>
-    </div>
-  </div>`,
-  imagePreviewHeight: 170,
-});
+document.addEventListener("DOMContentLoaded", function () {
+  // Register FilePond plugins
+  FilePond.registerPlugin(
+    FilePondPluginImagePreview,
+    FilePondPluginFileValidateType
+  );
 
-const form = document.querySelector("form");
-form.addEventListener("submit", function () {
-  const realInput = document.getElementById("realMediaFiles");
-  const dataTransfer = new DataTransfer();
-
-  pond.getFiles().forEach((fileItem) => {
-    dataTransfer.items.add(fileItem.file);
+  // Initialize FilePond
+  const pond = FilePond.create(document.getElementById("filepond"), {
+    allowMultiple: true,
+    maxFiles: 10,
+    acceptedFileTypes: ["image/*"],
+    labelIdle: `<div class="p-4 d-flex justify-content-between align-items-center">
+      <div class="me-5 fs-3x text-primary">
+        <i class="fa-solid fa-file-arrow-up"></i>
+      </div>
+      <div class="text-start">
+        <h3 class="fs-5 fw-bold text-dark mb-1">Drop files here or click to upload.</h3>
+        <span class="fs-7 text-muted">Upload up to 10 files</span>
+      </div>
+    </div>`,
+    imagePreviewHeight: 170,
   });
 
-  realInput.files = dataTransfer.files;
+  // Get existing media items (if in edit mode)
+  const existingMediaContainer = document.getElementById(
+    "existing-media-container"
+  );
+  const existingMediaItems = existingMediaContainer
+    ? existingMediaContainer.querySelectorAll("[data-media-url]")
+    : [];
+  const isEditMode = existingMediaItems.length > 0;
+
+  // Array to track existing media URLs
+  const existingMedia = [];
+
+  // In edit mode, load existing images and create tracking input
+  if (isEditMode) {
+    console.log("Edit mode detected, loading existing images");
+
+    // Create hidden input to track existing media files
+    const existingFilesInput = document.createElement("input");
+    existingFilesInput.type = "hidden";
+    existingFilesInput.id = "existingMediaFiles";
+    existingFilesInput.name = "ExistingMediaFiles";
+    document.querySelector("form").appendChild(existingFilesInput);
+
+    // Process each existing media item
+    existingMediaItems.forEach((item) => {
+      const mediaUrl = item.getAttribute("data-media-url");
+      if (mediaUrl) {
+        // Add to tracking array
+        existingMedia.push(mediaUrl);
+
+        // Create a file name from the URL
+        const fileName = mediaUrl.split("/").pop();
+
+        // Fetch the image and add it to FilePond
+        fetch(mediaUrl)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Failed to fetch image: ${response.status} ${response.statusText}`
+              );
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            // Create a File object
+            const file = new File([blob], fileName, {
+              type: getFileTypeFromUrl(mediaUrl),
+            });
+
+            // Add to FilePond and store the URL reference
+            return pond.addFile(file);
+          })
+          .then((fileItem) => {
+            // Store original URL as a custom property on the FilePond file item
+            if (fileItem) {
+              fileItem.existingUrl = mediaUrl;
+            }
+          })
+          .catch((error) => {
+            console.error(`Error loading image ${mediaUrl}:`, error);
+          });
+      }
+    });
+
+    // Initial update of the hidden input
+    updateExistingFilesInput();
+  } else {
+    console.log("Create mode detected");
+  }
+
+  // Function to update the hidden input with current existing files
+  function updateExistingFilesInput() {
+    const input = document.getElementById("existingMediaFiles");
+    if (input) {
+      input.value = JSON.stringify(existingMedia);
+    }
+  }
+
+  // Function to guess file type from URL
+  function getFileTypeFromUrl(url) {
+    const extension = url.split(".").pop().toLowerCase();
+    switch (extension) {
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "gif":
+        return "image/gif";
+      case "webp":
+        return "image/webp";
+      default:
+        return "image/jpeg"; // Default fallback
+    }
+  }
+
+  // When a file is removed from FilePond
+  pond.on("removefile", (error, fileItem) => {
+    // Check if it's an existing file (has existingUrl property)
+    if (fileItem && fileItem.existingUrl) {
+      // Remove from tracking array
+      const index = existingMedia.indexOf(fileItem.existingUrl);
+      if (index > -1) {
+        existingMedia.splice(index, 1);
+        updateExistingFilesInput();
+      }
+    }
+  });
+
+  // Handle form submission
+  const form = document.querySelector("form");
+  form.addEventListener("submit", function (e) {
+    // Get all files from FilePond
+    const allFiles = pond.getFiles();
+
+    if (allFiles.length === 0) {
+      // No files in FilePond, make sure realInput is empty too
+      const realInput = document.getElementById("realMediaFiles");
+      realInput.value = "";
+      return; // Allow form to submit normally
+    }
+
+    // Get the real file input element for new uploads
+    const realInput = document.getElementById("realMediaFiles");
+    const dataTransfer = new DataTransfer();
+
+    // Count how many new files we find
+    let newFileCount = 0;
+
+    // Process all FilePond files
+    allFiles.forEach((fileItem) => {
+      // Check if this is a new file (doesn't have existingUrl property)
+      if (!fileItem.existingUrl) {
+        newFileCount++;
+        // Add to the real file input
+        dataTransfer.items.add(fileItem.file);
+      }
+    });
+
+    console.log(
+      `Processing ${newFileCount} new files and ${existingMedia.length} existing files`
+    );
+
+    // Set the files to the real input
+    realInput.files = dataTransfer.files;
+
+    // Make sure existing files input is up to date if in edit mode
+    if (isEditMode) {
+      updateExistingFilesInput();
+    }
+  });
 });
 
 // Quill init

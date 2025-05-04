@@ -51,6 +51,21 @@ namespace LuxenHotel.Areas.Admin.Controllers
             {
                 AddNotification("Invalid input data", NotificationType.Error);
                 LogInfo("Invalid input data for creating accommodation");
+
+                foreach (var entry in ModelState)
+                {
+                    var fieldName = entry.Key;
+                    var state = entry.Value;
+
+                    if (state != null && state.Errors.Count > 0)
+                    {
+                        foreach (var error in state.Errors)
+                        {
+                            LogInfo($"Validation error in field '{fieldName}': {error.ErrorMessage}");
+                        }
+                    }
+                }
+
                 return View("Save", viewModel);
             }
 

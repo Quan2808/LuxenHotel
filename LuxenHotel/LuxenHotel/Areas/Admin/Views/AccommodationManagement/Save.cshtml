@@ -66,8 +66,11 @@
                 }
             });
         });
-
     </script>
+
+    <script type="application/json" id="existingMedia">
+            @Html.Raw(Json.Serialize(Model.Media))
+        </script>
 }
 
 <form asp-action="@((Model.Id == 0) ? "Create" : "Edit")" asp-route-id="@Model.Id" id="kt_ecommerce_add_product_form"

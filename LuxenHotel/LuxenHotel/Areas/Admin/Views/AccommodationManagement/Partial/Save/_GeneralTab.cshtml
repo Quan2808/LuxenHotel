@@ -108,6 +108,20 @@
                     files.
                 </div>
                 <span asp-validation-for="MediaFiles" class="text-danger"></span>
+
+                <!-- Hidden container for existing media data -->
+                @if (Model.Id != 0)
+                {
+                    <div id="existing-media-container" class="d-none">
+                        @if (Model != null && Model.Media != null && Model.Media.Any())
+                        {
+                            @foreach (var mediaUrl in Model.Media)
+                            {
+                                <div data-media-url="@mediaUrl"></div>
+                            }
+                        }
+                    </div>
+                }
             </div>
             <!--end::Media-->
         </div>
