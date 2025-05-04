@@ -5,6 +5,7 @@ using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
@@ -31,21 +32,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return View(accommodations);
         }
 
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (!id.HasValue)
-                return RedirectWithError("Invalid accommodation ID");
-
-            var viewModel = await _accommodationService.GetAsync(id.Value);
-            if (viewModel == null)
-                return RedirectWithError("Accommodation not found");
-
-            SetPageTitle($"Details of {viewModel.Name}");
-            LogInfo($"Viewed details of accommodation ID: {id}");
-            return View(viewModel);
-        }
-
         [HttpGet("create")]
         public IActionResult Create()
         {
@@ -55,7 +41,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
             };
             SetPageTitle("Add New Accommodation");
             LogInfo("Accessed add accommodation page");
-            return View(viewModel);
+            return View("Save", viewModel);
         }
 
         [HttpPost("create")]
@@ -64,9 +50,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                AddNotification("Invalid input data", NotificationType.Error);
-                LogInfo("Invalid input data for creating accommodation");
-                return View(viewModel);
+                HandleInvalidModelState(viewModel);
+                return View("Save", viewModel);
             }
 
             await _accommodationService.CreateAsync(viewModel);
@@ -90,7 +75,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             SetPageTitle($"Edit {viewModel.Name}");
             LogInfo($"Accessed edit page for accommodation ID: {id}");
-            return View(viewModel);
+            return View("Save", viewModel);
         }
 
         [HttpPost("edit/{id}")]
@@ -102,10 +87,15 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                AddNotification("Invalid input data", NotificationType.Error);
-                LogInfo($"Invalid input data for editing accommodation ID: {id}");
-                return View(viewModel);
+                HandleInvalidModelState(viewModel);
+                return View("Save", viewModel);
             }
+
+            // Process media to delete
+            ProcessMediaToDelete(viewModel);
+
+            // Process services to delete
+            ProcessServicesToDelete(viewModel);
 
             try
             {
@@ -118,63 +108,66 @@ namespace LuxenHotel.Areas.Admin.Controllers
             {
                 AddNotification(ex.Message, NotificationType.Error);
                 LogInfo($"Failed to update accommodation ID: {id}, Error: {ex.Message}");
-                return View(viewModel);
+                return View("save", viewModel);
             }
         }
 
-        [HttpGet("delete/{id}")]
-        public async Task<IActionResult> Delete(int? id)
+        private void ProcessMediaToDelete(AccommodationViewModel viewModel)
         {
-            if (!id.HasValue)
-                return RedirectWithError("Invalid accommodation ID");
-
-            var viewModel = await _accommodationService.GetAsync(id.Value);
-            if (viewModel == null)
-                return RedirectWithError("Accommodation not found");
-
-            SetPageTitle($"Delete {viewModel.Name}");
-            LogInfo($"Accessed delete page for accommodation ID: {id}");
-            return View(viewModel);
-        }
-
-        [HttpPost("delete/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            try
+            // Process MediaToDelete if it's a JSON string
+            if (Request.Form["MediaToDelete"].Count > 0)
             {
-                var viewModel = await _accommodationService.GetAsync(id);
-                if (viewModel == null)
-                    return RedirectWithError("Accommodation not found");
-
-                await _accommodationService.DeleteAsync(id);
-                AddNotification("Accommodation deleted successfully", NotificationType.Success);
-                LogInfo($"Deleted accommodation ID: {id}");
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException ex)
-            {
-                AddNotification(ex.Message, NotificationType.Error);
-                LogInfo($"Failed to delete accommodation ID: {id}, Error: {ex.Message}");
-                return RedirectToAction(nameof(Index));
+                string mediaToDeleteJson = Request.Form["MediaToDelete"];
+                if (!string.IsNullOrEmpty(mediaToDeleteJson))
+                {
+                    try
+                    {
+                        List<string> mediaToDelete = JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson);
+                        viewModel.MediaToDelete = mediaToDelete;
+                    }
+                    catch (JsonException ex)
+                    {
+                        LogInfo($"Error parsing MediaToDelete JSON: {ex.Message}");
+                    }
+                }
             }
         }
 
-        [HttpPost("upload-images")]
-        public async Task<IActionResult> UploadImages(List<IFormFile> files, [FromServices] IWebHostEnvironment environment)
+        private void ProcessServicesToDelete(AccommodationViewModel viewModel)
         {
-            if (files == null || !files.Any())
-                return BadRequest("No files uploaded");
+            // Get the services to delete from the form
+            var servicesToDelete = Request.Form["ServicesToDelete[]"].ToList();
+            if (servicesToDelete.Any())
+            {
+                viewModel.ServicesToDelete = servicesToDelete
+                    .Select(s => int.TryParse(s, out int id) ? id : 0)
+                    .Where(id => id > 0)
+                    .ToList();
 
-            var mediaPaths = await FileUploadUtility.UploadFilesAsync(files, environment);
-
-            return Ok(new { paths = mediaPaths });
+                LogInfo($"Services marked for deletion: {string.Join(", ", viewModel.ServicesToDelete)}");
+            }
         }
 
         private IActionResult RedirectWithError(string message)
         {
             AddNotification(message, NotificationType.Error);
             return RedirectToAction(nameof(Index));
+        }
+
+        private void HandleInvalidModelState(AccommodationViewModel viewModel)
+        {
+            AddNotification("Invalid input data", NotificationType.Error);
+            LogInfo("Invalid input data for creating accommodation");
+
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
+
+            foreach (var error in errors)
+            {
+                AddNotification(error, NotificationType.Error);
+            }
         }
     }
 }

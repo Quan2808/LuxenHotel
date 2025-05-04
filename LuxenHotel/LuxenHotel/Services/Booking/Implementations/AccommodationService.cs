@@ -89,13 +89,43 @@ namespace LuxenHotel.Services.Booking.Implementations
             accommodation.UpdatedAt = DateTime.UtcNow;
 
             await UpdateMediaAsync(accommodation, viewModel);
-            UpdateServices(accommodation, viewModel.Services);
+
+            var servicesToDelete = ExtractServicesToDelete(viewModel);
+            UpdateServices(accommodation, viewModel.Services, servicesToDelete);
 
             await _context.SaveChangesAsync();
         }
 
+        private int[] ExtractServicesToDelete(AccommodationViewModel viewModel)
+        {
+            // Check if the ServicesToDelete property exists in the viewModel
+            // This would need to be added to your AccommodationViewModel class
+            if (viewModel.ServicesToDelete != null && viewModel.ServicesToDelete.Any())
+            {
+                return viewModel.ServicesToDelete.ToArray();
+            }
+            return Array.Empty<int>();
+        }
+
         private async Task UpdateMediaAsync(Accommodation accommodation, AccommodationViewModel viewModel)
         {
+            // Handle media files to delete
+            if (viewModel.MediaToDelete?.Any() == true)
+            {
+                var filesToDelete = new List<string>();
+                foreach (var mediaPath in viewModel.MediaToDelete)
+                {
+                    if (accommodation.Media.Contains(mediaPath))
+                    {
+                        filesToDelete.Add(mediaPath);
+                        accommodation.Media.Remove(mediaPath);
+                    }
+                }
+
+                // Delete the files from the file system
+                FileUploadUtility.DeleteFiles(filesToDelete, _environment);
+            }
+
             // Handle media uploads
             if (viewModel.MediaFiles?.Any() == true)
             {
@@ -103,41 +133,80 @@ namespace LuxenHotel.Services.Booking.Implementations
                 accommodation.UpdateMedia(mediaPaths);
             }
 
+            // Handle thumbnail deletion
+            if (viewModel.DeleteThumbnail && !string.IsNullOrEmpty(accommodation.Thumbnail))
+            {
+                FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                accommodation.Thumbnail = null;
+            }
+
             // Handle thumbnail upload
             if (viewModel.ThumbnailFile?.Length > 0)
             {
+                // If we have an existing thumbnail, delete it first
+                if (!string.IsNullOrEmpty(accommodation.Thumbnail))
+                {
+                    FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                }
+
                 var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
                 if (thumbnailPath != null)
                 {
-                    if (!string.IsNullOrEmpty(accommodation.Thumbnail))
-                    {
-                        var oldFilePath = Path.Combine(_environment.WebRootPath, accommodation.Thumbnail.TrimStart('/'));
-                        if (File.Exists(oldFilePath))
-                            File.Delete(oldFilePath);
-                    }
                     accommodation.Thumbnail = thumbnailPath;
                 }
             }
         }
 
-        private void UpdateServices(Accommodation accommodation, IList<ServiceViewModel>? services)
+        private void UpdateServices(Accommodation accommodation, IList<ServiceViewModel>? services, int[]? servicesToDelete = null)
         {
-            accommodation.Services.Clear();
-            if (services?.Any() != true)
-                return;
-
-            foreach (var serviceViewModel in services)
+            // Handle deletions if any services are marked for deletion
+            if (servicesToDelete != null && servicesToDelete.Length > 0)
             {
-                if (!string.IsNullOrEmpty(serviceViewModel.Name))
+                // Find and remove services marked for deletion
+                foreach (var serviceId in servicesToDelete)
                 {
-                    accommodation.Services.Add(new Service
+                    var serviceToRemove = accommodation.Services.FirstOrDefault(s => s.Id == serviceId);
+                    if (serviceToRemove != null)
                     {
-                        Name = serviceViewModel.Name,
-                        Price = serviceViewModel.Price,
-                        Description = serviceViewModel.Description,
-                        CreatedAt = DateTime.UtcNow,
-                        Accommodation = accommodation
-                    });
+                        accommodation.Services.Remove(serviceToRemove);
+                    }
+                }
+            }
+
+            // Update existing services and add new ones
+            if (services?.Any() == true)
+            {
+                foreach (var serviceViewModel in services)
+                {
+                    // Skip empty services
+                    if (string.IsNullOrEmpty(serviceViewModel.Name))
+                        continue;
+
+                    // Case 1: Existing service (has ID)
+                    if (serviceViewModel.Id > 0)
+                    {
+                        // Find and update the existing service
+                        var existingService = accommodation.Services.FirstOrDefault(s => s.Id == serviceViewModel.Id);
+                        if (existingService != null)
+                        {
+                            existingService.Name = serviceViewModel.Name;
+                            existingService.Price = serviceViewModel.Price;
+                            existingService.Description = serviceViewModel.Description;
+                            existingService.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                    // Case 2: New service (no ID)
+                    else
+                    {
+                        accommodation.Services.Add(new Service
+                        {
+                            Name = serviceViewModel.Name,
+                            Price = serviceViewModel.Price,
+                            Description = serviceViewModel.Description,
+                            CreatedAt = DateTime.UtcNow,
+                            Accommodation = accommodation
+                        });
+                    }
                 }
             }
         }

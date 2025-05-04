@@ -77,39 +77,47 @@
         .image-input-placeholder {
           background-image: url("/images/blank-image.svg");
         }
+
+        [data-bs-theme="dark"] .image-input-placeholder {
+          background-image: url("/images/blank-image-dark.svg");
+        }
       </style>
 
-      <div class="image-input image-input-empty image-input-outline image-input-placeholder mb-3"
+      <div
+        class="image-input image-input-outline image-input-placeholder mb-3 @(string.IsNullOrEmpty(Model.Thumbnail) ? "image-input-empty" : "")"
         data-kt-image-input="true">
-        <div class="image-input-wrapper w-150px h-150px"></div>
+        <div class="image-input-wrapper w-150px h-150px"
+          style="background-image: url(@(string.IsNullOrEmpty(Model.Thumbnail) ? "/images/blank-image.svg" : Model.Thumbnail))">
+        </div>
 
         <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-          data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Change avatar"
-          data-bs-original-title="Change avatar">
+          data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Change thumbnail"
+          data-bs-original-title="Change thumbnail">
           <i class="fa-solid fa-pencil fs-7"></i>
           <input type="file" asp-for="ThumbnailFile" accept=".png, .jpg, .jpeg" />
           <input type="hidden" name="ThumbnailFile_remove" />
         </label>
 
         <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-          data-kt-image-input-action="cancel" data-bs-toggle="tooltip" aria-label="Cancel avatar"
-          data-bs-original-title="Cancel avatar">
+          data-kt-image-input-action="cancel" data-bs-toggle="tooltip" aria-label="Cancel thumbnail"
+          data-bs-original-title="Cancel thumbnail">
           <i class="fa-solid fa-xmark fs-2"></i>
         </span>
 
         <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-          data-kt-image-input-action="remove" data-bs-toggle="tooltip" aria-label="Remove avatar"
-          data-bs-original-title="Remove avatar">
-          <i class="ki-duotone ki-cross fs-2"><span class="path1"></span><span class="path2"></span></i>
+          data-kt-image-input-action="remove" data-bs-toggle="tooltip" aria-label="Remove thumbnail"
+          data-bs-original-title="Remove thumbnail">
+          <i class="fa-solid fa-xmark fs-2"></i>
         </span>
       </div>
 
       <div class="text-muted fs-7">
-        Set the product thumbnail image. Only *.png, *.jpg and *.jpeg image files are accepted.
+        Set the accommodation thumbnail. Only *.png, *.jpg, and *.jpeg image files are accepted.
       </div>
       <span asp-validation-for="ThumbnailFile" class="text-danger"></span>
     </div>
   </div>
+
   <!--end::Thumbnail settings-->
 
   <!--begin::General-->

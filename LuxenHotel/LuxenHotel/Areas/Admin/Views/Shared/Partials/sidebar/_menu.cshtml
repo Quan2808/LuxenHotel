@@ -54,7 +54,8 @@
 
       <!--begin:Menu item-->
       <div class="menu-item">
-        <a class="menu-link" asp-area="Admin" asp-controller="AccommodationManagement" asp-action="Create">
+        <a class="menu-link  @(action == "Create" && controller == "AccommodationManagement" ? "active" : "")"
+          asp-area="Admin" asp-controller="AccommodationManagement" asp-action="Create">
           <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
           <span class="menu-title">Add New</span>
         </a>
@@ -72,67 +73,5 @@
       </span>
       <span class="menu-title">Users</span>
     </a>
-  </div>
-
-  <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
-    <!--begin:Menu link-->
-    <span class="menu-link">
-      <span class="menu-icon">
-        <i class="ki-duotone ki-rescue fs-1">
-          <span class="path1"></span>
-          <span class="path2"></span>
-        </i>
-      </span>
-      <span class="menu-title">Drop down</span>
-      <span class="menu-arrow"></span>
-    </span>
-    <!--end:Menu link-->
-
-    <!--begin:Menu sub-->
-    <div class="menu-sub menu-sub-accordion">
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link" href="https://preview.keenthemes.com/html/saul-html-pro/docs/base/utilities"
-          target="_blank" title="Check out over 200 in-house components" data-bs-toggle="tooltip"
-          data-bs-trigger="hover" data-bs-dismiss="click" data-bs-placement="right">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">Components</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link" href="https://preview.keenthemes.com/html/saul-html-pro/docs" target="_blank"
-          title="Check out the complete documentation" data-bs-toggle="tooltip" data-bs-trigger="hover"
-          data-bs-dismiss="click" data-bs-placement="right">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">Documentation</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link" href="?page=layout-builder"
-          title="Build your layout and export HTML for server side integration" data-bs-toggle="tooltip"
-          data-bs-trigger="hover" data-bs-dismiss="click" data-bs-placement="right">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">Layout Builder</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link" href="https://preview.keenthemes.com/html/saul-html-pro/docs/getting-started/changelog"
-          target="_blank">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">Changelog v1.0.4</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-    </div>
-    <!--end:Menu sub-->
   </div>
 </div>

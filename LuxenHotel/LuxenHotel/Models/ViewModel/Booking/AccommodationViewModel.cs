@@ -36,13 +36,19 @@ public class AccommodationViewModel
     public List<string> Media { get; set; } = new List<string>();
 
     // For file uploads
-    public IFormFile ThumbnailFile { get; set; }
+    public IFormFile? ThumbnailFile { get; set; }
 
     // To display existing thumbnail
     public string? Thumbnail { get; set; }
 
+    // Media deletion
+    public List<string> MediaToDelete { get; set; } = new List<string>();
+    public bool DeleteThumbnail { get; set; }
+
     // List of services
     public List<ServiceViewModel> Services { get; set; } = new List<ServiceViewModel>();
+
+    public List<int> ServicesToDelete { get; set; } = new List<int>();
 
     public DateTime? CreatedAt { get; set; }
 
