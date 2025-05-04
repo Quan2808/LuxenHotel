@@ -193,30 +193,55 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Quill init
-var quill = new Quill("#accommodation-desc", {
-  theme: "snow",
-  placeholder: "Type your text here...",
-  modules: {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline"],
-      ["link", "image"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["clean"],
-    ],
-  },
-});
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize Quill editor
+  const quill = new Quill("#accommodation-desc", {
+    theme: "snow",
+    placeholder: "Type your content here...",
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ color: [] }, { background: [] }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        ["clean"],
+      ],
+    },
+  });
 
-const descriptionHidden = document.querySelector("#description-hidden");
-quill.on("text-change", function () {
-  descriptionHidden.value = quill.root.innerHTML;
-});
+  // Reference to the hidden input for storing editor content
+  const hiddenInput = document.querySelector("#description-hidden");
 
-// Use for edit
-if (descriptionHidden.value) {
-  quill.root.innerHTML = descriptionHidden.value;
-}
+  // Function to update hidden input with Quill content
+  function updateHiddenInput() {
+    hiddenInput.value = quill.root.innerHTML;
+  }
+
+  // Handle text changes in Quill
+  quill.on("text-change", function () {
+    updateHiddenInput();
+    console.log("Editor content updated");
+  });
+
+  // Load existing content in edit mode
+  if (hiddenInput.value) {
+    console.log("Edit mode detected, loading existing content");
+    quill.root.innerHTML = hiddenInput.value;
+  } else {
+    console.log("Create mode detected");
+  }
+
+  // Handle form submission
+  const form = document.querySelector("form");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      // Ensure hidden input is up-to-date before submission
+      updateHiddenInput();
+      console.log("Form submitted with editor content");
+    });
+  }
+});
 
 let serviceIndex = 0;
 
