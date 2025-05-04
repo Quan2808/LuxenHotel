@@ -96,6 +96,23 @@ namespace LuxenHotel.Services.Booking.Implementations
 
         private async Task UpdateMediaAsync(Accommodation accommodation, AccommodationViewModel viewModel)
         {
+            // Handle media files to delete
+            if (viewModel.MediaToDelete?.Any() == true)
+            {
+                var filesToDelete = new List<string>();
+                foreach (var mediaPath in viewModel.MediaToDelete)
+                {
+                    if (accommodation.Media.Contains(mediaPath))
+                    {
+                        filesToDelete.Add(mediaPath);
+                        accommodation.Media.Remove(mediaPath);
+                    }
+                }
+
+                // Delete the files from the file system
+                FileUploadUtility.DeleteFiles(filesToDelete, _environment);
+            }
+
             // Handle media uploads
             if (viewModel.MediaFiles?.Any() == true)
             {
@@ -103,18 +120,25 @@ namespace LuxenHotel.Services.Booking.Implementations
                 accommodation.UpdateMedia(mediaPaths);
             }
 
+            // Handle thumbnail deletion
+            if (viewModel.DeleteThumbnail && !string.IsNullOrEmpty(accommodation.Thumbnail))
+            {
+                FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                accommodation.Thumbnail = null;
+            }
+
             // Handle thumbnail upload
             if (viewModel.ThumbnailFile?.Length > 0)
             {
+                // If we have an existing thumbnail, delete it first
+                if (!string.IsNullOrEmpty(accommodation.Thumbnail))
+                {
+                    FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                }
+
                 var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
                 if (thumbnailPath != null)
                 {
-                    if (!string.IsNullOrEmpty(accommodation.Thumbnail))
-                    {
-                        var oldFilePath = Path.Combine(_environment.WebRootPath, accommodation.Thumbnail.TrimStart('/'));
-                        if (File.Exists(oldFilePath))
-                            File.Delete(oldFilePath);
-                    }
                     accommodation.Thumbnail = thumbnailPath;
                 }
             }

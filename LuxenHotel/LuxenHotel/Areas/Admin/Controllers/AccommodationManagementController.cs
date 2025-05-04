@@ -5,6 +5,7 @@ using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
@@ -105,6 +106,24 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 AddNotification("Invalid input data", NotificationType.Error);
                 LogInfo($"Invalid input data for editing accommodation ID: {id}");
                 return View(viewModel);
+            }
+
+            // Process MediaToDelete if it's a JSON string
+            if (Request.Form["MediaToDelete"].Count > 0)
+            {
+                string mediaToDeleteJson = Request.Form["MediaToDelete"];
+                if (!string.IsNullOrEmpty(mediaToDeleteJson))
+                {
+                    try
+                    {
+                        List<string> mediaToDelete = JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson);
+                        viewModel.MediaToDelete = mediaToDelete;
+                    }
+                    catch (JsonException ex)
+                    {
+                        LogInfo($"Error parsing MediaToDelete JSON: {ex.Message}");
+                    }
+                }
             }
 
             try

@@ -1,6 +1,3 @@
-// Place this code in a script tag at the bottom of your form view
-// or in a separate JS file referenced by the view
-
 document.addEventListener("DOMContentLoaded", function () {
   // Register FilePond plugins
   FilePond.registerPlugin(
@@ -36,17 +33,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Array to track existing media URLs
   const existingMedia = [];
+  // Array to track media URLs to delete
+  const mediaToDelete = [];
 
-  // In edit mode, load existing images and create tracking input
+  // In edit mode, load existing images and create tracking inputs
   if (isEditMode) {
     console.log("Edit mode detected, loading existing images");
 
-    // Create hidden input to track existing media files
-    const existingFilesInput = document.createElement("input");
-    existingFilesInput.type = "hidden";
-    existingFilesInput.id = "existingMediaFiles";
-    existingFilesInput.name = "ExistingMediaFiles";
-    document.querySelector("form").appendChild(existingFilesInput);
+    // Create hidden input to track media files to delete
+    const mediaToDeleteInput = document.createElement("input");
+    mediaToDeleteInput.type = "hidden";
+    mediaToDeleteInput.id = "mediaToDeleteInput";
+    mediaToDeleteInput.name = "MediaToDelete";
+    document.querySelector("form").appendChild(mediaToDeleteInput);
 
     // Process each existing media item
     existingMediaItems.forEach((item) => {
@@ -89,17 +88,17 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // Initial update of the hidden input
-    updateExistingFilesInput();
+    // Initial update of the hidden input for media to delete
+    updateMediaToDeleteInput();
   } else {
     console.log("Create mode detected");
   }
 
-  // Function to update the hidden input with current existing files
-  function updateExistingFilesInput() {
-    const input = document.getElementById("existingMediaFiles");
+  // Function to update the hidden input with media files to delete
+  function updateMediaToDeleteInput() {
+    const input = document.getElementById("mediaToDeleteInput");
     if (input) {
-      input.value = JSON.stringify(existingMedia);
+      input.value = JSON.stringify(mediaToDelete);
     }
   }
 
@@ -125,14 +124,30 @@ document.addEventListener("DOMContentLoaded", function () {
   pond.on("removefile", (error, fileItem) => {
     // Check if it's an existing file (has existingUrl property)
     if (fileItem && fileItem.existingUrl) {
-      // Remove from tracking array
+      // Add to the mediaToDelete array
+      mediaToDelete.push(fileItem.existingUrl);
+      // Remove from tracking array of existing media
       const index = existingMedia.indexOf(fileItem.existingUrl);
       if (index > -1) {
         existingMedia.splice(index, 1);
-        updateExistingFilesInput();
       }
+      updateMediaToDeleteInput();
+      console.log(`Marked file for deletion: ${fileItem.existingUrl}`);
     }
   });
+
+  // Handle thumbnail deletion if checkbox is clicked
+  const deleteThumbnailCheckbox = document.getElementById("deleteThumbnail");
+  if (deleteThumbnailCheckbox) {
+    deleteThumbnailCheckbox.addEventListener("change", function () {
+      const thumbnailPreview = document.getElementById("thumbnailPreview");
+      if (this.checked && thumbnailPreview) {
+        thumbnailPreview.classList.add("opacity-50");
+      } else if (thumbnailPreview) {
+        thumbnailPreview.classList.remove("opacity-50");
+      }
+    });
+  }
 
   // Handle form submission
   const form = document.querySelector("form");
@@ -144,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // No files in FilePond, make sure realInput is empty too
       const realInput = document.getElementById("realMediaFiles");
       realInput.value = "";
-      return; // Allow form to submit normally
+      // Don't return yet, as we still need to handle media deletion
     }
 
     // Get the real file input element for new uploads
@@ -165,15 +180,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     console.log(
-      `Processing ${newFileCount} new files and ${existingMedia.length} existing files`
+      `Processing ${newFileCount} new files, ${existingMedia.length} existing files, and ${mediaToDelete.length} files to delete`
     );
 
     // Set the files to the real input
     realInput.files = dataTransfer.files;
 
-    // Make sure existing files input is up to date if in edit mode
+    // Make sure media to delete input is up to date if in edit mode
     if (isEditMode) {
-      updateExistingFilesInput();
+      updateMediaToDeleteInput();
     }
   });
 });

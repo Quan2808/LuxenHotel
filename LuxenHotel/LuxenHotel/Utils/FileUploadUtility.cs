@@ -48,4 +48,25 @@ public static class FileUploadUtility
 
         return $"/media/{fileName}";
     }
+
+    public static void DeleteFile(string filePath, IWebHostEnvironment environment)
+    {
+        if (string.IsNullOrEmpty(filePath))
+            return;
+
+        var fullPath = Path.Combine(environment.WebRootPath, filePath.TrimStart('/'));
+        if (File.Exists(fullPath))
+            File.Delete(fullPath);
+    }
+
+    public static void DeleteFiles(IEnumerable<string> filePaths, IWebHostEnvironment environment)
+    {
+        if (filePaths == null || !filePaths.Any())
+            return;
+
+        foreach (var filePath in filePaths)
+        {
+            DeleteFile(filePath, environment);
+        }
+    }
 }
