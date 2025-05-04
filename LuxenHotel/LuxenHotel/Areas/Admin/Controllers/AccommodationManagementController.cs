@@ -50,23 +50,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                AddNotification("Invalid input data", NotificationType.Error);
-                LogInfo("Invalid input data for creating accommodation");
-
-                foreach (var entry in ModelState)
-                {
-                    var fieldName = entry.Key;
-                    var state = entry.Value;
-
-                    if (state != null && state.Errors.Count > 0)
-                    {
-                        foreach (var error in state.Errors)
-                        {
-                            LogInfo($"Validation error in field '{fieldName}': {error.ErrorMessage}");
-                        }
-                    }
-                }
-
+                HandleInvalidModelState(viewModel);
                 return View("Save", viewModel);
             }
 
@@ -103,9 +87,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                AddNotification("Invalid input data", NotificationType.Error);
-                LogInfo($"Invalid input data for editing accommodation ID: {id}");
-                return View(viewModel);
+                HandleInvalidModelState(viewModel);
+                return View("Save", viewModel);
             }
 
             // Process MediaToDelete if it's a JSON string
@@ -137,45 +120,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
             {
                 AddNotification(ex.Message, NotificationType.Error);
                 LogInfo($"Failed to update accommodation ID: {id}, Error: {ex.Message}");
-                return View(viewModel);
-            }
-        }
-
-        [HttpGet("delete/{id}")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (!id.HasValue)
-                return RedirectWithError("Invalid accommodation ID");
-
-            var viewModel = await _accommodationService.GetAsync(id.Value);
-            if (viewModel == null)
-                return RedirectWithError("Accommodation not found");
-
-            SetPageTitle($"Delete {viewModel.Name}");
-            LogInfo($"Accessed delete page for accommodation ID: {id}");
-            return View(viewModel);
-        }
-
-        [HttpPost("delete/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            try
-            {
-                var viewModel = await _accommodationService.GetAsync(id);
-                if (viewModel == null)
-                    return RedirectWithError("Accommodation not found");
-
-                await _accommodationService.DeleteAsync(id);
-                AddNotification("Accommodation deleted successfully", NotificationType.Success);
-                LogInfo($"Deleted accommodation ID: {id}");
-                return RedirectToAction(nameof(Index));
-            }
-            catch (InvalidOperationException ex)
-            {
-                AddNotification(ex.Message, NotificationType.Error);
-                LogInfo($"Failed to delete accommodation ID: {id}, Error: {ex.Message}");
-                return RedirectToAction(nameof(Index));
+                return View("save", viewModel);
             }
         }
 
@@ -183,6 +128,26 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             AddNotification(message, NotificationType.Error);
             return RedirectToAction(nameof(Index));
+        }
+
+        private void HandleInvalidModelState(AccommodationViewModel viewModel)
+        {
+            AddNotification("Invalid input data", NotificationType.Error);
+            LogInfo("Invalid input data for creating accommodation");
+
+            foreach (var entry in ModelState)
+            {
+                var fieldName = entry.Key;
+                var state = entry.Value;
+
+                if (state != null && state.Errors.Count > 0)
+                {
+                    foreach (var error in state.Errors)
+                    {
+                        LogInfo($"Validation error in field '{fieldName}': {error.ErrorMessage}");
+                    }
+                }
+            }
         }
     }
 }
