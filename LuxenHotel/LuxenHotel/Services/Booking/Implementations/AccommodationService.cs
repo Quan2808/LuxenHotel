@@ -99,7 +99,6 @@ namespace LuxenHotel.Services.Booking.Implementations
         private int[] ExtractServicesToDelete(AccommodationViewModel viewModel)
         {
             // Check if the ServicesToDelete property exists in the viewModel
-            // This would need to be added to your AccommodationViewModel class
             if (viewModel.ServicesToDelete != null && viewModel.ServicesToDelete.Any())
             {
                 return viewModel.ServicesToDelete.ToArray();

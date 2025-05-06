@@ -49,7 +49,7 @@ namespace LuxenHotel.Data
                         PhoneNumber = "0123456789"
                     };
 
-                    var result = await userManager.CreateAsync(adminUser, "Admin@123456");
+                    var result = await userManager.CreateAsync(adminUser, "adminadmin");
                     if (result.Succeeded)
                     {
                         await userManager.AddToRoleAsync(adminUser, "Admin");

@@ -1,4 +1,5 @@
 @model IEnumerable<LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel>
+@using System.Text.RegularExpressions
 
 @{
     ViewData["Title"] = "Accommodations";
@@ -49,43 +50,49 @@
                     {
                         <tr class="table-products-list pos-center">
                             <td class="products-image-table">
-                                @if (room.Media != null && room.Media.Any())
+                                @if (room.Thumbnail != null)
                                 {
-                                    <img src="@room.Media.First()" alt="@room.Name" class="img-responsive" />
+                                    <img src="@room.Thumbnail" alt="@room.Name" class="img-responsive" />
                                 }
                                 else
                                 {
                                     <img src="https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
                                         alt="No Image" class="img-responsive" />
                                 }
-                        </td>
-                        <td class="title-table">
-                            <div class="room-details-list clearfix">
-                                <div class="pull-left">
-                                    <h5>@room.Name</h5>
+                            </td>
+                            <td class="title-table">
+                                <div class="room-details-list clearfix">
+                                    <div class="pull-left">
+                                        <h5>@room.Name</h5>
+                                    </div>
                                 </div>
-                            </div>
-                            <p>
-                                @(room.Description != null && room.Description.Length > 100
-                                                                ? room.Description.Substring(0, 100) + "..."
-                                                                : room.Description ?? "No description available")
-                            </p>
-                        </td>
-                        <td>
-                            <h3>
-                                @room.Price.ToString("#,##0 ")
-                                <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
-                            </h3>
-                        </td>
-                        <td>
-                            <div class="book-button">
-                                <a href="@Url.Action("AccommodationDetails", "Booking", new { id = room.Id })">
-                                    <span class="mobile-visibility">BOOK</span>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                                        }
+
+                                @{
+                                    var plainText = Regex.Replace(room.Description ?? "", "<.*?>", ""); // loại bỏ HTML
+                                    var description = string.IsNullOrEmpty(plainText)
+                                    ? "No description available"
+                                    : plainText.Length > 100
+                                    ? plainText.Substring(0, 100) + "..."
+                                    : plainText;
+                                }
+
+                                <p>@description</p>
+                            </td>
+                            <td>
+                                <h3>
+                                    @room.Price.ToString("#,##0 ")
+                                    <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
+                                </h3>
+                            </td>
+                            <td>
+                                <div class="book-button">
+                                    <a href="@Url.Action("AccommodationDetails", "Booking", new { id = room.Id })">
+                                        <span class="mobile-visibility">BOOK</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

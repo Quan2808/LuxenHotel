@@ -78,7 +78,6 @@ namespace LuxenHotel
                 logging.SetMinimumLevel(LogLevel.Debug);
             });
 
-
             services.AddControllersWithViews();
         }
 
@@ -117,6 +116,7 @@ namespace LuxenHotel
                     areaName: "Customer",
                     pattern: "vnpay/return",
                     defaults: new { controller = "Product", action = "Return" });
+
                 // Customer Area: Short route for HomeController
                 endpoints.MapAreaControllerRoute(
                     name: "customer_pages",
