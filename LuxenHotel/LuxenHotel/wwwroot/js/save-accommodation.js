@@ -424,3 +424,294 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("DOM loaded, initializing services management");
   loadExistingServices();
 });
+
+let comboIndex = 0;
+
+// Function to add a new empty combo item
+function addComboItem() {
+  const wrapper = document.getElementById("combos-wrapper");
+  const template = document.getElementById("combo-template");
+  const clone = template.content.cloneNode(true);
+  const index = comboIndex++;
+
+  // Update unique IDs and attributes for accordion
+  const collapseId = `collapseCombo_${index}`;
+  const header = clone.querySelector(".accordion-header");
+  const collapse = clone.querySelector(".collapse");
+
+  header.setAttribute("data-bs-target", `#${collapseId}`);
+  header.setAttribute("aria-controls", collapseId);
+  header.setAttribute("aria-expanded", "true");
+  header.classList.remove("collapsed");
+
+  collapse.id = collapseId;
+  collapse.classList.add("show");
+
+  // Update input IDs and names
+  updateComboInputIds(clone, index);
+
+  // Populate services dropdown
+  populateServicesDropdown(clone, index);
+
+  // Append to DOM
+  wrapper.appendChild(clone);
+
+  // Initialize select2 for the services dropdown
+  $(`#combo_services_${index}`)
+    .select2({
+      placeholder: "Select services",
+      allowClear: true,
+    })
+    .on("change", function () {
+      updateEstimatedValue(index);
+    });
+
+  // Initialize estimated value
+  updateEstimatedValue(index);
+
+  // Focus on the combo name input
+  clone.querySelector(`#combo_name_${index}`).focus();
+
+  return index;
+}
+
+// Helper function to update all input IDs and names for a combo
+function updateComboInputIds(element, index) {
+  // Update name input
+  const nameInput = element.querySelector(`[id^="combo_name_"]`);
+  nameInput.id = `combo_name_${index}`;
+  nameInput.name = `Combos[${index}].Name`;
+
+  // Update price input
+  const priceInput = element.querySelector(`[id^="combo_price_"]`);
+  priceInput.id = `combo_price_${index}`;
+  priceInput.name = `Combos[${index}].Price`;
+
+  // Update services select
+  const servicesSelect = element.querySelector(`[id^="combo_services_"]`);
+  servicesSelect.id = `combo_services_${index}`;
+  servicesSelect.name = `Combos[${index}].ServiceIds`;
+
+  // Update estimated value input
+  const estimatedValueInput = element.querySelector(
+    `[id^="combo_estimated_value_"]`
+  );
+  estimatedValueInput.id = `combo_estimated_value_${index}`;
+
+  // Update description textarea
+  const descInput = element.querySelector(`[id^="combo_description_"]`);
+  descInput.id = `combo_description_${index}`;
+  descInput.name = `Combos[${index}].Description`;
+
+  // Update labels
+  element
+    .querySelector(`label[for^="combo_name_"]`)
+    .setAttribute("for", `combo_name_${index}`);
+  element
+    .querySelector(`label[for^="combo_price_"]`)
+    .setAttribute("for", `combo_price_${index}`);
+  element
+    .querySelector(`label[for^="combo_services_"]`)
+    .setAttribute("for", `combo_services_${index}`);
+  element
+    .querySelector(`label[for^="combo_estimated_value_"]`)
+    .setAttribute("for", `combo_estimated_value_${index}`);
+  element
+    .querySelector(`label[for^="combo_description_"]`)
+    .setAttribute("for", `combo_description_${index}`);
+
+  // Update validation spans
+  const nameValidation = element.querySelector(
+    `[data-valmsg-for="Combos[0].Name"]`
+  );
+  if (nameValidation)
+    nameValidation.setAttribute("data-valmsg-for", `Combos[${index}].Name`);
+
+  const priceValidation = element.querySelector(
+    `[data-valmsg-for="Combos[0].Price"]`
+  );
+  if (priceValidation)
+    priceValidation.setAttribute("data-valmsg-for", `Combos[${index}].Price`);
+
+  const servicesValidation = element.querySelector(
+    `[data-valmsg-for="Combos[0].ServiceIds"]`
+  );
+  if (servicesValidation)
+    servicesValidation.setAttribute(
+      "data-valmsg-for",
+      `Combos[${index}].ServiceIds`
+    );
+
+  const descValidation = element.querySelector(
+    `[data-valmsg-for="Combos[0].Description"]`
+  );
+  if (descValidation)
+    descValidation.setAttribute(
+      "data-valmsg-for",
+      `Combos[${index}].Description`
+    );
+}
+
+// Function to populate the services dropdown
+function populateServicesDropdown(element, index) {
+  const select = element.querySelector(`#combo_services_${index}`);
+  const services = document.querySelectorAll(".service-item");
+
+  services.forEach((service, idx) => {
+    const serviceIdInput = service.querySelector("input[name$='.Id']");
+    const serviceNameInput = service.querySelector("input[name$='.Name']");
+    const servicePriceInput = service.querySelector("input[name$='.Price']");
+    const serviceId = serviceIdInput ? serviceIdInput.value : `new_${idx}`;
+    const serviceName = serviceNameInput
+      ? serviceNameInput.value
+      : `Service #${idx + 1}`;
+    const servicePrice = servicePriceInput
+      ? parseFloat(servicePriceInput.value) || 0
+      : 0;
+
+    const option = document.createElement("option");
+    option.value = serviceId;
+    option.textContent = serviceName || `Service #${idx + 1}`;
+    option.dataset.price = servicePrice; // Store price in data attribute
+    select.appendChild(option);
+  });
+}
+
+// Function to calculate and update the estimated value
+function updateEstimatedValue(index) {
+  const select = document.getElementById(`combo_services_${index}`);
+  const estimatedValueInput = document.getElementById(
+    `combo_estimated_value_${index}`
+  );
+  let total = 0;
+
+  if (select) {
+    const selectedOptions = Array.from(select.selectedOptions);
+    total = selectedOptions.reduce((sum, option) => {
+      const price = parseFloat(option.dataset.price) || 0;
+      return sum + price;
+    }, 0);
+  }
+
+  if (estimatedValueInput) {
+    estimatedValueInput.value = total.toFixed(0); // No decimals for VND
+  }
+}
+
+// Function to remove a combo item
+function removeComboItem(button) {
+  if (!confirm("Are you sure you want to delete this combo?")) return;
+
+  const item = button.closest(".combo-item");
+  const comboIdInput = item.querySelector("input[name$='.Id']");
+
+  // If this is an existing combo, add a deletion marker
+  if (comboIdInput && comboIdInput.value) {
+    const form = document.querySelector("form");
+    const hiddenField = document.createElement("input");
+    hiddenField.type = "hidden";
+    hiddenField.name = "CombosToDelete[]";
+    hiddenField.value = comboIdInput.value;
+    form.appendChild(hiddenField);
+  }
+
+  // Destroy select2 instance
+  const select = item.querySelector("select");
+  if (select && $(select).data("select2")) {
+    $(select).select2("destroy");
+  }
+
+  item.remove();
+  updateComboIndices();
+}
+
+// Function to update the combo indices after deletion
+function updateComboIndices() {
+  const comboItems = document.querySelectorAll(".combo-item");
+  comboItems.forEach((item, idx) => {
+    item.querySelector(".combo-index").textContent = `Combo #${idx + 1}`;
+  });
+}
+
+// Function to add an existing combo with values from the model
+function addExistingCombo(combo) {
+  const index = addComboItem();
+
+  // Set values from existing combo
+  const nameField = document.getElementById(`combo_name_${index}`);
+  const priceField = document.getElementById(`combo_price_${index}`);
+  const servicesField = document.getElementById(`combo_services_${index}`);
+  const descField = document.getElementById(`combo_description_${index}`);
+
+  if (nameField) nameField.value = combo.name || "";
+  if (priceField) priceField.value = combo.price || 0;
+  if (descField) descField.value = combo.description || "";
+
+  // Set selected services
+  if (combo.serviceIds && Array.isArray(combo.serviceIds)) {
+    combo.serviceIds.forEach((serviceId) => {
+      const option = servicesField.querySelector(
+        `option[value="${serviceId}"]`
+      );
+      if (option) option.selected = true;
+    });
+    $(servicesField).trigger("change"); // Update select2 and estimated value
+  }
+
+  // Add hidden field for combo ID
+  if (combo.id) {
+    const comboItem = document
+      .querySelector(`#collapseCombo_${index}`)
+      .closest(".combo-item");
+    const idField = document.createElement("input");
+    idField.type = "hidden";
+    idField.name = `Combos[${index}].Id`;
+    idField.value = combo.id;
+    comboItem.appendChild(idField);
+  }
+}
+
+// Function to check if we're in edit mode and have existing combos
+function load_existingCombos() {
+  console.log("Checking for existing combos:", window.existingCombos);
+
+  if (
+    window.existingCombos &&
+    Array.isArray(window.existingCombos) &&
+    window.existingCombos.length > 0
+  ) {
+    console.log(
+      `Found ${window.existingCombos.length} existing combos to load`
+    );
+    document.querySelectorAll(".combo-item").forEach((item) => item.remove());
+    window.existingCombos.forEach((combo) => {
+      if (combo && typeof combo === "object") {
+        addExistingCombo(combo);
+      } else {
+        console.warn("Invalid combo data:", combo);
+      }
+    });
+  } else {
+    console.log("No existing combos found, adding default empty combo");
+    addComboItem();
+  }
+}
+
+// Initialize when the DOM is fully loaded
+window.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded, initializing combos management");
+  load_existingCombos();
+
+  // Ensure select2 is initialized for any existing select elements
+  $("select[name$='.ServiceIds']").each(function () {
+    $(this)
+      .select2({
+        placeholder: "Select services",
+        allowClear: true,
+      })
+      .on("change", function () {
+        const index = this.id.replace("combo_services_", "");
+        updateEstimatedValue(index);
+      });
+  });
+});

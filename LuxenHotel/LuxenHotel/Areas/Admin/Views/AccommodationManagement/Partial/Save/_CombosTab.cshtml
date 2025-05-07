@@ -1,0 +1,102 @@
+@model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
+
+<div class="tab-pane fade" id="combo" role="tabpanel" aria-labelledby="combo-tab">
+    <div class="d-flex flex-column gap-7 gap-lg-10">
+        <!--begin::Combos Form-->
+        <div id="combos-wrapper" class="accordion accordion-icon-collapse" id="combosAccordion">
+            <!-- Placeholder to add combo items -->
+        </div>
+        <!--end::Combos Form-->
+
+        <!-- Add new combo -->
+        <div class="text-end mt-5">
+            <button type="button" class="btn btn-light-primary" onclick="addComboItem()" aria-label="Add a new combo">
+                <i class="fa-solid fa-plus fs-2 me-2"></i>Add Combo
+            </button>
+        </div>
+
+        <!-- Hidden template for combo -->
+        <template id="combo-template">
+            <div class="mb-5 combo-item card card-flush">
+                <!--begin::Card header (Accordion header)-->
+                <div class="accordion-header card-header py-4 d-flex align-items-center collapsed"
+                    data-bs-toggle="collapse" data-bs-target="#collapseCombo_0" aria-expanded="true"
+                    aria-controls="collapseCombo_0">
+                    <span class="accordion-icon me-3 badge badge-square badge-light">
+                        <i class="fa-solid fa-plus fs-3 accordion-icon-off"></i>
+                        <i class="fa-solid fa-minus fs-3 accordion-icon-on"></i>
+                    </span>
+                    <h3 class="fs-4 fw-semibold mb-0 combo-index">Combo #1</h3>
+                    <!-- Delete button -->
+                    <button type="button" class="btn btn-icon btn-sm btn-light-danger ms-auto"
+                        onclick="removeComboItem(this)" aria-label="Delete this combo">
+                        <i class="fa-solid fa-xmark fs-2"></i>
+                    </button>
+                </div>
+                <!--end::Card header-->
+
+                <!--begin::Card body (Accordion body)-->
+                <div id="collapseCombo_0" class="collapse fs-6 ps-10" data-bs-parent="#combosAccordion">
+                    <div class="card-body pt-4">
+                        <div class="row g-5">
+                            <!-- Combo Name -->
+                            <div class="col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label required fw-medium" for="combo_name_0">Combo Name</label>
+                                <input type="text" class="form-control" id="combo_name_0"
+                                    placeholder="e.g., Deluxe Breakfast Package" maxlength="255"
+                                    name="Combos[0].Name" />
+                                <div class="text-muted fs-7 mt-1">Specify the name of the combo package.</div>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].Name"></span>
+                            </div>
+
+                            <!-- Combo Price -->
+                            <div class="col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label required fw-medium" for="combo_price_0">Combo Price
+                                    (VND)</label>
+                                <input type="number" class="form-control" id="combo_price_0" placeholder="e.g., 500000"
+                                    min="0" max="100000000" name="Combos[0].Price" />
+                                <div class="text-muted fs-7 mt-1">Set the total cost for this combo in Vietnamese Dong
+                                    (VND).</div>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].Price"></span>
+                            </div>
+
+                            <!-- Services Selection -->
+                            <div class="col-md-12 fv-row fv-plugins-icon-container">
+                                <label class="form-label required fw-medium" for="combo_services_0">Included
+                                    Services</label>
+                                <select class="form-select" id="combo_services_0" name="Combos[0].ServiceIds" multiple
+                                    data-placeholder="Select services" data-allow-clear="true">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <div class="text-muted fs-7 mt-1">Select the services included in this combo.</div>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].ServiceIds"></span>
+                            </div>
+
+                            <!-- Estimated Value -->
+                            <div class="col-md-6 fv-row">
+                                <label class="form-label fw-medium" for="combo_estimated_value_0">Estimated Value
+                                    (VND)</label>
+                                <input type="number" class="form-control" id="combo_estimated_value_0" value="0"
+                                    readonly />
+                                <div class="text-muted fs-7 mt-1">Total price of selected services (informational).
+                                </div>
+                            </div>
+
+                            <!-- Description (Full Width) -->
+                            <div class="col-md-12 mt-5 fv-row fv-plugins-icon-container">
+                                <label class="form-label fw-medium" for="combo_description_0">Description</label>
+                                <textarea class="form-control" id="combo_description_0" rows="4"
+                                    name="Combos[0].Description"
+                                    placeholder="e.g., A luxurious package including breakfast and spa services."></textarea>
+                                <div class="text-muted fs-7 mt-1">Add details to help guests understand what the combo
+                                    includes.</div>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].Description"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end::Card body-->
+            </div>
+        </template>
+    </div>
+</div>

@@ -41,6 +41,7 @@ namespace LuxenHotel.Services.Booking.Implementations
             var accommodation = await _context.Accommodations
                 .AsNoTracking()
                 .Include(a => a.Services)
+                .Include(c => c.Combos)
                 .FirstOrDefaultAsync(m => m.Id == id.Value);
 
             return accommodation == null ? null : ToViewModel(accommodation);
