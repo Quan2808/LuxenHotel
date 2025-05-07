@@ -17,7 +17,6 @@ namespace LuxenHotel.Data
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Combo> Combos { get; set; }
-        public DbSet<ComboService> ComboServices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -65,20 +64,21 @@ namespace LuxenHotel.Data
                 .HasForeignKey(s => s.AccommodationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ComboService>()
-                .HasKey(cs => new { cs.ComboId, cs.ServiceId });
-
-            modelBuilder.Entity<ComboService>()
-                .HasOne(cs => cs.Combo)
-                .WithMany(c => c.ComboServices)
-                .HasForeignKey(cs => cs.ComboId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ComboService>()
-                .HasOne(cs => cs.Service)
+            modelBuilder.Entity<Combo>()
+                .HasMany(c => c.ComboServices)
                 .WithMany(s => s.ComboServices)
-                .HasForeignKey(cs => cs.ServiceId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .UsingEntity<Dictionary<string, object>>(
+                    j => j
+                        .HasOne<Service>()
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict),
+                    j => j
+                        .HasOne<Combo>()
+                        .WithMany()
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                ).ToTable("ComboService");
         }
     }
 }

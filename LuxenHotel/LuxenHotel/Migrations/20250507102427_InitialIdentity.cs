@@ -141,7 +141,7 @@ namespace LuxenHotel.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ComboServices",
+                name: "ComboService",
                 columns: table => new
                 {
                     ComboId = table.Column<int>(type: "int", nullable: false),
@@ -149,15 +149,15 @@ namespace LuxenHotel.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ComboServices", x => new { x.ComboId, x.ServiceId });
+                    table.PrimaryKey("PK_ComboService", x => new { x.ComboId, x.ServiceId });
                     table.ForeignKey(
-                        name: "FK_ComboServices_Combos_ComboId",
+                        name: "FK_ComboService_Combos_ComboId",
                         column: x => x.ComboId,
                         principalTable: "Combos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ComboServices_Services_ServiceId",
+                        name: "FK_ComboService_Services_ServiceId",
                         column: x => x.ServiceId,
                         principalTable: "Services",
                         principalColumn: "Id",
@@ -170,8 +170,8 @@ namespace LuxenHotel.Migrations
                 column: "AccommodationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ComboServices_ServiceId",
-                table: "ComboServices",
+                name: "IX_ComboService_ServiceId",
+                table: "ComboService",
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
@@ -208,7 +208,7 @@ namespace LuxenHotel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ComboServices");
+                name: "ComboService");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");

@@ -28,5 +28,6 @@ public class Service
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
-    public List<ComboService> ComboServices { get; set; } = new();
+    public List<Combo> ComboServices { get; set; } = new();
+
 }

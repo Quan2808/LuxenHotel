@@ -22,6 +22,21 @@ namespace LuxenHotel.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ComboService", b =>
+                {
+                    b.Property<int>("ComboId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ComboId", "ServiceId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ComboService", (string)null);
+                });
+
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Accommodation", b =>
                 {
                     b.Property<int>("Id")
@@ -105,21 +120,6 @@ namespace LuxenHotel.Migrations
                     b.HasIndex("AccommodationId");
 
                     b.ToTable("Combos");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.ComboService", b =>
-                {
-                    b.Property<int>("ComboId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ComboId", "ServiceId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("ComboServices");
                 });
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
@@ -353,6 +353,21 @@ namespace LuxenHotel.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ComboService", b =>
+                {
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", null)
+                        .WithMany()
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Service", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
                 {
                     b.HasOne("LuxenHotel.Models.Entities.Booking.Accommodation", "Accommodation")
@@ -362,25 +377,6 @@ namespace LuxenHotel.Migrations
                         .IsRequired();
 
                     b.Navigation("Accommodation");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.ComboService", b =>
-                {
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", "Combo")
-                        .WithMany("ComboServices")
-                        .HasForeignKey("ComboId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Service", "Service")
-                        .WithMany("ComboServices")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Combo");
-
-                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
@@ -450,16 +446,6 @@ namespace LuxenHotel.Migrations
                     b.Navigation("Combos");
 
                     b.Navigation("Services");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
-                {
-                    b.Navigation("ComboServices");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
-                {
-                    b.Navigation("ComboServices");
                 });
 #pragma warning restore 612, 618
         }

@@ -29,7 +29,7 @@ public class Combo
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
-    public List<ComboService> ComboServices { get; set; } = new();
+    public List<Service> ComboServices { get; set; } = new();
 
     public enum ComboStatus
     {
