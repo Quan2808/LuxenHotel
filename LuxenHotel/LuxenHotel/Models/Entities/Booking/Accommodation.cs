@@ -74,7 +74,6 @@ public class Accommodation
 
     public List<Service> Services { get; set; } = new();
     public List<Combo> Combos { get; set; } = new();
-    public List<Booking> Bookings { get; set; } = new();
 
     public void UpdateMedia(List<string> media)
     {

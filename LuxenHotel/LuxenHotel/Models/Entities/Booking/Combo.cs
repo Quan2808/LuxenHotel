@@ -20,13 +20,20 @@ public class Combo
     [Column(TypeName = "nvarchar(max)")]
     public string? Description { get; set; }
 
-    [Column(TypeName = "decimal(5,2)")]
-    [Range(0, 100, ErrorMessage = "Discount must be between 0 and 100%")]
-    public decimal? Discount { get; set; }
+    [Required]
+    public int AccommodationId { get; set; }
+    public Accommodation Accommodation { get; set; }
+
+    public ComboStatus Status { get; set; } = ComboStatus.Published;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     public List<ComboService> ComboServices { get; set; } = new();
-    public List<Accommodation> Accommodations { get; set; } = new();
+
+    public enum ComboStatus
+    {
+        Published,
+        Unpublished
+    }
 }
