@@ -2,7 +2,6 @@ using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
-using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

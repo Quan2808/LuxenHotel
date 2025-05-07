@@ -1,6 +1,6 @@
-namespace LuxenHotel.Utils;
+namespace LuxenHotel.Helpers;
 
-public static class FileUploadUtility
+public static class FileStorageService
 {
     public static async Task<List<string>> UploadFilesAsync(List<IFormFile> files, IWebHostEnvironment environment)
     {

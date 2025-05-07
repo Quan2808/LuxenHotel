@@ -2,7 +2,7 @@ using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
-using LuxenHotel.Utils;
+using LuxenHotel.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -122,20 +122,20 @@ namespace LuxenHotel.Services.Booking.Implementations
                 }
 
                 // Delete the files from the file system
-                FileUploadUtility.DeleteFiles(filesToDelete, _environment);
+                FileStorageService.DeleteFiles(filesToDelete, _environment);
             }
 
             // Handle media uploads
             if (viewModel.MediaFiles?.Any() == true)
             {
-                var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
+                var mediaPaths = await FileStorageService.UploadFilesAsync(viewModel.MediaFiles, _environment);
                 accommodation.UpdateMedia(mediaPaths);
             }
 
             // Handle thumbnail deletion
             if (viewModel.DeleteThumbnail && !string.IsNullOrEmpty(accommodation.Thumbnail))
             {
-                FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                FileStorageService.DeleteFile(accommodation.Thumbnail, _environment);
                 accommodation.Thumbnail = null;
             }
 
@@ -145,10 +145,10 @@ namespace LuxenHotel.Services.Booking.Implementations
                 // If we have an existing thumbnail, delete it first
                 if (!string.IsNullOrEmpty(accommodation.Thumbnail))
                 {
-                    FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                    FileStorageService.DeleteFile(accommodation.Thumbnail, _environment);
                 }
 
-                var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
+                var thumbnailPath = await FileStorageService.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
                 if (thumbnailPath != null)
                 {
                     accommodation.Thumbnail = thumbnailPath;
