@@ -334,26 +334,36 @@ function updateInputIds(element, index) {
 
 // Function to remove a service item
 function removeServiceItem(button) {
-  const item = button.closest(".service-item");
+  Swal.fire({
+    title: "Confirm",
+    text: "Are you sure you want to delete this combo?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const item = button.closest(".service-item");
 
-  // If this is an existing service (has a hidden ID field), add a deletion marker
-  const serviceIdInput = item.querySelector("input[name$='.Id']");
-  if (serviceIdInput && serviceIdInput.value) {
-    // Create a hidden field to track deleted services
-    const form = document.querySelector("form");
-    const hiddenField = document.createElement("input");
-    hiddenField.type = "hidden";
-    hiddenField.name = "ServicesToDelete[]"; // Use array notation
-    hiddenField.value = serviceIdInput.value;
-    form.appendChild(hiddenField);
+      // If this is an existing service (has a hidden ID field), add a deletion marker
+      const serviceIdInput = item.querySelector("input[name$='.Id']");
+      if (serviceIdInput && serviceIdInput.value) {
+        const form = document.querySelector("form");
+        const hiddenField = document.createElement("input");
+        hiddenField.type = "hidden";
+        hiddenField.name = "ServicesToDelete[]";
+        hiddenField.value = serviceIdInput.value;
+        form.appendChild(hiddenField);
+      }
 
-    console.log(`Marked service ID ${serviceIdInput.value} for deletion`);
-  }
+      item.remove();
+      updateServiceIndices();
 
-  item.remove();
-
-  // Reorder service numbers if needed
-  updateServiceIndices();
+      Swal.fire("Deleted!", "Service has been deleted.", "success");
+    }
+  });
 }
 
 // Function to update the service indices (numbers) after deletion
@@ -452,6 +462,9 @@ function addComboItem() {
 
   // Populate services dropdown
   populateServicesDropdown(clone, index);
+
+  // Update service index display
+  clone.querySelector(".combo-index").textContent = `Combo #${index + 1}`;
 
   // Append to DOM
   wrapper.appendChild(clone);
@@ -600,37 +613,54 @@ function updateEstimatedValue(index) {
 
 // Function to remove a combo item
 function removeComboItem(button) {
-  if (!confirm("Are you sure you want to delete this combo?")) return;
-
-  const item = button.closest(".combo-item");
-  const comboIdInput = item.querySelector("input[name$='.Id']");
-
-  // If this is an existing combo, add a deletion marker
-  if (comboIdInput && comboIdInput.value) {
-    const form = document.querySelector("form");
-    const hiddenField = document.createElement("input");
-    hiddenField.type = "hidden";
-    hiddenField.name = "CombosToDelete[]";
-    hiddenField.value = comboIdInput.value;
-    form.appendChild(hiddenField);
-  }
-
-  // Destroy select2 instance
-  const select = item.querySelector("select");
-  if (select && $(select).data("select2")) {
-    $(select).select2("destroy");
-  }
-
-  item.remove();
-  updateComboIndices();
+  Swal.fire({
+    title: "Confirm",
+    text: "Are you sure you want to delete this combo?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const item = button.closest(".combo-item");
+      if (item) {
+        item.remove();
+        updateComboIndices();
+        Swal.fire("Deleted!", "Combo has been deleted.", "success");
+      }
+    }
+  });
 }
 
-// Function to update the combo indices after deletion
+// Helper function to update combo indices after deletion
 function updateComboIndices() {
   const comboItems = document.querySelectorAll(".combo-item");
-  comboItems.forEach((item, idx) => {
-    item.querySelector(".combo-index").textContent = `Combo #${idx + 1}`;
+  comboItems.forEach((item, index) => {
+    const header = item.querySelector(".accordion-header");
+    const collapse = item.querySelector(".collapse");
+    const newCollapseId = `collapseCombo_${index}`;
+
+    // Update header attributes
+    header.setAttribute("data-bs-target", `#${newCollapseId}`);
+    header.setAttribute("aria-controls", newCollapseId);
+
+    // Update collapse ID
+    collapse.id = newCollapseId;
+
+    // Update index title
+    const indexTitle = item.querySelector(".combo-index");
+    if (indexTitle) {
+      indexTitle.textContent = `Combo #${index + 1}`;
+    }
+
+    // Update all input IDs and names
+    updateComboInputIds(item, index);
   });
+
+  // Reset comboIndex to next available index
+  comboIndex = comboItems.length;
 }
 
 // Function to add an existing combo with values from the model
