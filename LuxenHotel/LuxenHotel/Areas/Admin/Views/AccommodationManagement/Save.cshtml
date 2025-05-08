@@ -80,16 +80,15 @@
     </script>
 
     <script type="application/json" id="existingMedia">
-                                            @Html.Raw(Json.Serialize(Model.Media))
-                                        </script>
+                                                            @Html.Raw(Json.Serialize(Model.Media))
+                                                        </script>
 
     <script>
         window.existingServices = @Html.Raw(servicesJson);
     </script>
 }
 
-
-<form asp-action="@((Model.Id == 0) ? "Create" : "Edit")" asp-route-id="@Model.Id" id="kt_ecommerce_add_product_form"
+<form asp-action="@((Model.Id == 0) ? "Create" : "Edit")" asp-route-id="@Model.Id"
     class="form d-flex flex-column flex-lg-row fv-plugins-bootstrap5 fv-plugins-framework" method="post"
     enctype="multipart/form-data">
     @Html.Partial("Partial/Save/_Aside", Model)

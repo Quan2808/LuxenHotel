@@ -49,7 +49,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                HandleInvalidModelState(viewModel);
+                HandleInvalidModelState();
                 return View("Save", viewModel);
             }
 
@@ -86,7 +86,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                HandleInvalidModelState(viewModel);
+                HandleInvalidModelState();
                 return View("Save", viewModel);
             }
 
@@ -116,12 +116,13 @@ namespace LuxenHotel.Areas.Admin.Controllers
             // Process MediaToDelete if it's a JSON string
             if (Request.Form["MediaToDelete"].Count > 0)
             {
-                string mediaToDeleteJson = Request.Form["MediaToDelete"];
+                string? mediaToDeleteJson = Request.Form["MediaToDelete"];
                 if (!string.IsNullOrEmpty(mediaToDeleteJson))
                 {
                     try
                     {
-                        List<string> mediaToDelete = JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson);
+                        List<string> mediaToDelete =
+                            JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson) ?? new List<string>();
                         viewModel.MediaToDelete = mediaToDelete;
                     }
                     catch (JsonException ex)
@@ -153,15 +154,15 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private void HandleInvalidModelState(AccommodationViewModel viewModel)
+        private void HandleInvalidModelState()
         {
             AddNotification("Invalid input data", NotificationType.Error);
             LogInfo("Invalid input data for creating accommodation");
 
             var errors = ModelState.Values
-            .SelectMany(v => v.Errors)
-            .Select(e => e.ErrorMessage)
-            .ToList();
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
 
             foreach (var error in errors)
             {
