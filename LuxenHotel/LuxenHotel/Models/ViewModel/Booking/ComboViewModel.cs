@@ -1,13 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using LuxenHotel.Models.Entities.Booking;
 
 namespace LuxenHotel.Models.ViewModels.Booking;
 
 public class ComboViewModel
 {
-    [Required(ErrorMessage = "Combo name is required")]
-    [StringLength(255, ErrorMessage = "Combo name cannot exceed 255 characters")]
-    public string Name { get; set; }
+    public int Id { get; set; }
 
-    [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100")]
-    public decimal DiscountPercent { get; set; }
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(255, ErrorMessage = "Name cannot exceed 255 characters")]
+    public string Name { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Price is required")]
+    [Range(0, 50000000, ErrorMessage = "Price must be between 0 and 50,000,000")]
+    public int Price { get; set; }
+
+    public string? Description { get; set; }
+
+    public Combo.ComboStatus Status { get; set; } = Combo.ComboStatus.Published;
+
+    // Selected service IDs to be included in this combo
+    public List<int> SelectedServiceIds { get; set; } = new List<int>();
+
+    public DateTime? CreatedAt { get; set; }
 }

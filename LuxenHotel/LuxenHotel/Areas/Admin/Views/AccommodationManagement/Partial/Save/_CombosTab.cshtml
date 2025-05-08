@@ -10,7 +10,7 @@
 
         <!-- Add new combo -->
         <div class="text-end mt-5">
-            <button type="button" class="btn btn-light-primary" onclick="addComboItem()" aria-label="Add a new combo">
+            <button type="button" class="btn btn-light-primary" onclick="addComboItem()">
                 <i class="fa-solid fa-plus fs-2 me-2"></i>Add Combo
             </button>
         </div>
@@ -39,12 +39,15 @@
                 <div id="collapseCombo_0" class="collapse fs-6 ps-10" data-bs-parent="#combosAccordion">
                     <div class="card-body pt-4">
                         <div class="row g-5">
+                            <!-- Hidden ID field for existing combos -->
+                            <!-- Will be added dynamically for existing combos -->
+
                             <!-- Combo Name -->
                             <div class="col-md-6 fv-row fv-plugins-icon-container">
                                 <label class="form-label required fw-medium" for="combo_name_0">Combo Name</label>
                                 <input type="text" class="form-control" id="combo_name_0"
                                     placeholder="e.g., Deluxe Breakfast Package" maxlength="255"
-                                    name="Combos[0].Name" />
+                                    asp-for="Combos[0].Name" />
                                 <div class="text-muted fs-7 mt-1">Specify the name of the combo package.</div>
                                 <span class="invalid-feedback" data-valmsg-for="Combos[0].Name"></span>
                             </div>
@@ -54,22 +57,33 @@
                                 <label class="form-label required fw-medium" for="combo_price_0">Combo Price
                                     (VND)</label>
                                 <input type="number" class="form-control" id="combo_price_0" placeholder="e.g., 500000"
-                                    min="0" max="100000000" name="Combos[0].Price" />
+                                    min="0" max="100000000" asp-for="Combos[0].Price" />
                                 <div class="text-muted fs-7 mt-1">Set the total cost for this combo in Vietnamese Dong
                                     (VND).</div>
                                 <span class="invalid-feedback" data-valmsg-for="Combos[0].Price"></span>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label required fw-medium" for="combo_status_0">Status</label>
+                                <select class="form-select" id="combo_status_0" asp-for="Combos[0].Status">
+                                    <option value="0">Published</option>
+                                    <option value="1">Unpublished</option>
+                                </select>
+                                <div class="text-muted fs-7 mt-1">Set the visibility status of this combo.</div>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].Status"></span>
                             </div>
 
                             <!-- Services Selection -->
                             <div class="col-md-12 fv-row fv-plugins-icon-container">
                                 <label class="form-label required fw-medium" for="combo_services_0">Included
                                     Services</label>
-                                <select class="form-select" id="combo_services_0" name="Combos[0].ServiceIds" multiple
-                                    data-placeholder="Select services" data-allow-clear="true">
+                                <select class="form-select" id="combo_services_0" asp-for="Combos[0].SelectedServiceIds"
+                                    multiple data-placeholder="Select services" data-allow-clear="true">
                                     <!-- Populated dynamically -->
                                 </select>
                                 <div class="text-muted fs-7 mt-1">Select the services included in this combo.</div>
-                                <span class="invalid-feedback" data-valmsg-for="Combos[0].ServiceIds"></span>
+                                <span class="invalid-feedback" data-valmsg-for="Combos[0].SelectedServiceIds"></span>
                             </div>
 
                             <!-- Estimated Value -->
@@ -77,7 +91,7 @@
                                 <label class="form-label fw-medium" for="combo_estimated_value_0">Estimated Value
                                     (VND)</label>
                                 <input type="number" class="form-control" id="combo_estimated_value_0" value="0"
-                                    readonly />
+                                    readonly asp-for="Combos[0].Price" />
                                 <div class="text-muted fs-7 mt-1">Total price of selected services (informational).
                                 </div>
                             </div>
@@ -86,7 +100,7 @@
                             <div class="col-md-12 mt-5 fv-row fv-plugins-icon-container">
                                 <label class="form-label fw-medium" for="combo_description_0">Description</label>
                                 <textarea class="form-control" id="combo_description_0" rows="4"
-                                    name="Combos[0].Description"
+                                    asp-for="Combos[0].Description"
                                     placeholder="e.g., A luxurious package including breakfast and spa services."></textarea>
                                 <div class="text-muted fs-7 mt-1">Add details to help guests understand what the combo
                                     includes.</div>
@@ -100,3 +114,9 @@
         </template>
     </div>
 </div>
+
+<!-- Script to initialize existing combos -->
+<script>
+    // Initialize existing combos data for JS to load
+    window.existingCombos = @Html.Raw(Json.Serialize(Model.Combos));
+</script>

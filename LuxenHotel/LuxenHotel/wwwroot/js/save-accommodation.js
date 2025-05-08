@@ -490,6 +490,12 @@ function addComboItem() {
 
 // Helper function to update all input IDs and names for a combo
 function updateComboInputIds(element, index) {
+  // Update ID input (if exists)
+  const idInput = element.querySelector(`input[name^="Combos"][name$=".Id"]`);
+  if (idInput) {
+    idInput.name = `Combos[${index}].Id`;
+  }
+
   // Update name input
   const nameInput = element.querySelector(`[id^="combo_name_"]`);
   nameInput.id = `combo_name_${index}`;
@@ -500,10 +506,15 @@ function updateComboInputIds(element, index) {
   priceInput.id = `combo_price_${index}`;
   priceInput.name = `Combos[${index}].Price`;
 
+  // Update status select
+  const statusSelect = element.querySelector(`[id^="combo_status_"]`);
+  statusSelect.id = `combo_status_${index}`;
+  statusSelect.name = `Combos[${index}].Status`;
+
   // Update services select
   const servicesSelect = element.querySelector(`[id^="combo_services_"]`);
   servicesSelect.id = `combo_services_${index}`;
-  servicesSelect.name = `Combos[${index}].ServiceIds`;
+  servicesSelect.name = `Combos[${index}].SelectedServiceIds`;
 
   // Update estimated value input
   const estimatedValueInput = element.querySelector(
@@ -524,6 +535,9 @@ function updateComboInputIds(element, index) {
     .querySelector(`label[for^="combo_price_"]`)
     .setAttribute("for", `combo_price_${index}`);
   element
+    .querySelector(`label[for^="combo_status_"]`)
+    .setAttribute("for", `combo_status_${index}`);
+  element
     .querySelector(`label[for^="combo_services_"]`)
     .setAttribute("for", `combo_services_${index}`);
   element
@@ -534,35 +548,24 @@ function updateComboInputIds(element, index) {
     .setAttribute("for", `combo_description_${index}`);
 
   // Update validation spans
-  const nameValidation = element.querySelector(
-    `[data-valmsg-for="Combos[0].Name"]`
-  );
-  if (nameValidation)
-    nameValidation.setAttribute("data-valmsg-for", `Combos[${index}].Name`);
+  updateValidationSpan(element, "Name", index);
+  updateValidationSpan(element, "Price", index);
+  updateValidationSpan(element, "Status", index);
+  updateValidationSpan(element, "SelectedServiceIds", index);
+  updateValidationSpan(element, "Description", index);
+}
 
-  const priceValidation = element.querySelector(
-    `[data-valmsg-for="Combos[0].Price"]`
+// Helper function to update validation spans
+function updateValidationSpan(element, fieldName, index) {
+  const validationSpan = element.querySelector(
+    `[data-valmsg-for="Combos[0].${fieldName}"]`
   );
-  if (priceValidation)
-    priceValidation.setAttribute("data-valmsg-for", `Combos[${index}].Price`);
-
-  const servicesValidation = element.querySelector(
-    `[data-valmsg-for="Combos[0].ServiceIds"]`
-  );
-  if (servicesValidation)
-    servicesValidation.setAttribute(
+  if (validationSpan) {
+    validationSpan.setAttribute(
       "data-valmsg-for",
-      `Combos[${index}].ServiceIds`
+      `Combos[${index}].${fieldName}`
     );
-
-  const descValidation = element.querySelector(
-    `[data-valmsg-for="Combos[0].Description"]`
-  );
-  if (descValidation)
-    descValidation.setAttribute(
-      "data-valmsg-for",
-      `Combos[${index}].Description`
-    );
+  }
 }
 
 // Function to populate the services dropdown
@@ -625,6 +628,19 @@ function removeComboItem(button) {
   }).then((result) => {
     if (result.isConfirmed) {
       const item = button.closest(".combo-item");
+
+      // Check if this is an existing combo that needs to be tracked for deletion
+      const comboIdInput = item.querySelector("input[name$='.Id']");
+      if (comboIdInput && comboIdInput.value) {
+        const comboId = comboIdInput.value;
+        // Add hidden field to track deletion
+        const deleteInput = document.createElement("input");
+        deleteInput.type = "hidden";
+        deleteInput.name = `CombosToDelete`;
+        deleteInput.value = comboId;
+        document.querySelector("form").appendChild(deleteInput);
+      }
+
       if (item) {
         item.remove();
         updateComboIndices();
@@ -670,16 +686,18 @@ function addExistingCombo(combo) {
   // Set values from existing combo
   const nameField = document.getElementById(`combo_name_${index}`);
   const priceField = document.getElementById(`combo_price_${index}`);
+  const statusField = document.getElementById(`combo_status_${index}`);
   const servicesField = document.getElementById(`combo_services_${index}`);
   const descField = document.getElementById(`combo_description_${index}`);
 
   if (nameField) nameField.value = combo.name || "";
   if (priceField) priceField.value = combo.price || 0;
+  if (statusField) statusField.value = combo.status || 0;
   if (descField) descField.value = combo.description || "";
 
   // Set selected services
-  if (combo.serviceIds && Array.isArray(combo.serviceIds)) {
-    combo.serviceIds.forEach((serviceId) => {
+  if (combo.selectedServiceIds && Array.isArray(combo.selectedServiceIds)) {
+    combo.selectedServiceIds.forEach((serviceId) => {
       const option = servicesField.querySelector(
         `option[value="${serviceId}"]`
       );
@@ -733,7 +751,7 @@ window.addEventListener("DOMContentLoaded", () => {
   load_existingCombos();
 
   // Ensure select2 is initialized for any existing select elements
-  $("select[name$='.ServiceIds']").each(function () {
+  $("select[name$='.SelectedServiceIds']").each(function () {
     $(this)
       .select2({
         placeholder: "Select services",

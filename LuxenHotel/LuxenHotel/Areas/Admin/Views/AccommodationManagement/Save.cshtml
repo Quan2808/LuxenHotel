@@ -8,6 +8,15 @@
         price = s.Price,
         description = s.Description
     }).ToList());
+
+    var comboJson = Json.Serialize(Model.Combos.Select(s => new
+    {
+        id = s.Id,
+        name = s.Name,
+        price = s.Price,
+        status = s.Status,
+        description = s.Description
+    }).ToList());
 }
 
 @section Styles {
@@ -80,8 +89,8 @@
     </script>
 
     <script type="application/json" id="existingMedia">
-                                                            @Html.Raw(Json.Serialize(Model.Media))
-                                                        </script>
+                            @Html.Raw(Json.Serialize(Model.Media))
+                        </script>
 
     <script>
         window.existingServices = @Html.Raw(servicesJson);
