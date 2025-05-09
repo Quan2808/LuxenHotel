@@ -48,42 +48,84 @@ public class ComboService : IComboService
     public async Task<List<Combo>> GetCombosByAccommodationIdAsync(int accommodationId)
     {
         return await _context.Combos
+            .AsNoTracking()
             .Where(c => c.AccommodationId == accommodationId)
             .Include(c => c.Accommodation)
             .Include(c => c.ComboServices)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
     public async Task<Combo?> GetComboByIdAsync(int comboId)
     {
         return await _context.Combos
+            .AsNoTracking()
             .Include(c => c.Accommodation)
             .Include(c => c.ComboServices)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == comboId);
     }
 
     public async Task<Combo> CreateComboAsync(Combo combo)
     {
         combo.CreatedAt = DateTime.UtcNow;
-        _context.Combos.Add(combo);
+        combo.UpdatedAt = DateTime.UtcNow;
+
+        _context.Entry(combo).State = EntityState.Added;
         await _context.SaveChangesAsync();
+
+        if (combo.ComboServices != null && combo.ComboServices.Any())
+        {
+            await _context.Entry(combo)
+                .Collection(c => c.ComboServices)
+                .LoadAsync();
+        }
+
         return combo;
     }
 
-    public async Task<Combo?> UpdateComboAsync(int comboId, Combo combo)
+    public async Task<Combo?> UpdateComboAsync(int comboId, Combo updatedCombo)
     {
-        var existingCombo = await _context.Combos.FindAsync(comboId);
+        var existingCombo = await _context.Combos
+            .Include(c => c.ComboServices)
+            .FirstOrDefaultAsync(c => c.Id == comboId);
+
         if (existingCombo == null)
         {
             return null;
         }
 
-        existingCombo.Name = combo.Name;
-        existingCombo.Price = combo.Price;
-        existingCombo.Description = combo.Description;
-        existingCombo.Status = combo.Status;
-        existingCombo.AccommodationId = combo.AccommodationId;
+        existingCombo.Name = updatedCombo.Name;
+        existingCombo.Price = updatedCombo.Price;
+        existingCombo.Description = updatedCombo.Description;
+        existingCombo.Status = updatedCombo.Status;
+        existingCombo.AccommodationId = updatedCombo.AccommodationId;
         existingCombo.UpdatedAt = DateTime.UtcNow;
+
+        if (updatedCombo.ComboServices != null)
+        {
+            var currentServiceIds = existingCombo.ComboServices.Select(s => s.Id).ToList();
+            var updatedServiceIds = updatedCombo.ComboServices.Select(s => s.Id).ToList();
+
+            var servicsToRemove = existingCombo.ComboServices
+                .Where(s => !updatedServiceIds.Contains(s.Id))
+                .ToList();
+
+            foreach (var service in servicsToRemove)
+            {
+                existingCombo.ComboServices.Remove(service);
+            }
+
+            var existingServiceIds = existingCombo.ComboServices.Select(s => s.Id).ToList();
+            var servicesToAdd = updatedCombo.ComboServices
+                .Where(s => !existingServiceIds.Contains(s.Id))
+                .ToList();
+
+            foreach (var service in servicesToAdd)
+            {
+                existingCombo.ComboServices.Add(service);
+            }
+        }
 
         await _context.SaveChangesAsync();
         return existingCombo;
@@ -102,24 +144,4 @@ public class ComboService : IComboService
         return true;
     }
 
-    private ComboViewModel ToViewModel(Combo combo)
-    {
-        return new ComboViewModel
-        {
-            Id = combo.Id,
-            Name = combo.Name,
-            Price = combo.Price,
-            Description = combo.Description,
-            AccommodationId = combo.AccommodationId,
-            AccommodationName = combo.Accommodation.Name,
-            Status = combo.Status,
-            CreatedAt = combo.CreatedAt,
-            Services = combo.ComboServices
-                .Select(cs => new ServiceViewModel
-                {
-                    Id = cs.Id,
-                    Name = cs.Name
-                })
-        };
-    }
 }
