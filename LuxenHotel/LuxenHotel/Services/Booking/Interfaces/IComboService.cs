@@ -5,7 +5,7 @@ namespace LuxenHotel.Services.Booking.Interfaces
 {
     public interface IComboService
     {
-        Task<List<AccommodationViewModel>> GetAllCombosAsync();
+        Task<List<AccommodationViewModel>> ListAsync();
         Task<List<Combo>> GetCombosByAccommodationIdAsync(int accommodationId);
         Task<Combo?> GetComboByIdAsync(int comboId);
         Task<Combo> CreateComboAsync(Combo combo);

@@ -66,8 +66,7 @@
   </div>
 
   <!-- Combos -->
-  <div data-kt-menu-trigger="click"
-    class="menu-item menu-accordion @(controller == "ComboManagement" ? "here show" : "")">
+  <div data-kt-menu-trigger="click" class="menu-item menu-accordion @(controller == "ComboManager" ? "here show" : "")">
     <!--begin:Menu link-->
     <span class="menu-link">
       <span class="menu-icon">
@@ -82,8 +81,8 @@
     <div class="menu-sub menu-sub-accordion">
       <!--begin:Menu item-->
       <div class="menu-item">
-        <a class="menu-link @(action == "Index" && controller == "ComboManagement" ? "active" : "")" asp-area="Admin"
-          asp-controller="ComboManagement" asp-action="Index">
+        <a class="menu-link @(action == "Index" && controller == "ComboManager" ? "active" : "")" asp-area="Admin"
+          asp-controller="ComboManager" asp-action="Index">
           <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
           <span class="menu-title">View All</span>
         </a>
@@ -92,8 +91,8 @@
 
       <!--begin:Menu item-->
       <div class="menu-item">
-        <a class="menu-link  @(action == "Create" && controller == "ComboManagement" ? "active" : "")" asp-area="Admin"
-          asp-controller="ComboManagement" asp-action="Create">
+        <a class="menu-link  @(action == "Create" && controller == "ComboManager" ? "active" : "")" asp-area="Admin"
+          asp-controller="ComboManager" asp-action="Create">
           <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
           <span class="menu-title">Add New</span>
         </a>

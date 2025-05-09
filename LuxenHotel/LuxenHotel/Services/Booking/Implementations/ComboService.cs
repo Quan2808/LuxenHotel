@@ -15,7 +15,7 @@ public class ComboService : IComboService
         _context = context;
     }
 
-    public async Task<List<AccommodationViewModel>> GetAllCombosAsync()
+    public async Task<List<AccommodationViewModel>> ListAsync()
     {
         var accommodations = await _context.Accommodations
             .AsNoTracking()
