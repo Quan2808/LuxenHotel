@@ -81,6 +81,7 @@
                     });
                 }
             });
+
         }); 
     </script>
 }
@@ -114,7 +115,7 @@
                 <!--end::Select2-->
             </div>
             <!--begin::Add combo-->
-            <a asp-action="Create" class="btn btn-primary"> Add Combo </a>
+            <a data-bs-target="#kt_modal_add_combo" data-bs-toggle="modal" class="btn btn-primary"> Add Combo </a>
             <!--end::Add combo-->
         </div>
         <!--end::Card toolbar-->
@@ -139,3 +140,5 @@
         </div>
     </div>
 </div>
+
+@Html.Partial("Partial/Index/_AddComboForm", Model)
