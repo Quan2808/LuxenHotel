@@ -1,7 +1,6 @@
 ﻿using LuxenHotel.Data;
-using LuxenHotel.Models.Entities.Booking;
+using LuxenHotel.Configuration;
 using LuxenHotel.Models.Entities.Identity;
-using LuxenHotel.Services.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,51 +22,17 @@ namespace LuxenHotel
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Register custom user store
-            services.AddTransient<IUserStore<User>, CustomUserStore>();
-            services.AddTransient<IRoleStore<Role>, CustomRoleStore>();
+            // Register all services using ServiceRegistration
+            services.RegisterServices();
 
-            // Register AccommodationService
-            services.AddScoped<
-                LuxenHotel.Services.Booking.Interfaces.IAccommodationService,
-                LuxenHotel.Services.Booking.Implementations.AccommodationService>();
-
-            // Configure Identity
-            services.AddIdentity<User, Role>(options =>
-            {
-                // Configure Identity options as needed
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 8;
-
-                // Disable features we don't need
-                options.SignIn.RequireConfirmedEmail = false;
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-                options.Lockout.AllowedForNewUsers = false;
-            })
-            // .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            // Configure Identity using IdentityConfiguration
+            services.ConfigureIdentity();
 
             // Configure routing
             services.Configure<RouteOptions>(options =>
             {
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = true;
-            });
-
-            // Configure authentication cookies
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/identity/login";
-                // options.AccessDeniedPath = "/Account/AccessDenied";
-            });
-
-            services.Configure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, options =>
-            {
-                options.Cookie.SameSite = SameSiteMode.Strict;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
             // Configure Logging
