@@ -18,6 +18,19 @@ namespace LuxenHotel.Services.Booking.Implementations
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
+        public async Task<List<AccommodationDropdownItem>> GetDropdownListAsync()
+        {
+            return await _context.Accommodations
+                .AsNoTracking()
+                .OrderBy(a => a.Name)
+                .Select(a => new AccommodationDropdownItem
+                {
+                    Id = a.Id,
+                    Name = a.Name
+                })
+                .ToListAsync();
+        }
+
         public async Task<List<AccommodationViewModel>> ListAsync()
         {
             var accommodations = await _context.Accommodations

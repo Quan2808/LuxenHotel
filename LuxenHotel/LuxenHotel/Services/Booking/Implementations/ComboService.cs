@@ -15,17 +15,34 @@ public class ComboService : IComboService
         _context = context;
     }
 
-    public async Task<List<AccommodationViewModel>> ListAsync()
+    public async Task<List<ComboViewModel>> ListAsync()
     {
-        var accommodations = await _context.Accommodations
+        // Fetch combos with their accommodations
+        var combos = await _context.Combos
             .AsNoTracking()
-            .Include(a => a.Services)
-            .Include(a => a.Combos)
-                .ThenInclude(c => c.ComboServices)
-            .Where(a => a.Combos.Any())
+            .Include(c => c.Accommodation)
+            .Include(c => c.ComboServices) // Direct include for the many-to-many relationship
             .ToListAsync();
 
-        return accommodations.Select(ToViewModel).ToList();
+        // Map to view models
+        var result = combos.Select(combo => new ComboViewModel
+        {
+            Id = combo.Id,
+            Name = combo.Name,
+            Price = combo.Price,
+            Description = combo.Description,
+            AccommodationId = combo.AccommodationId,
+            AccommodationName = combo.Accommodation.Name,
+            Status = combo.Status,
+            CreatedAt = combo.CreatedAt,
+            Services = combo.ComboServices.Select(service => new ServiceViewModel
+            {
+                Id = service.Id,
+                Name = service.Name
+            })
+        }).ToList();
+
+        return result;
     }
 
     public async Task<List<Combo>> GetCombosByAccommodationIdAsync(int accommodationId)
@@ -85,27 +102,24 @@ public class ComboService : IComboService
         return true;
     }
 
-    private AccommodationViewModel ToViewModel(Accommodation accommodation) => new()
+    private ComboViewModel ToViewModel(Combo combo)
     {
-        Id = accommodation.Id,
-        Name = accommodation.Name,
-        Thumbnail = accommodation.Thumbnail,
-        Services = accommodation.Services?.Select(s => new ServiceViewModel
+        return new ComboViewModel
         {
-            Id = s.Id,
-            Name = s.Name,
-            Price = s.Price,
-            Description = s.Description
-        }).ToList() ?? new List<ServiceViewModel>(),
-        Combos = accommodation.Combos?.Select(c => new ComboViewModel
-        {
-            Id = c.Id,
-            Name = c.Name,
-            Price = c.Price,
-            Description = c.Description,
-            Status = c.Status,
-            CreatedAt = c.CreatedAt,
-            SelectedServiceIds = c.ComboServices?.Select(s => s.Id).ToList() ?? new List<int>()
-        }).ToList() ?? new List<ComboViewModel>()
-    };
+            Id = combo.Id,
+            Name = combo.Name,
+            Price = combo.Price,
+            Description = combo.Description,
+            AccommodationId = combo.AccommodationId,
+            AccommodationName = combo.Accommodation.Name,
+            Status = combo.Status,
+            CreatedAt = combo.CreatedAt,
+            Services = combo.ComboServices
+                .Select(cs => new ServiceViewModel
+                {
+                    Id = cs.Id,
+                    Name = cs.Name
+                })
+        };
+    }
 }
