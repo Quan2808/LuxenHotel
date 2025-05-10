@@ -12,23 +12,26 @@
             </div>
             <div class="modal-body py-10 px-lg-17">
                 <!-- Begin::Form -->
-                <form id="kt_modal_add_combo_form" class="form" action="@Url.Action("Create", "ComboManager")" method="post">
+                <form id="kt_modal_add_combo_form" class="form" action="@Url.Action("Create", "ComboManager")"
+                    method="post">
                     @Html.AntiForgeryToken()
                     <div class="scroll-y me-n7 pe-7" id="kt_modal_add_combo_scroll" data-kt-scroll="true"
                         data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto"
                         data-kt-scroll-dependencies="#kt_modal_add_combo_header"
                         data-kt-scroll-wrappers="#kt_modal_add_combo_scroll" data-kt-scroll-offset="300px">
 
-                       <div class="row mb-7">
+                        <div class="row mb-7">
                             <div class="col-md-6 fv-row">
                                 <label class="required fw-semibold fs-6 mb-2">Name</label>
-                                <input type="text" name="Name" class="form-control form-control-solid" placeholder="Combo name" required />
+                                <input type="text" name="Name" class="form-control form-control-solid"
+                                    placeholder="Combo name" required />
                             </div>
                             <div class="col-md-6 fv-row">
                                 <label class="required fw-semibold fs-6 mb-2">Accommodation</label>
-                                <select id="accommodationSelect" name="AccommodationId" class="form-select form-select-solid" 
-                                        data-control="select2" data-dropdown-parent="#kt_modal_add_combo" 
-                                        data-placeholder="Select an accommodation" required>
+                                <select id="accommodationSelect" name="AccommodationId"
+                                    class="form-select form-select-solid" data-control="select2"
+                                    data-dropdown-parent="#kt_modal_add_combo"
+                                    data-placeholder="Select an accommodation" required>
                                     <option value="">Select Accommodation</option>
                                     @foreach (var accommodation in Model.Accommodations)
                                     {
@@ -38,75 +41,29 @@
                             </div>
                         </div>
 
-                       <div class="row mb-7">
+                        <div class="row mb-7">
                             <div class="col-md-6 fv-row">
                                 <label class="required fw-semibold fs-6 mb-2">Price</label>
-                                <input type="number" name="Price" class="form-control form-control-solid" 
-                                       placeholder="0" min="0" max="50000000" required />
+                                <input type="number" name="Price" class="form-control form-control-solid"
+                                    placeholder="0" min="0" max="50000000" required />
                             </div>
                             <div class="col-md-6 fv-row">
                                 <label class="required fw-semibold fs-6 mb-2">Status</label>
-                                <select name="Status" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                                <select name="Status" class="form-select form-select-solid" data-control="select2"
+                                    data-hide-search="true">
                                     <option value="0">Published</option>
                                     <option value="1">Unpublished</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Begin::Description -->
                         <div class="fv-row mb-7">
                             <label class="fw-semibold fs-6 mb-2">Description</label>
                             <textarea name="Description" class="form-control form-control-solid" rows="4"
                                 placeholder="Description"></textarea>
                         </div>
-                        <!-- End::Description -->
 
-
-                        <!-- Begin::Services -->
-                        <div class="fv-row mb-7">
-                            <label class="fw-semibold fs-6 mb-2">Services</label>
-                            <div class="services-container">
-                                @foreach (var accommodationPair in Model.AccommodationServices)
-                                {
-                                    <div id="services_@accommodationPair.Key" class="services-for-accommodation" style="display: none;">
-                                        @if (accommodationPair.Value != null && accommodationPair.Value.Any())
-                                        {
-                                            <div class="d-flex flex-column gap-3">
-                                                @foreach (var service in accommodationPair.Value)
-                                                {
-                                                    <div class="form-check form-check-custom form-check-solid">
-                                                        <input class="form-check-input" type="checkbox" name="SelectedServiceIds" 
-                                                            value="@service.Id" id="service_@accommodationPair.Key@service.Id" />
-                                                        <label class="form-check-label fw-semibold" for="service_@accommodationPair.Key@service.Id">
-                                                            @service.Name - @service.Price.ToString("N0") VND
-                                                        </label>
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="alert alert-warning mb-0">
-                                                <div class="d-flex flex-column">
-                                                    <h4 class="mb-1 text-dark">No services available</h4>
-                                                    <span>This accommodation doesn't have any services yet. Please add services to the accommodation first.</span>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                                
-                                <div id="services_placeholder" class="mt-3">
-                                    <div class="alert alert-info mb-0">
-                                        <div class="d-flex flex-column">
-                                            <h4 class="mb-1 text-dark">Select an accommodation</h4>
-                                            <span>Please select an accommodation to view available services.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End::Services -->
+                        @await Html.PartialAsync("Partial/Index/_ComboServices", Model)
                     </div>
 
                     <div class="text-center pt-10">
