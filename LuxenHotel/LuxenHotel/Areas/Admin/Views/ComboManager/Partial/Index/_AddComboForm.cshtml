@@ -18,36 +18,40 @@
                         data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto"
                         data-kt-scroll-dependencies="#kt_modal_add_combo_header"
                         data-kt-scroll-wrappers="#kt_modal_add_combo_scroll" data-kt-scroll-offset="300px">
-                        <!-- Begin::Name -->
-                        <div class="fv-row mb-7">
-                            <label class="required fw-semibold fs-6 mb-2">Name</label>
-                            <input type="text" name="Name" class="form-control form-control-solid mb-3 mb-lg-0"
-                                placeholder="Combo name" required />
-                        </div>
-                        <!-- End::Name -->
 
-                        <!-- Begin::Accommodation -->
-                        <div class="fv-row mb-7">
-                            <label class="required fw-semibold fs-6 mb-2">Accommodation</label>
-                            <select id="accommodationSelect" name="AccommodationId" class="form-select form-select-solid" data-control="select2"
-                                data-dropdown-parent="#kt_modal_add_combo" data-placeholder="Select an accommodation"
-                                required>
-                                <option value="">Select Accommodation</option>
-                                @foreach (var accommodation in Model.Accommodations)
-                                {
-                                    <option value="@accommodation.Id">@accommodation.Name</option>
-                                }
-                            </select>
+                       <div class="row mb-7">
+                            <div class="col-md-6 fv-row">
+                                <label class="required fw-semibold fs-6 mb-2">Name</label>
+                                <input type="text" name="Name" class="form-control form-control-solid" placeholder="Combo name" required />
+                            </div>
+                            <div class="col-md-6 fv-row">
+                                <label class="required fw-semibold fs-6 mb-2">Accommodation</label>
+                                <select id="accommodationSelect" name="AccommodationId" class="form-select form-select-solid" 
+                                        data-control="select2" data-dropdown-parent="#kt_modal_add_combo" 
+                                        data-placeholder="Select an accommodation" required>
+                                    <option value="">Select Accommodation</option>
+                                    @foreach (var accommodation in Model.Accommodations)
+                                    {
+                                        <option value="@accommodation.Id">@accommodation.Name</option>
+                                    }
+                                </select>
+                            </div>
                         </div>
-                        <!-- End::Accommodation -->
 
-                        <!-- Begin::Price -->
-                        <div class="fv-row mb-7">
-                            <label class="required fw-semibold fs-6 mb-2">Price</label>
-                            <input type="number" name="Price" class="form-control form-control-solid" placeholder="0"
-                                min="0" max="50000000" required />
+                       <div class="row mb-7">
+                            <div class="col-md-6 fv-row">
+                                <label class="required fw-semibold fs-6 mb-2">Price</label>
+                                <input type="number" name="Price" class="form-control form-control-solid" 
+                                       placeholder="0" min="0" max="50000000" required />
+                            </div>
+                            <div class="col-md-6 fv-row">
+                                <label class="required fw-semibold fs-6 mb-2">Status</label>
+                                <select name="Status" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                                    <option value="0">Published</option>
+                                    <option value="1">Unpublished</option>
+                                </select>
+                            </div>
                         </div>
-                        <!-- End::Price -->
 
                         <!-- Begin::Description -->
                         <div class="fv-row mb-7">
@@ -57,16 +61,6 @@
                         </div>
                         <!-- End::Description -->
 
-                        <!-- Begin::Status -->
-                        <div class="fv-row mb-7">
-                            <label class="required fw-semibold fs-6 mb-2">Status</label>
-                            <select name="Status" class="form-select form-select-solid">
-                                <option value="0">Draft</option>
-                                <option value="1" selected>Published</option>
-                                <option value="2">Archived</option>
-                            </select>
-                        </div>
-                        <!-- End::Status -->
 
                         <!-- Begin::Services -->
                         <div class="fv-row mb-7">
