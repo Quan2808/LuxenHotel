@@ -82,22 +82,46 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
+  // Handle accommodation selection
   $("#accommodationSelect").on("change", function () {
     const accommodationId = $(this).val();
 
     $(".services-for-accommodation").hide();
+    $(".total-price").text("0");
 
     if (accommodationId) {
       $("#services_" + accommodationId).show();
       $("#services_placeholder").hide();
+      updateTotalPrice(accommodationId);
     } else {
       $("#services_placeholder").show();
     }
   });
 
+  // Handle service checkbox changes
+  $(".service-checkbox").on("change", function () {
+    const accommodationId = $(this).data("accommodation-id");
+    if ($("#services_" + accommodationId).is(":visible")) {
+      updateTotalPrice(accommodationId);
+    }
+  });
+
+  // Reset form and UI when modal is closed
   $("#kt_modal_add_combo").on("hidden.bs.modal", function () {
     $("#kt_modal_add_combo_form")[0].reset();
     $(".services-for-accommodation").hide();
+    $(".total-price").text("0"); // Reset all total prices
     $("#services_placeholder").show();
   });
+
+  // Function to calculate and update total price for an accommodation
+  function updateTotalPrice(accommodationId) {
+    let total = 0;
+    $("#services_" + accommodationId)
+      .find(".service-checkbox:checked")
+      .each(function () {
+        total += parseFloat($(this).data("price")) || 0;
+      });
+    $("#total_price_" + accommodationId).text(total.toLocaleString("en-US"));
+  }
 });

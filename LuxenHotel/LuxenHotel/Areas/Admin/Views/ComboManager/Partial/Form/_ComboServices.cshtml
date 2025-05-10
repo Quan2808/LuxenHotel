@@ -4,7 +4,6 @@
 <div class="fv-row mb-7">
     <label class="fw-semibold fs-6 mb-2">Services</label>
     <div class="services-container">
-
         <div id="services_placeholder" class="mt-3">
             <div class="alert alert-info mb-0">
                 <div class="d-flex flex-column">
@@ -26,7 +25,6 @@
                     </tr>
                 </thead>
                 <tbody class="fw-semibold text-gray-600">
-
                     @if (accommodationPair.Value != null && accommodationPair.Value.Any())
                     {
                         foreach (var service in accommodationPair.Value)
@@ -34,8 +32,9 @@
                             <tr>
                                 <td>
                                     <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                        <input class="form-check-input" type="checkbox" name="SelectedServiceIds"
-                                            value="@service.Id" id="service_@accommodationPair.Key@service.Id" />
+                                        <input class="form-check-input service-checkbox" type="checkbox" name="SelectedServiceIds"
+                                            value="@service.Id" id="service_@accommodationPair.Key@service.Id"
+                                            data-price="@service.Price" data-accommodation-id="@accommodationPair.Key" />
                                     </div>
                                 </td>
                                 <td class="text-gray-800 text-hover-primary fs-5 fw-bold">
@@ -59,14 +58,20 @@
                                         <h4 class="mb-1 text-dark">No services available</h4>
                                         <span>This accommodation doesn't have any services yet.</span>
                                     </div>
-                                </div>
                             </td>
                         </tr>
                     }
-
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="text-end fw-bold">Estimated Total:</td>
+                        <td class="text-end pe-5">
+                            <span class="fw-bold ms-3 total-price" id="total_price_@accommodationPair.Key">0</span>
+                            <i class="fa-solid fa-dong-sign"></i>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         }
-
     </div>
 </div>
