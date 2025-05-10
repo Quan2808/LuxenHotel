@@ -174,21 +174,5 @@ namespace LuxenHotel.Areas.Admin.Controllers
             AddNotification(message, NotificationType.Error);
             return RedirectToAction(nameof(Index));
         }
-
-        private void HandleInvalidModelState()
-        {
-            AddNotification("Invalid input data", NotificationType.Error);
-            LogInfo("Invalid input data for creating accommodation");
-
-            var errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-
-            foreach (var error in errors)
-            {
-                AddNotification(error, NotificationType.Error);
-            }
-        }
     }
 }

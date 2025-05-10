@@ -19,11 +19,11 @@ namespace LuxenHotel.Models.ViewModels.Booking
         public string? Description { get; set; }
 
         public int AccommodationId { get; set; }
-        public string AccommodationName { get; set; }
+        public string? AccommodationName { get; set; }
 
         public Combo.ComboStatus Status { get; set; } = Combo.ComboStatus.Published;
 
-        public IEnumerable<ServiceViewModel> Services { get; set; }
+        public IEnumerable<ServiceViewModel>? Services { get; set; } = new List<ServiceViewModel>();
 
         // Selected service IDs to be included in this combo
         public List<int> SelectedServiceIds { get; set; } = new List<int>();
@@ -35,6 +35,8 @@ namespace LuxenHotel.Models.ViewModels.Booking
     {
         public List<ComboViewModel> Combos { get; set; }
         public List<AccommodationDropdownItem> Accommodations { get; set; }
+        public Dictionary<int, List<ServiceViewModel>> AccommodationServices { get; set; } =
+            new Dictionary<int, List<ServiceViewModel>>();
     }
 
     public class AccommodationDropdownItem

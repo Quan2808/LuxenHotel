@@ -84,6 +84,34 @@
 
         }); 
     </script>
+
+    <script>
+        $(document).ready(function () {
+            // Xử lý khi chọn accommodation để hiển thị services tương ứng
+            $('#accommodationSelect').on('change', function () {
+                const accommodationId = $(this).val();
+
+                // Ẩn tất cả các danh sách dịch vụ
+                $('.services-for-accommodation').hide();
+
+                if (accommodationId) {
+                    // Hiển thị danh sách dịch vụ của accommodation được chọn
+                    $('#services_' + accommodationId).show();
+                    $('#services_placeholder').hide();
+                } else {
+                    // Hiển thị placeholder khi chưa chọn accommodation
+                    $('#services_placeholder').show();
+                }
+            });
+
+            // Reset form khi đóng modal
+            $('#kt_modal_add_combo').on('hidden.bs.modal', function () {
+                $('#kt_modal_add_combo_form')[0].reset();
+                $('.services-for-accommodation').hide();
+                $('#services_placeholder').show();
+            });
+        });
+    </script>
 }
 
 <div class="card card-flush">

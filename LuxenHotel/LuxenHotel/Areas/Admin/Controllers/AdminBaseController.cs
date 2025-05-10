@@ -55,6 +55,22 @@ namespace LuxenHotel.Areas.Admin.Controllers
             AddNotification(errorMessage, NotificationType.Error);
             return RedirectToAction("Index", "Dashboard");
         }
+
+        protected void HandleInvalidModelState()
+        {
+            AddNotification("Invalid input data", NotificationType.Error);
+            LogInfo("Invalid input data for creating accommodation");
+
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            foreach (var error in errors)
+            {
+                AddNotification(error, NotificationType.Error);
+            }
+        }
     }
 
     // Enum để định nghĩa loại thông báo

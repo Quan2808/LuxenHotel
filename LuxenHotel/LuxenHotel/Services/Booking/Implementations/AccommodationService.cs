@@ -56,6 +56,27 @@ namespace LuxenHotel.Services.Booking.Implementations
             return accommodation == null ? null : ToViewModel(accommodation);
         }
 
+        public async Task<List<ServiceViewModel>> GetServicesForAccommodationAsync(int accommodationId)
+        {
+            var accommodation = await _context.Accommodations
+                .AsNoTracking()
+                .Include(a => a.Services)
+                .FirstOrDefaultAsync(a => a.Id == accommodationId);
+
+            if (accommodation == null || accommodation.Services == null)
+            {
+                return new List<ServiceViewModel>();
+            }
+
+            return accommodation.Services.Select(s => new ServiceViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                Description = s.Description
+            }).ToList();
+        }
+
         public async Task CreateAsync(AccommodationViewModel viewModel)
         {
             if (viewModel == null)

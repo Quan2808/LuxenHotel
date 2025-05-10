@@ -66,19 +66,34 @@ public class ComboService : IComboService
             .FirstOrDefaultAsync(c => c.Id == comboId);
     }
 
-    public async Task<Combo> CreateComboAsync(Combo combo)
+    public async Task<Combo> CreateComboAsync(Combo combo, List<int> selectedServiceIds)
     {
         combo.CreatedAt = DateTime.UtcNow;
-        combo.UpdatedAt = DateTime.UtcNow;
+        // combo.UpdatedAt = DateTime.UtcNow;
 
-        _context.Entry(combo).State = EntityState.Added;
+        // First, save the combo without services to get an ID
+        await _context.Combos.AddAsync(combo);
         await _context.SaveChangesAsync();
 
-        if (combo.ComboServices != null && combo.ComboServices.Any())
+        // Now handle the many-to-many relationship
+        if (selectedServiceIds != null && selectedServiceIds.Any())
         {
-            await _context.Entry(combo)
-                .Collection(c => c.ComboServices)
-                .LoadAsync();
+            // Get the actual service entities from the database
+            var services = await _context.Services
+                .Where(s => selectedServiceIds.Contains(s.Id))
+                .ToListAsync();
+
+            // Clear any existing relationships
+            combo.ComboServices = new List<Service>();
+
+            // Add each service to the combo's ComboServices collection
+            foreach (var service in services)
+            {
+                combo.ComboServices.Add(service);
+            }
+
+            // Save the changes
+            await _context.SaveChangesAsync();
         }
 
         return combo;
