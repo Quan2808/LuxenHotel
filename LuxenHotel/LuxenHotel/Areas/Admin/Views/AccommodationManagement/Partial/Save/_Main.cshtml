@@ -31,7 +31,6 @@
 
   <!--begin::Tab content-->
   <div class="tab-content">
-
     <!--begin::Tab pane-->
     @Html.Partial("Partial/Save/_GeneralTab", Model)
     <!--end::Tab pane-->
@@ -39,12 +38,6 @@
     <!--begin::Tab pane-->
     @Html.Partial("Partial/Save/_ServicesTab", Model)
     <!--end::Tab pane-->
-    @if (Model.Id != 0)
-    {
-      <!--begin::Tab pane-->
-      @Html.Partial("Partial/Save/_CombosTab", Model)
-      <!--end::Tab pane-->
-    }
   </div>
   <!--end::Tab content-->
 

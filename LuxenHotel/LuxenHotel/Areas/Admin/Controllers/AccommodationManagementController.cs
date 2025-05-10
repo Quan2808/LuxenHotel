@@ -99,9 +99,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
             // Process services to delete
             ProcessServicesToDelete(viewModel);
 
-            // Process combos to delete
-            ProcessCombosToDelete(viewModel);
-
             try
             {
                 await _accommodationService.EditAsync(id, viewModel);
@@ -151,21 +148,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     .ToList();
 
                 LogInfo($"Services marked for deletion: {string.Join(", ", viewModel.ServicesToDelete)}");
-            }
-        }
-
-        private void ProcessCombosToDelete(AccommodationViewModel viewModel)
-        {
-            // Extract combo IDs that are marked for deletion from form data
-            var comboIdsToDelete = Request.Form.Keys
-                .Where(k => k.StartsWith("deleteCombo_") && Request.Form[k] == "true")
-                .Select(k => int.Parse(k.Replace("deleteCombo_", "")))
-                .ToList();
-
-            // Add them to the viewModel's CombosToDelete list
-            if (comboIdsToDelete.Any())
-            {
-                viewModel.CombosToDelete.AddRange(comboIdsToDelete);
             }
         }
 
