@@ -1,5 +1,6 @@
 @model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
 @using LuxenHotel.Models.ViewModels.Booking
+
 @{
     ViewData["Title"] = @Model.Name;
 }
@@ -167,15 +168,55 @@
                         </button>
                     }
                 </div>
-
             </div>
 
-            @if (!string.IsNullOrEmpty(Model.Description))
+            @if (Model.Services != null && Model.Services.Any())
             {
-                <p class="description">@Html.Raw(Model.Description)</p>
+                <div class="services mt-4" style="margin-top: 20px;">
+                    <h4 class="font-weight-bold">Services Included</h4>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <ul class="list-unstyled">
+                                @foreach (var service in Model.Services)
+                                {
+                                    <li class="mb-2" style="margin-bottom: 12px;">
+                                        <div>
+                                            <i class="fa fa-check-circle text-success" style="margin-right: 6px;"></i>
+                                            <strong>@service.Name</strong>
+                                            @if (service.Price > 0)
+                                            {
+                                                <span class="text-primary">
+                                                    - @service.Price.ToString("#,##0") <i class="fa-solid fa-dong-sign"
+                                                        style="font-size: 0.8em;"></i>
+                                                </span>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(service.Description))
+                                        {
+                                            <div class="text-muted"
+                                                style="margin-left: 20px; margin-top: 4px; display: block; white-space: normal;">
+                                                @service.Description
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             }
+
         </div>
     </div>
+
+    <div class="container mb-20">
+        <h3 class="fw-bold mb-10">Description</h3>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="description">@Html.Raw(Model.Description)</p>
+        }
+    </div>
+
     @await Html.PartialAsync("Partials/_AmenitiesFacilities")
 
 </div>

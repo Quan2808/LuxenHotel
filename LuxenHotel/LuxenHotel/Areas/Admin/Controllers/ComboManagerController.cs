@@ -59,7 +59,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             try
             {
-                // Xác thực accommodation
                 var accommodation = await _accommodationService.GetAsync(model.AccommodationId);
                 if (accommodation == null)
                 {
@@ -67,7 +66,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Tạo entity Combo từ ViewModel
                 var combo = new Combo
                 {
                     Name = model.Name,
@@ -77,7 +75,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     Status = model.Status
                 };
 
-                // Lưu combo và thiết lập quan hệ với services
                 await _comboService.CreateComboAsync(combo, model.SelectedServiceIds);
 
                 TempData["SuccessMessage"] = "Combo created successfully!";

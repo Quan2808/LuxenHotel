@@ -11,17 +11,11 @@ namespace LuxenHotel.Areas.Customer.Controllers;
 public class BookingController : Controller
 {
 
-    private readonly ApplicationDbContext _context;
-    private readonly IWebHostEnvironment _environment;
     private readonly IAccommodationService _accommodationService;
 
-    public BookingController(IAccommodationService accommodationService,
-        ApplicationDbContext context,
-        IWebHostEnvironment environment)
+    public BookingController(IAccommodationService accommodationService)
     {
         _accommodationService = accommodationService;
-        _context = context;
-        _environment = environment;
     }
 
     [HttpGet]
