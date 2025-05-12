@@ -45,13 +45,28 @@ public class ComboService : IComboService
         return result;
     }
 
-    public async Task<List<Combo>> GetCombosByAccommodationIdAsync(int accommodationId)
+    public async Task<List<ComboViewModel>> GetCombosByAccommodationIdAsync(int accommodationId)
     {
         return await _context.Combos
-            .AsNoTracking()
             .Where(c => c.AccommodationId == accommodationId)
-            .Include(c => c.Accommodation)
-            .Include(c => c.ComboServices)
+            .Select(c => new ComboViewModel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Price = c.Price,
+                Description = c.Description,
+                AccommodationId = c.AccommodationId,
+                AccommodationName = c.Accommodation.Name,
+                Status = c.Status,
+                CreatedAt = c.CreatedAt,
+                Services = c.ComboServices.Select(cs => new ServiceViewModel
+                {
+                    Id = cs.Id,
+                    Name = cs.Name,
+                    Price = cs.Price,
+                    Description = cs.Description
+                }).ToList(),
+            })
             .AsSplitQuery()
             .ToListAsync();
     }
@@ -158,5 +173,4 @@ public class ComboService : IComboService
         await _context.SaveChangesAsync();
         return true;
     }
-
 }

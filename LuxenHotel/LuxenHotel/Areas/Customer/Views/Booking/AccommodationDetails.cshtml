@@ -1,8 +1,8 @@
-@model LuxenHotel.Models.ViewModels.Booking.AccommodationViewModel
+@model LuxenHotel.Models.ViewModels.Booking.AccommodationDetailsViewModel
 @using LuxenHotel.Models.ViewModels.Booking
 
 @{
-    ViewData["Title"] = @Model.Name;
+    ViewData["Title"] = @Model.Accommodation.Name;
 }
 
 @section Styles {
@@ -87,19 +87,20 @@
 <div class="container">
     <div class="row accommodation-details mb-20">
         <div class="col-md-6">
-            @if (Model.Media.Any())
+            @if (Model.Accommodation.Media.Any())
             {
                 <div class="owl-carousel image-carousel">
                     <div class="item">
-                        <a href="@Model.Thumbnail" class="image-popup">
-                            <img src="@Model.Thumbnail" alt="@Model.Name" class="img-responsive img-rounded">
+                        <a href="@Model.Accommodation.Thumbnail" class="image-popup">
+                            <img src="@Model.Accommodation.Thumbnail" alt="@Model.Accommodation.Name"
+                                class="img-responsive img-rounded">
                         </a>
                     </div>
-                    @foreach (var media in Model.Media)
+                    @foreach (var media in Model.Accommodation.Media)
                     {
                         <div class="item">
                             <a href="@media" class="image-popup">
-                                <img src="@media" alt="@Model.Name" class="img-responsive img-rounded">
+                                <img src="@media" alt="@Model.Accommodation.Name" class="img-responsive img-rounded">
                             </a>
                         </div>
                     }
@@ -112,7 +113,7 @@
                 string? statusLabel = null;
                 string statusClass = "";
 
-                switch (Model.Status)
+                switch (Model.Accommodation.Status)
                 {
                     case LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Unpublished:
                         statusLabel = "Currently unavailable";
@@ -139,7 +140,7 @@
             }
 
 
-            <h1 class="accommodation-title">@Model.Name</h1>
+            <h1 class="accommodation-title">@Model.Accommodation.Name</h1>
             <hr>
 
             <div class="row" style="display: flex; align-items: center;">
@@ -147,15 +148,17 @@
                     <p class="accommodation-title-price">
                         Price per Night:
                         <span style="color: #114a6d">
-                            @Model.Price.ToString("#,##0 ")
+                            @Model.Accommodation.Price.ToString("#,##0 ")
                             <i class="fa-solid fa-dong-sign" style="font-size: 0.8em;"></i>
                         </span>
                     </p>
-                    <p class="area" style="margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Area m²</p>
-                    <p class="occupancy"><strong>Max Occupancy:</strong> @Model.MaxOccupancy guest(s)</p>
+                    <p class="area" style="margin-bottom: -6px;"><strong>Room Size:</strong> @Model.Accommodation.Area
+                        m²</p>
+                    <p class="occupancy"><strong>Max Occupancy:</strong> @Model.Accommodation.MaxOccupancy guest(s)</p>
                 </div>
                 <div class="col-md-4 book-button" style="display: flex; justify-content: center;">
-                    @if (Model.Status == LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Published)
+                    @if (Model.Accommodation.Status ==
+                                        LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Published)
                     {
                         <a href="reservation-form-dark.html" class="btn btn-primary">
                             <i class="fa fa-calendar"></i> BOOK NOW
@@ -170,14 +173,14 @@
                 </div>
             </div>
 
-            @if (Model.Services != null && Model.Services.Any())
+            @if (Model.Accommodation.Services != null && Model.Accommodation.Services.Any())
             {
                 <div class="services mt-4" style="margin-top: 20px;">
                     <h4 class="font-weight-bold">Services Included</h4>
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <ul class="list-unstyled">
-                                @foreach (var service in Model.Services)
+                                @foreach (var service in Model.Accommodation.Services)
                                 {
                                     <li class="mb-2" style="margin-bottom: 12px;">
                                         <div>
@@ -211,12 +214,13 @@
 
     <div class="container mb-20">
         <h3 class="fw-bold mb-10">Description</h3>
-        @if (!string.IsNullOrEmpty(Model.Description))
+        @if (!string.IsNullOrEmpty(Model.Accommodation.Description))
         {
-            <p class="description">@Html.Raw(Model.Description)</p>
+            <div class="description">@Html.Raw(Model.Accommodation.Description)</div>
         }
     </div>
 
-    @await Html.PartialAsync("Partials/_AmenitiesFacilities")
+    @await Html.PartialAsync("Partials/_AccommodationCombo", Model)
 
+    @await Html.PartialAsync("Partials/_AmenitiesFacilities")
 </div>

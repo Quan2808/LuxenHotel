@@ -3,7 +3,6 @@ using LuxenHotel.Models.Entities.Booking;
 
 namespace LuxenHotel.Models.ViewModels.Booking
 {
-
     public class ComboViewModel
     {
         public int Id { get; set; }
