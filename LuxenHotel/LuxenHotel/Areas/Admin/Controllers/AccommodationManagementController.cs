@@ -1,11 +1,7 @@
-using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
 {
@@ -71,9 +67,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             if (!viewModel.Services.Any())
                 viewModel.Services.Add(new ServiceViewModel());
-
-            if (!viewModel.Combos.Any())
-                viewModel.Combos.Add(new ComboViewModel());
 
             SetPageTitle($"Edit {viewModel.Name}");
             LogInfo($"Accessed edit page for accommodation ID: {id}");

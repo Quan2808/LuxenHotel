@@ -114,51 +114,57 @@ public class ComboService : IComboService
         return combo;
     }
 
-    public async Task<Combo?> UpdateComboAsync(int comboId, Combo updatedCombo)
+    public async Task UpdateComboAsync(Combo combo, List<int> selectedServiceIds)
     {
-        var existingCombo = await _context.Combos
-            .Include(c => c.ComboServices)
-            .FirstOrDefaultAsync(c => c.Id == comboId);
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        if (existingCombo == null)
+        try
         {
-            return null;
-        }
+            // Get the existing combo from the database
+            var existingCombo = await _context.Combos
+                .Include(c => c.ComboServices)
+                .FirstOrDefaultAsync(c => c.Id == combo.Id);
 
-        existingCombo.Name = updatedCombo.Name;
-        existingCombo.Price = updatedCombo.Price;
-        existingCombo.Description = updatedCombo.Description;
-        existingCombo.Status = updatedCombo.Status;
-        existingCombo.AccommodationId = updatedCombo.AccommodationId;
-        existingCombo.UpdatedAt = DateTime.UtcNow;
-
-        if (updatedCombo.ComboServices != null)
-        {
-            var currentServiceIds = existingCombo.ComboServices.Select(s => s.Id).ToList();
-            var updatedServiceIds = updatedCombo.ComboServices.Select(s => s.Id).ToList();
-
-            var servicsToRemove = existingCombo.ComboServices
-                .Where(s => !updatedServiceIds.Contains(s.Id))
-                .ToList();
-
-            foreach (var service in servicsToRemove)
+            if (existingCombo == null)
             {
-                existingCombo.ComboServices.Remove(service);
+                throw new Exception("Combo not found.");
             }
 
-            var existingServiceIds = existingCombo.ComboServices.Select(s => s.Id).ToList();
-            var servicesToAdd = updatedCombo.ComboServices
-                .Where(s => !existingServiceIds.Contains(s.Id))
-                .ToList();
+            // Update the combo's properties
+            existingCombo.Name = combo.Name;
+            existingCombo.Price = combo.Price;
+            existingCombo.Description = combo.Description;
+            existingCombo.AccommodationId = combo.AccommodationId;
+            existingCombo.Status = combo.Status;
+            existingCombo.UpdatedAt = DateTime.UtcNow;
 
-            foreach (var service in servicesToAdd)
+            // Save changes to the combo
+            await _context.SaveChangesAsync();
+
+            // Get the actual service entities from the database
+            var services = await _context.Services
+                .Where(s => selectedServiceIds.Contains(s.Id))
+                .ToListAsync();
+
+            // Clear existing relationships
+            existingCombo.ComboServices.Clear();
+
+            // Add each selected service to the combo
+            foreach (var service in services)
             {
                 existingCombo.ComboServices.Add(service);
             }
-        }
 
-        await _context.SaveChangesAsync();
-        return existingCombo;
+            // Save the updated relationships
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> DeleteComboAsync(int comboId)
