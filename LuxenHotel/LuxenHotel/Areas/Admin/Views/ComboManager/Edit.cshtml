@@ -1,100 +1,203 @@
 @model LuxenHotel.Models.ViewModels.Booking.ComboViewModel
 @using System.Linq
 @using LuxenHotel.Models.ViewModels.Booking
-
 @{
-    ViewData["Title"] = ViewBag.PageTitle ?? "Edit Combo";
     var accommodationServices = ViewBag.AccommodationServices as List<ServiceViewModel> ?? new List<ServiceViewModel>();
 }
 
-<div class="container mt-5">
-    <h2>@ViewData["Title"]</h2>
-
-    <!-- Display error or success messages -->
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="card shadow-sm">
+    <!--begin::Card header-->
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <h2 class="fw-bolder">Edit Combo Package - @Model.Name</h2>
         </div>
-    }
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    </div>
+    <!--end::Card header-->
 
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="CreatedAt" />
+    <!--begin::Card body-->
+    <div class="card-body pt-0">
+        <form asp-action="Edit" method="post" id="kt_combo_edit_form" class="form">
+            <!--begin::Scroll-->
+            <div class="scroll-y me-n7 pe-7" id="kt_modal_edit_combo_scroll" data-kt-scroll="true"
+                data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto"
+                data-kt-scroll-dependencies="#kt_modal_edit_combo_header"
+                data-kt-scroll-wrappers="#kt_modal_edit_combo_scroll" data-kt-scroll-offset="300px">
 
-        <div class="mb-3">
-            <label asp-for="Name" class="form-label"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
-        </div>
+                <div class="row">
+                    <!-- Left column: General Information -->
+                    <div class="col-md-7 scroll-y me-n7 pe-7">
+                        <div class="card card-flush">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h2>General</h2>
+                                </div>
+                            </div>
 
-        <div class="mb-3">
-            <label asp-for="Price" class="form-label"></label>
-            <input asp-for="Price" class="form-control" type="number" />
-            <span asp-validation-for="Price" class="text-danger"></span>
-        </div>
+                            <div class="card-body pt-0">
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="CreatedAt" />
 
-        <div class="mb-3">
-            <label asp-for="Description" class="form-label"></label>
-            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
+                                <!--begin::Input group: Name-->
+                                <div class="fv-row mb-7">
+                                    <label class="required fw-bold fs-6 mb-2" asp-for="Name">Package Name</label>
+                                    <input type="text" asp-for="Name"
+                                        class="form-control form-control-solid mb-3 mb-lg-0"
+                                        placeholder="Enter combo package name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                                <!--end::Input group-->
 
-        <div class="mb-3">
-            <label asp-for="AccommodationId" class="form-label">Accommodation</label>
-            <select asp-for="AccommodationId" class="form-select"
-                asp-items="@(new SelectList(ViewBag.Accommodations, "Id", "Name"))">
-                <option value="">Select an accommodation</option>
-            </select>
-            <span asp-validation-for="AccommodationId" class="text-danger"></span>
-        </div>
+                                <!--begin::Input group: Price-->
+                                <div class="fv-row mb-7">
+                                    <label class="required fw-bold fs-6 mb-2" asp-for="Price">Price</label>
+                                    <div class="input-group input-group-solid">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" asp-for="Price" class="form-control form-control-solid"
+                                            placeholder="0.00" step="0.01" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                                <!--end::Input group-->
 
-        <div class="mb-3">
-            <label asp-for="Status" class="form-label">Status</label>
-            <select asp-for="Status" class="form-select">
-                <option value="@LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Published">Published</option>
-                <option value="@LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Unpublished">Draft</option>
-            </select>
-            <span asp-validation-for="Status" class="text-danger"></span>
-        </div>
+                                <!--begin::Input group: Description-->
+                                <div class="fv-row mb-7">
+                                    <label class="required fw-bold fs-6 mb-2" asp-for="Description">Description</label>
+                                    <textarea asp-for="Description" class="form-control form-control-solid" rows="4"
+                                        placeholder="Enter package description"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                <!--end::Input group-->
 
-        <div class="mb-3">
-            <label class="form-label">Services</label>
-            <div class="form-check-container">
-                @if (accommodationServices.Any())
-                {
-                    foreach (var service in accommodationServices)
-                    {
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="SelectedServiceIds" value="@service.Id"
-                                @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : "") />
-                            <label class="form-check-label">@service.Name (Price: @service.Price)</label>
+                                <!--begin::Input group: Accommodation-->
+                                <div class="fv-row mb-7 d-none">
+                                    <label class="required fw-bold fs-6 mb-2"
+                                        asp-for="AccommodationId">Accommodation</label>
+                                    <select asp-for="AccommodationId" class="form-select form-select-solid"
+                                        data-control="select2" data-placeholder="Select an accommodation"
+                                        asp-items="@(new SelectList(ViewBag.Accommodations, "Id", "Name"))">
+                                        <option value="">Select an accommodation</option>
+                                    </select>
+                                    <span asp-validation-for="AccommodationId" class="text-danger"></span>
+                                </div>
+                                <!--end::Input group-->
+
+                                <!--begin::Input group: Status-->
+                                <div class="fv-row mb-7">
+                                    <label class="required fw-bold fs-6 mb-2" asp-for="Status">Status</label>
+                                    <select class="form-select form-select-solid form-select-sm"
+                                        asp-for="Status"  data-control="select2" data-hide-search="true"
+                                        asp-items="@(new List<SelectListItem> {
+                                                new SelectListItem { Text = "Published", Value = ((int)LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Published).ToString(), Selected = Model.Status == LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Published },
+                                                new SelectListItem { Text = "Unpublished", Value = ((int)LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Unpublished).ToString(), Selected = Model.Status == LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Unpublished }
+                                            })">
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+
+                                <!--end::Input group-->
+                            </div>
                         </div>
-                    }
-                }
-                else
-                {
-                    <p>No services available for this accommodation.</p>
-                }
-            </div>
-            <span asp-validation-for="SelectedServiceIds" class="text-danger"></span>
-        </div>
+                    </div>
 
-        <div class="mb-3">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+                    <!-- Right column: Services -->
+                    <div class="col-md-5">
+                        <div class="card card-flush h-100">
+                            <!--begin::Card Header-->
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <h2>Services Included with @Model.AccommodationName</h2>
+                                </div>
+                            </div>
+                            <!--end::Card Header-->
+
+                            <!--begin::Card Body-->
+                            <div class="card-body pt-0">
+                                <div class="mb-7">
+                                    @if (accommodationServices.Any())
+                                    {
+                                        <div class="d-flex flex-column">
+                                            @foreach (var service in accommodationServices)
+                                            {
+                                                <div class="d-flex align-items-center py-2 border-bottom">
+                                                    <div class="form-check form-check-custom form-check-solid form-check-sm">
+                                                        <input type="checkbox" class="form-check-input"
+                                                            name="SelectedServiceIds" value="@service.Id"
+                                                            @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : "") />
+                                                    </div>
+                                                    <div class="d-flex flex-column ms-3">
+                                                        <span class="text-gray-800 fw-bold fs-6">@service.Name</span>
+                                                        <span class="text-muted fs-7">$@service.Price</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-warning d-flex align-items-center p-4">
+                                            <i class="ki-duotone ki-information fs-2tx me-3 text-warning"></i>
+                                            <div>
+                                                <h4 class="mb-1 fw-bold text-gray-900">No Services Available</h4>
+                                                <div class="text-muted">No services are available for this accommodation.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <span asp-validation-for="SelectedServiceIds" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <!--end::Card Body-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end::Scroll-->
+
+            <!--begin::Actions-->
+            <div class="text-center pt-15 mt-5 border-top">
+                <a asp-action="Index" class="btn btn-light me-3">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="kt_combo_edit_submit">
+                    <span class="indicator-label">Save Changes</span>
+                    <span class="indicator-progress">Please wait...
+                        <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                </button>
+            </div>
+            <!--end::Actions-->
+        </form>
+    </div>
+    <!--end::Card body-->
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2
+            $('.form-select[data-control="select2"]').select2({
+                minimumResultsForSearch: Infinity
+            });
+
+            // Form submission
+            const form = document.querySelector('#kt_combo_edit_form');
+            const submitButton = document.querySelector('#kt_combo_edit_submit');
+
+            form.addEventListener('submit', function (e) {
+                // Prevent default to handle submission manually
+                e.preventDefault();
+
+                // Validate form
+                if (form.checkValidity()) {
+                    // Show loading indication
+                    submitButton.setAttribute('data-kt-indicator', 'on');
+                    submitButton.disabled = true;
+
+                    // Submit form
+                    form.submit();
+                } else {
+                    // Handle invalid form
+                    form.class  classList.add('was-validated');
+                }
+            });
+        });
+    </script>
 }
