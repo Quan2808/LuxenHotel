@@ -115,22 +115,51 @@
                                 <div class="mb-7">
                                     @if (accommodationServices.Any())
                                     {
-                                        <div class="d-flex flex-column">
-                                            @foreach (var service in accommodationServices)
-                                            {
-                                                <div class="d-flex align-items-center py-2 border-bottom">
-                                                    <div class="form-check form-check-custom form-check-solid form-check-sm">
-                                                        <input type="checkbox" class="form-check-input"
-                                                            name="SelectedServiceIds" value="@service.Id"
-                                                            @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : "") />
-                                                    </div>
-                                                    <div class="d-flex flex-column ms-3">
-                                                        <span class="text-gray-800 fw-bold fs-6">@service.Name</span>
-                                                        <span class="text-muted fs-7">$@service.Price</span>
-                                                    </div>
-                                                </div>
-                                            }
-                                        </div>
+
+                                        <table class="table align-middle table-row-dashed fs-6 gy-5 services-for-accommodation">
+                                            <thead>
+                                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                                                    <th class="w-25px pe-2"></th>
+                                                    <th class="min-w-200px">Service</th>
+                                                    <th class="min-w-100px text-end pe-5">Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="fw-semibold text-gray-600">
+                                                @foreach (var service in accommodationServices)
+                                                {
+                                                    var checkboxId = $"service_{service.Id}";
+                                                    <tr>
+                                                        <td>
+                                                            <div class="form-check form-check-sm form-check-custom form-check-solid">
+                                                                <input class="form-check-input service-checkbox" type="checkbox" 
+                                                                    name="SelectedServiceIds" value="@service.Id" id="@checkboxId"
+                                                                    data-price="@service.Price" data-accommodation-id=""
+                                                                    @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : "") />
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-gray-800 text-hover-primary fs-5 fw-bold">
+                                                            <label for="@checkboxId" class="cursor-pointer">
+                                                                @service.Name
+                                                            </label>
+                                                        </td>
+                                                        <td class="text-end pe-5">
+                                                            <span class="fw-bold ms-3">@service.Price.ToString("N0")</span>
+                                                            <i class="fa-solid fa-dong-sign"></i>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="2" class="text-end fw-bold">Estimated Total:</td>
+                                                    <td class="text-end pe-5">
+                                                        <span class="fw-bold ms-3 total-price" id="total_price">0</span>
+                                                        <i class="fa-solid fa-dong-sign"></i>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        
                                     }
                                     else
                                     {
@@ -198,6 +227,32 @@
                     form.class  classList.add('was-validated');
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const checkboxes = document.querySelectorAll('.service-checkbox');
+        const totalPriceEl = document.getElementById('total_price');
+
+        function updateTotalPrice() {
+            let total = 0;
+            checkboxes.forEach(cb => {
+            if (cb.checked) {
+                // Lấy giá trị giá từ data-price, parse thành số
+                const price = parseFloat(cb.getAttribute('data-price')) || 0;
+                total += price;
+            }
+            });
+            // Hiển thị tổng giá theo định dạng số có dấu phẩy (N0)
+            totalPriceEl.textContent = total.toLocaleString('vi-VN');
+        }
+
+        // Gắn sự kiện change cho từng checkbox
+        checkboxes.forEach(cb => cb.addEventListener('change', updateTotalPrice));
+
+        // Khởi tạo tổng giá khi load trang
+        updateTotalPrice();
         });
     </script>
 }
