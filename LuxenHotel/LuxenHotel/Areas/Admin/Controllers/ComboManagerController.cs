@@ -92,7 +92,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid combo ID.";
+                AddNotification("Invalid combo ID.", NotificationType.Error);
+                LogInfo("Attempted to edit combo with invalid ID");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -101,7 +102,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 var combo = await _comboService.GetComboByIdAsync(id);
                 if (combo == null)
                 {
-                    TempData["ErrorMessage"] = "Combo not found.";
+                    AddNotification("Combo not found.", NotificationType.Error);
+                    LogInfo($"Combo with ID {id} not found");
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -109,16 +111,15 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 var accommodationServices = await _accommodationService.GetServicesForAccommodationAsync(combo.AccommodationId);
 
                 ViewBag.Accommodations = accommodations;
-                ViewBag.AccommodationServices = accommodationServices; // Available services for checkboxes
-
+                ViewBag.AccommodationServices = accommodationServices;
                 SetPageTitle($"Edit {combo.Name}");
+                LogInfo($"Loaded edit page for combo ID {id}");
 
                 return View(combo);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while loading the combo. Please try again later.";
-                return RedirectToAction(nameof(Index));
+                return HandleError("An error occurred while loading the combo.", ex);
             }
         }
 
@@ -141,12 +142,12 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 viewModel.Services = await _accommodationService.GetServicesForAccommodationAsync(viewModel.AccommodationId);
                 ViewBag.Accommodations = await _accommodationService.GetDropdownListAsync();
                 ViewBag.AccommodationServices = viewModel.Services;
+                LogInfo($"Invalid model state for combo ID {id} edit");
                 return View(viewModel);
             }
 
             try
             {
-                // Map view model to entity
                 var combo = new Combo
                 {
                     Id = viewModel.Id,
@@ -158,23 +159,19 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                // Update combo with selected services
                 await _comboService.UpdateComboAsync(combo, viewModel.SelectedServiceIds ?? new List<int>());
 
                 AddNotification("Combo updated successfully", NotificationType.Success);
-                LogInfo($"Combo ID {id} updated successfully.");
+                LogInfo($"Combo ID {id} updated successfully");
                 return RedirectToAction(nameof(Edit), new { id });
             }
             catch (Exception ex)
             {
-                LogError("Error updating combo.", ex);
-
-                // Reload data for the form
                 viewModel.Services = await _accommodationService.GetServicesForAccommodationAsync(viewModel.AccommodationId);
                 ViewBag.Accommodations = await _accommodationService.GetDropdownListAsync();
                 ViewBag.AccommodationServices = viewModel.Services;
-                AddNotification("An error occurred while updating the combo.", NotificationType.Error);
-                return View(viewModel);
+
+                return HandleError("An error occurred while updating the combo.", ex);
             }
         }
 
