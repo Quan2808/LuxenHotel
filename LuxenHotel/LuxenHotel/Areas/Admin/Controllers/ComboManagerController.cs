@@ -90,9 +90,14 @@ namespace LuxenHotel.Areas.Admin.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
+            if (id <= 0)
+            {
+                TempData["ErrorMessage"] = "Invalid combo ID.";
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
-                // Get the combo with its services
                 var combo = await _comboService.GetComboByIdAsync(id);
                 if (combo == null)
                 {
@@ -100,99 +105,76 @@ namespace LuxenHotel.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Get all accommodations for dropdown
                 var accommodations = await _accommodationService.GetDropdownListAsync();
-
-                // Get services for the combo's accommodation
                 var accommodationServices = await _accommodationService.GetServicesForAccommodationAsync(combo.AccommodationId);
 
-                // Create the view model
-                var viewModel = new ComboViewModel
-                {
-                    Id = combo.Id,
-                    Name = combo.Name,
-                    Price = combo.Price,
-                    Description = combo.Description,
-                    AccommodationId = combo.AccommodationId,
-                    AccommodationName = combo.Accommodation?.Name,
-                    Status = combo.Status,
-                    // Get the IDs of the services associated with this combo
-                    SelectedServiceIds = combo.ComboServices.Select(s => s.Id).ToList(),
-                    Services = accommodationServices,
-                    CreatedAt = combo.CreatedAt
-                };
-
-                // Store accommodation services in ViewBag for the view to use
                 ViewBag.Accommodations = accommodations;
-                ViewBag.AccommodationServices = new Dictionary<int, IEnumerable<ServiceViewModel>>
-                {
-                    { combo.AccommodationId, accommodationServices }
-                };
-                SetPageTitle($"Edit {viewModel.Name}");
-                return View(viewModel);
+                ViewBag.AccommodationServices = accommodationServices; // Available services for checkboxes
+
+                SetPageTitle($"Edit {combo.Name}");
+
+                return View(combo);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading combo: {ex.Message}";
+                TempData["ErrorMessage"] = "An error occurred while loading the combo. Please try again later.";
                 return RedirectToAction(nameof(Index));
             }
         }
 
-        [HttpPost]
-        [Route("edit")]
+        [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ComboViewModel model)
+        public async Task<IActionResult> Edit(int id, ComboViewModel viewModel)
         {
+            if (id != viewModel.Id)
+            {
+                AddNotification("Invalid combo ID.", NotificationType.Error);
+                LogInfo("Mismatch between route ID and view model ID.");
+                return RedirectToAction(nameof(Index));
+            }
+
             if (!ModelState.IsValid)
             {
                 HandleInvalidModelState();
 
-                // Re-populate the data for the view
-                await PrepareEditViewData(model);
-                return View(model);
+                // Reload data for the form
+                viewModel.Services = await _accommodationService.GetServicesForAccommodationAsync(viewModel.AccommodationId);
+                ViewBag.Accommodations = await _accommodationService.GetDropdownListAsync();
+                ViewBag.AccommodationServices = viewModel.Services;
+                return View(viewModel);
             }
 
             try
             {
-                // Validate the accommodation
-                var accommodation = await _accommodationService.GetAsync(model.AccommodationId);
-                if (accommodation == null)
-                {
-                    TempData["ErrorMessage"] = "The selected accommodation does not exist.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Get the existing combo to ensure it exists
-                var existingCombo = await _comboService.GetComboByIdAsync(model.Id);
-                if (existingCombo == null)
-                {
-                    TempData["ErrorMessage"] = "Combo not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                // Create the combo entity from the view model
+                // Map view model to entity
                 var combo = new Combo
                 {
-                    Id = model.Id,
-                    Name = model.Name,
-                    Price = model.Price,
-                    Description = model.Description,
-                    AccommodationId = model.AccommodationId,
-                    Status = model.Status,
-                    // Keep the original creation date
-                    CreatedAt = existingCombo.CreatedAt
+                    Id = viewModel.Id,
+                    Name = viewModel.Name,
+                    Price = viewModel.Price,
+                    Description = viewModel.Description,
+                    AccommodationId = viewModel.AccommodationId,
+                    Status = viewModel.Status,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
-                // Update the combo and its service relationships
-                await _comboService.UpdateComboAsync(combo, model.SelectedServiceIds);
+                // Update combo with selected services
+                await _comboService.UpdateComboAsync(combo, viewModel.SelectedServiceIds ?? new List<int>());
 
-                TempData["SuccessMessage"] = "Combo updated successfully!";
-                return RedirectToAction(nameof(Index));
+                AddNotification("Combo updated successfully", NotificationType.Success);
+                LogInfo($"Combo ID {id} updated successfully.");
+                return RedirectToAction(nameof(Edit), new { id });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error updating combo: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                LogError("Error updating combo.", ex);
+
+                // Reload data for the form
+                viewModel.Services = await _accommodationService.GetServicesForAccommodationAsync(viewModel.AccommodationId);
+                ViewBag.Accommodations = await _accommodationService.GetDropdownListAsync();
+                ViewBag.AccommodationServices = viewModel.Services;
+                AddNotification("An error occurred while updating the combo.", NotificationType.Error);
+                return View(viewModel);
             }
         }
 

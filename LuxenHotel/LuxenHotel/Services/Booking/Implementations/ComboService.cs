@@ -17,11 +17,11 @@ public class ComboService : IComboService
 
     public async Task<List<ComboViewModel>> ListAsync()
     {
-        // Fetch combos with their accommodations
+        // Fetch combos with their accommodations and services
         var combos = await _context.Combos
             .AsNoTracking()
             .Include(c => c.Accommodation)
-            .Include(c => c.ComboServices) // Direct include for the many-to-many relationship
+            .Include(c => c.ComboServices)
             .ToListAsync();
 
         // Map to view models
@@ -39,7 +39,8 @@ public class ComboService : IComboService
             {
                 Id = service.Id,
                 Name = service.Name
-            })
+            }).ToList(),
+            SelectedServiceIds = combo.ComboServices.Select(service => service.Id).ToList()
         }).ToList();
 
         return result;
@@ -49,6 +50,8 @@ public class ComboService : IComboService
     {
         return await _context.Combos
             .Where(c => c.AccommodationId == accommodationId)
+            .Include(c => c.Accommodation)
+            .Include(c => c.ComboServices)
             .Select(c => new ComboViewModel
             {
                 Id = c.Id,
@@ -66,25 +69,54 @@ public class ComboService : IComboService
                     Price = cs.Price,
                     Description = cs.Description
                 }).ToList(),
+                SelectedServiceIds = c.ComboServices.Select(cs => cs.Id).ToList()
             })
             .AsSplitQuery()
             .ToListAsync();
     }
 
-    public async Task<Combo?> GetComboByIdAsync(int comboId)
+    public async Task<ComboViewModel?> GetComboByIdAsync(int comboId)
     {
-        return await _context.Combos
-            .AsNoTracking()
-            .Include(c => c.Accommodation)
-            .Include(c => c.ComboServices)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(c => c.Id == comboId);
+        try
+        {
+            var combo = await _context.Combos
+                .AsNoTracking()
+                .Where(c => c.Id == comboId)
+                .Include(c => c.Accommodation)
+                .Include(c => c.ComboServices)
+                .Select(c => new ComboViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Price = c.Price,
+                    Description = c.Description,
+                    AccommodationId = c.AccommodationId,
+                    AccommodationName = c.Accommodation.Name,
+                    Status = c.Status,
+                    CreatedAt = c.CreatedAt,
+                    Services = c.ComboServices.Select(cs => new ServiceViewModel
+                    {
+                        Id = cs.Id,
+                        Name = cs.Name,
+                        Price = cs.Price,
+                        Description = cs.Description
+                    }).ToList(),
+                    SelectedServiceIds = c.ComboServices.Select(cs => cs.Id).ToList()
+                })
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
+
+            return combo;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred while retrieving the combo.", ex);
+        }
     }
 
     public async Task<Combo> CreateComboAsync(Combo combo, List<int> selectedServiceIds)
     {
         combo.CreatedAt = DateTime.UtcNow;
-        // combo.UpdatedAt = DateTime.UtcNow;
 
         // First, save the combo without services to get an ID
         await _context.Combos.AddAsync(combo);

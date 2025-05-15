@@ -7,7 +7,7 @@ namespace LuxenHotel.Services.Booking.Interfaces
     {
         Task<List<ComboViewModel>> ListAsync();
         Task<List<ComboViewModel>> GetCombosByAccommodationIdAsync(int accommodationId);
-        Task<Combo?> GetComboByIdAsync(int comboId);
+        Task<ComboViewModel> GetComboByIdAsync(int comboId);
         Task<Combo> CreateComboAsync(Combo combo, List<int> selectedServiceIds);
         Task UpdateComboAsync(Combo combo, List<int> selectedServiceIds);
         Task<bool> DeleteComboAsync(int comboId);
