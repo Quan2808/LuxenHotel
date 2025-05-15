@@ -66,40 +66,13 @@
   </div>
 
   <!-- Combos -->
-  <div data-kt-menu-trigger="click" class="menu-item menu-accordion @(controller == "ComboManager" ? "here show" : "")">
-    <!--begin:Menu link-->
-    <span class="menu-link">
+  <div data-kt-menu-trigger="click" class="menu-item @(controller == "ComboManager" ? "here show" : "")">
+    <a class="menu-link" asp-area="Admin" asp-controller="ComboManager" asp-action="Index">
       <span class="menu-icon">
         <i class="fa-solid fa-compass ps-1"></i>
       </span>
       <span class="menu-title">Combos</span>
-      <span class="menu-arrow"></span>
-    </span>
-    <!--end:Menu link-->
-
-    <!--begin:Menu sub-->
-    <div class="menu-sub menu-sub-accordion">
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link @(action == "Index" && controller == "ComboManager" ? "active" : "")" asp-area="Admin"
-          asp-controller="ComboManager" asp-action="Index">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">View All</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-
-      <!--begin:Menu item-->
-      <div class="menu-item">
-        <a class="menu-link  @(action == "Create" && controller == "ComboManager" ? "active" : "")" asp-area="Admin"
-          asp-controller="ComboManager" asp-action="Create">
-          <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-          <span class="menu-title">Add New</span>
-        </a>
-      </div>
-      <!--end:Menu item-->
-    </div>
-    <!--end:Menu sub-->
+    </a>
   </div>
 
   <!-- Users -->

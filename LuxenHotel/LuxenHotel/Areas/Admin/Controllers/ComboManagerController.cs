@@ -112,7 +112,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
                 ViewBag.Accommodations = accommodations;
                 ViewBag.AccommodationServices = accommodationServices;
-                SetPageTitle($"Edit {combo.Name}");
+                SetPageTitle($"Edit Combo - {combo.Name}");
                 LogInfo($"Loaded edit page for combo ID {id}");
 
                 return View(combo);

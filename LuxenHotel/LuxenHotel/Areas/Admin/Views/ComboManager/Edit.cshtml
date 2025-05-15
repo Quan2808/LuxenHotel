@@ -5,197 +5,30 @@
     var accommodationServices = ViewBag.AccommodationServices as List<ServiceViewModel> ?? new List<ServiceViewModel>();
 }
 
-<div class="card shadow-sm">
-    <!--begin::Card header-->
-    <div class="card-header border-0 pt-6">
-        <div class="card-title">
-            <h2 class="fw-bolder">Edit Combo Package - @Model.Name</h2>
+<form asp-action="Edit" method="post" id="kt_combo_edit_form" class="form">
+    <div class="scroll-y me-n7 pe-7" id="kt_modal_edit_combo_scroll" data-kt-scroll="true"
+        data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto"
+        data-kt-scroll-dependencies="#kt_modal_edit_combo_header" data-kt-scroll-wrappers="#kt_modal_edit_combo_scroll"
+        data-kt-scroll-offset="300px">
+
+        <div class="row">
+            <div class="col-md-7 scroll-y me-n7 pe-7">
+                @await Html.PartialAsync("Partial/EditForm/_GeneralInfo", Model)
+            </div>
+
+            <div class="col-md-5">
+                @await Html.PartialAsync("Partial/EditForm/_ServicesIncluded", Model)
+            </div>
         </div>
     </div>
-    <!--end::Card header-->
 
-    <!--begin::Card body-->
-    <div class="card-body pt-0">
-        <form asp-action="Edit" method="post" id="kt_combo_edit_form" class="form">
-            <!--begin::Scroll-->
-            <div class="scroll-y me-n7 pe-7" id="kt_modal_edit_combo_scroll" data-kt-scroll="true"
-                data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto"
-                data-kt-scroll-dependencies="#kt_modal_edit_combo_header"
-                data-kt-scroll-wrappers="#kt_modal_edit_combo_scroll" data-kt-scroll-offset="300px">
-
-                <div class="row">
-                    <!-- Left column: General Information -->
-                    <div class="col-md-7 scroll-y me-n7 pe-7">
-                        <div class="card card-flush">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <h2>General</h2>
-                                </div>
-                            </div>
-
-                            <div class="card-body pt-0">
-                                <input type="hidden" asp-for="Id" />
-                                <input type="hidden" asp-for="CreatedAt" />
-
-                                <!--begin::Input group: Name-->
-                                <div class="fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2" asp-for="Name">Package Name</label>
-                                    <input type="text" asp-for="Name"
-                                        class="form-control form-control-solid mb-3 mb-lg-0"
-                                        placeholder="Enter combo package name" />
-                                    <span asp-validation-for="Name" class="text-danger"></span>
-                                </div>
-                                <!--end::Input group-->
-
-                                <!--begin::Input group: Price-->
-                                <div class="fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2" asp-for="Price">Price</label>
-                                    <div class="input-group input-group-solid">
-                                        <span class="input-group-text">$</span>
-                                        <input type="number" asp-for="Price" class="form-control form-control-solid"
-                                            placeholder="0.00" step="0.01" />
-                                    </div>
-                                    <span asp-validation-for="Price" class="text-danger"></span>
-                                </div>
-                                <!--end::Input group-->
-
-                                <!--begin::Input group: Description-->
-                                <div class="fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2" asp-for="Description">Description</label>
-                                    <textarea asp-for="Description" class="form-control form-control-solid" rows="4"
-                                        placeholder="Enter package description"></textarea>
-                                    <span asp-validation-for="Description" class="text-danger"></span>
-                                </div>
-                                <!--end::Input group-->
-
-                                <!--begin::Input group: Accommodation-->
-                                <div class="fv-row mb-7 d-none">
-                                    <label class="required fw-bold fs-6 mb-2"
-                                        asp-for="AccommodationId">Accommodation</label>
-                                    <select asp-for="AccommodationId" class="form-select form-select-solid"
-                                        data-control="select2" data-placeholder="Select an accommodation"
-                                        asp-items="@(new SelectList(ViewBag.Accommodations, "Id", "Name"))">
-                                        <option value="">Select an accommodation</option>
-                                    </select>
-                                    <span asp-validation-for="AccommodationId" class="text-danger"></span>
-                                </div>
-                                <!--end::Input group-->
-
-                                <!--begin::Input group: Status-->
-                                <div class="fv-row mb-7">
-                                    <label class="required fw-bold fs-6 mb-2" asp-for="Status">Status</label>
-                                    <select class="form-select form-select-solid form-select-sm"
-                                        asp-for="Status"  data-control="select2" data-hide-search="true"
-                                        asp-items="@(new List<SelectListItem> {
-                                                new SelectListItem { Text = "Published", Value = ((int)LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Published).ToString(), Selected = Model.Status == LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Published },
-                                                new SelectListItem { Text = "Unpublished", Value = ((int)LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Unpublished).ToString(), Selected = Model.Status == LuxenHotel.Models.Entities.Booking.Combo.ComboStatus.Unpublished }
-                                            })">
-                                    </select>
-                                    <span asp-validation-for="Status" class="text-danger"></span>
-                                </div>
-
-                                <!--end::Input group-->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right column: Services -->
-                    <div class="col-md-5">
-                        <div class="card card-flush h-100">
-                            <!--begin::Card Header-->
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <h2>Services Included with @Model.AccommodationName</h2>
-                                </div>
-                            </div>
-                            <!--end::Card Header-->
-
-                            <!--begin::Card Body-->
-                            <div class="card-body pt-0">
-                                <div class="mb-7">
-                                    @if (accommodationServices.Any())
-                                    {
-
-                                        <table class="table align-middle table-row-dashed fs-6 gy-5 services-for-accommodation">
-                                            <thead>
-                                                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                                                    <th class="w-25px pe-2"></th>
-                                                    <th class="min-w-200px">Service</th>
-                                                    <th class="min-w-100px text-end pe-5">Price</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="fw-semibold text-gray-600">
-                                                @foreach (var service in accommodationServices)
-                                                {
-                                                    var checkboxId = $"service_{service.Id}";
-                                                    <tr>
-                                                        <td>
-                                                            <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                                                <input class="form-check-input service-checkbox" type="checkbox" 
-                                                                    name="SelectedServiceIds" value="@service.Id" id="@checkboxId"
-                                                                    data-price="@service.Price" data-accommodation-id=""
-                                                                    @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : "") />
-                                                            </div>
-                                                        </td>
-                                                        <td class="text-gray-800 text-hover-primary fs-5 fw-bold">
-                                                            <label for="@checkboxId" class="cursor-pointer">
-                                                                @service.Name
-                                                            </label>
-                                                        </td>
-                                                        <td class="text-end pe-5">
-                                                            <span class="fw-bold ms-3">@service.Price.ToString("N0")</span>
-                                                            <i class="fa-solid fa-dong-sign"></i>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <td colspan="2" class="text-end fw-bold">Estimated Total:</td>
-                                                    <td class="text-end pe-5">
-                                                        <span class="fw-bold ms-3 total-price" id="total_price">0</span>
-                                                        <i class="fa-solid fa-dong-sign"></i>
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                        
-                                    }
-                                    else
-                                    {
-                                        <div class="alert alert-warning d-flex align-items-center p-4">
-                                            <i class="ki-duotone ki-information fs-2tx me-3 text-warning"></i>
-                                            <div>
-                                                <h4 class="mb-1 fw-bold text-gray-900">No Services Available</h4>
-                                                <div class="text-muted">No services are available for this accommodation.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                    <span asp-validation-for="SelectedServiceIds" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <!--end::Card Body-->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--end::Scroll-->
-
-            <!--begin::Actions-->
-            <div class="text-center pt-15 mt-5 border-top">
-                <a asp-action="Index" class="btn btn-light me-3">Cancel</a>
-                <button type="submit" class="btn btn-primary" id="kt_combo_edit_submit">
-                    <span class="indicator-label">Save Changes</span>
-                    <span class="indicator-progress">Please wait...
-                        <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                </button>
-            </div>
-            <!--end::Actions-->
-        </form>
+    <div class="text-end pt-15 mt-5">
+        <a asp-action="Index" class="btn btn-light me-3">Cancel</a>
+        <button type="submit" id="kt_combo_edit_submit" class="btn btn-primary">
+            Save Changes
+        </button>
     </div>
-    <!--end::Card body-->
-</div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -232,27 +65,27 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-        const checkboxes = document.querySelectorAll('.service-checkbox');
-        const totalPriceEl = document.getElementById('total_price');
+            const checkboxes = document.querySelectorAll('.service-checkbox');
+            const totalPriceEl = document.getElementById('total_price');
 
-        function updateTotalPrice() {
-            let total = 0;
-            checkboxes.forEach(cb => {
-            if (cb.checked) {
-                // Lấy giá trị giá từ data-price, parse thành số
-                const price = parseFloat(cb.getAttribute('data-price')) || 0;
-                total += price;
+            function updateTotalPrice() {
+                let total = 0;
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        // Lấy giá trị giá từ data-price, parse thành số
+                        const price = parseFloat(cb.getAttribute('data-price')) || 0;
+                        total += price;
+                    }
+                });
+                // Hiển thị tổng giá theo định dạng số có dấu phẩy (N0)
+                totalPriceEl.textContent = total.toLocaleString('vi-VN');
             }
-            });
-            // Hiển thị tổng giá theo định dạng số có dấu phẩy (N0)
-            totalPriceEl.textContent = total.toLocaleString('vi-VN');
-        }
 
-        // Gắn sự kiện change cho từng checkbox
-        checkboxes.forEach(cb => cb.addEventListener('change', updateTotalPrice));
+            // Gắn sự kiện change cho từng checkbox
+            checkboxes.forEach(cb => cb.addEventListener('change', updateTotalPrice));
 
-        // Khởi tạo tổng giá khi load trang
-        updateTotalPrice();
+            // Khởi tạo tổng giá khi load trang
+            updateTotalPrice();
         });
     </script>
 }
