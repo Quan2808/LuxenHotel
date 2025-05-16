@@ -1,5 +1,6 @@
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Identity;
+using LuxenHotel.Models.Entities.Order;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,9 @@ namespace LuxenHotel.Data
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Combo> Combos { get; set; }
+        
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -80,5 +84,80 @@ namespace LuxenHotel.Data
                         .OnDelete(DeleteBehavior.Restrict)
                 ).ToTable("ComboService");
         }
+        
+        private void ConfigureOrder(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Order>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .IsRequired(false) 
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Accommodation)
+                .WithMany()
+                .HasForeignKey(o => o.AccommodationId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Service)
+                .WithMany()
+                .HasForeignKey(o => o.ServiceId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Combo)
+                .WithMany()
+                .HasForeignKey(o => o.ComboId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            modelBuilder.Entity<Order>()
+                .ToTable(t => t.HasCheckConstraint("CK_Order_ServiceOrCombo", 
+                    "([ServiceId] IS NULL AND [ComboId] IS NOT NULL) OR ([ServiceId] IS NOT NULL AND [ComboId] IS NULL)"));
+                
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Order)
+                .WithMany()
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade); 
+                
+            modelBuilder.Entity<Payment>()
+                .HasIndex(p => p.TransactionId)
+                .IsUnique();
+                
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Status)
+                .HasConversion<string>();
+                
+            modelBuilder.Entity<Order>()
+                .Property(o => o.PaymentMethod)
+                .HasConversion<string>();
+                
+            modelBuilder.Entity<Order>()
+                .Property(o => o.PaymentStatus)
+                .HasConversion<string>();
+                
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Status)
+                .HasConversion<string>();
+                
+            modelBuilder.Entity<Order>()
+                .Property(o => o.OrderCode)
+                .IsRequired()
+                .HasMaxLength(20);
+                
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.TransactionId)
+                .IsRequired()
+                .HasMaxLength(100);
+                
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.PaymentProvider)
+                .IsRequired()
+                .HasMaxLength(50);
+        }   
     }
 }
