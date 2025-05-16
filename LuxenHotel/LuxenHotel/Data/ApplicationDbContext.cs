@@ -18,8 +18,10 @@ namespace LuxenHotel.Data
         public DbSet<Accommodation> Accommodations { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Combo> Combos { get; set; }
-        
+
         public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderService> OrderService { get; set; }
+        public DbSet<OrderCombo> OrderCombo { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -29,6 +31,7 @@ namespace LuxenHotel.Data
             // Call the separated configuration methods
             ConfigureIdentity(builder);
             ConfigureBooking(builder);
+            ConfigureOrder(builder);
         }
 
         private void ConfigureIdentity(ModelBuilder builder)
@@ -84,80 +87,86 @@ namespace LuxenHotel.Data
                         .OnDelete(DeleteBehavior.Restrict)
                 ).ToTable("ComboService");
         }
-        
+
         private void ConfigureOrder(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Orders>()
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
-                .IsRequired(false) 
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
-                
+
             modelBuilder.Entity<Orders>()
                 .HasOne(o => o.Accommodation)
                 .WithMany()
                 .HasForeignKey(o => o.AccommodationId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
-            modelBuilder.Entity<Orders>()
-                .HasOne(o => o.Service)
+
+            modelBuilder.Entity<OrderService>()
+                    .HasOne(os => os.Order)
+                    .WithMany(o => o.OrderServices)
+                    .HasForeignKey(os => os.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderService>()
+                .HasOne(os => os.Service)
                 .WithMany()
-                .HasForeignKey(o => o.ServiceId)
-                .IsRequired(false)
+                .HasForeignKey(os => os.ServiceId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
-            modelBuilder.Entity<Orders>()
-                .HasOne(o => o.Combo)
+
+            modelBuilder.Entity<OrderCombo>()
+                .HasOne(oc => oc.Order)
+                .WithMany(o => o.OrderCombos)
+                .HasForeignKey(oc => oc.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderCombo>()
+                .HasOne(oc => oc.Combo)
                 .WithMany()
-                .HasForeignKey(o => o.ComboId)
-                .IsRequired(false)
+                .HasForeignKey(oc => oc.ComboId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
-            modelBuilder.Entity<Orders>()
-                .ToTable(t => t.HasCheckConstraint("CK_Order_ServiceOrCombo", 
-                    "([ServiceId] IS NULL AND [ComboId] IS NOT NULL) OR ([ServiceId] IS NOT NULL AND [ComboId] IS NULL)"));
-                
+
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Orders)
                 .WithMany()
                 .HasForeignKey(p => p.OrderId)
-                .OnDelete(DeleteBehavior.Cascade); 
-                
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Payment>()
                 .HasIndex(p => p.TransactionId)
                 .IsUnique();
-                
+
             modelBuilder.Entity<Orders>()
                 .Property(o => o.Status)
                 .HasConversion<string>();
-                
+
             modelBuilder.Entity<Orders>()
                 .Property(o => o.PaymentMethod)
                 .HasConversion<string>();
-                
+
             modelBuilder.Entity<Orders>()
                 .Property(o => o.PaymentStatus)
                 .HasConversion<string>();
-                
+
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Status)
                 .HasConversion<string>();
-                
+
             modelBuilder.Entity<Orders>()
                 .Property(o => o.OrderCode)
                 .IsRequired()
                 .HasMaxLength(20);
-                
+
             modelBuilder.Entity<Payment>()
                 .Property(p => p.TransactionId)
                 .IsRequired()
                 .HasMaxLength(100);
-                
+
             modelBuilder.Entity<Payment>()
                 .Property(p => p.PaymentProvider)
                 .IsRequired()
                 .HasMaxLength(50);
-        }   
+        }
     }
 }

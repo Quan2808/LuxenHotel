@@ -12,13 +12,11 @@ public class Orders
     public int Id { get; set; }
 
     [Required]
-    public string OrderCode { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+    public string OrderCode { get; set; } = Guid.NewGuid().ToString("N")[..10].ToUpper();
 
-    // User information - linked to AspNetUsers
     public string? UserId { get; set; }
     public User? User { get; set; }
 
-    // Customer information (for guest bookings)
     public string? CustomerName { get; set; }
     public string? CustomerEmail { get; set; }
     public string? CustomerPhone { get; set; }
@@ -27,7 +25,6 @@ public class Orders
     public int AccommodationId { get; set; }
     public Accommodation Accommodation { get; set; }
 
-    // Transaction ID from payment gateways
     public string? TransactionId { get; set; }
 
     [Required]
@@ -44,63 +41,84 @@ public class Orders
     [Range(0, int.MaxValue, ErrorMessage = "Total price must be a positive number")]
     public int TotalPrice { get; set; }
 
-    // Check-in/out dates
     [Required]
     public DateTime CheckInDate { get; set; }
 
     [Required]
     public DateTime CheckOutDate { get; set; }
 
-    // Number of guests
     [Required]
     [Range(1, 50, ErrorMessage = "Number of guests must be between 1 and 50")]
     public int NumberOfGuests { get; set; }
 
-    // Order can include either Service or Combo, not both
-    public int? ServiceId { get; set; }
-    public Service? Service { get; set; }
-    public int? ServiceQuantity { get; set; }
-
-    public int? ComboId { get; set; }
-    public Combo? Combo { get; set; }
-    public int? ComboQuantity { get; set; }
-
-    // Special requests
     public string? SpecialRequests { get; set; }
 
-    // Timestamps
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-
-    // Payment and cancellation timestamps
     public DateTime? PaidAt { get; set; }
     public DateTime? CancelledAt { get; set; }
 
-    // Cancellation reason
     public string? CancellationReason { get; set; }
 
-    // Calculate total price
+    // Danh sách dịch vụ & combo
+    public List<OrderService> OrderServices { get; set; } = new();
+    public List<OrderCombo> OrderCombos { get; set; } = new();
+
     public void CalculateTotalPrice()
     {
         int total = Accommodation?.Price ?? 0;
 
-        // Calculate number of stay days
         int numberOfDays = (int)Math.Ceiling((CheckOutDate - CheckInDate).TotalDays);
         if (numberOfDays < 1) numberOfDays = 1;
         total *= numberOfDays;
 
-        // Add service price if applicable
-        if (Service != null && ServiceQuantity.HasValue)
+        foreach (var os in OrderServices)
         {
-            total += Service.Price * ServiceQuantity.Value;
+            total += os.Service?.Price * os.Quantity ?? 0;
         }
 
-        // Add combo price if applicable
-        if (Combo != null && ComboQuantity.HasValue)
+        foreach (var oc in OrderCombos)
         {
-            total += Combo.Price * ComboQuantity.Value;
+            total += oc.Combo?.Price * oc.Quantity ?? 0;
         }
 
         TotalPrice = total;
     }
+}
+
+public class OrderService
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required]
+    public int OrderId { get; set; }
+    public Orders Order { get; set; }
+
+    [Required]
+    public int ServiceId { get; set; }
+    public Service Service { get; set; }
+
+    [Required]
+    [Range(1, 100, ErrorMessage = "Số lượng phải lớn hơn 0")]
+    public int Quantity { get; set; }
+}
+
+
+public class OrderCombo
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required]
+    public int OrderId { get; set; }
+    public Orders Order { get; set; }
+
+    [Required]
+    public int ComboId { get; set; }
+    public Combo Combo { get; set; }
+
+    [Required]
+    [Range(1, 100, ErrorMessage = "Số lượng phải lớn hơn 0")]
+    public int Quantity { get; set; }
 }
