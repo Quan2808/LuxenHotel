@@ -2,7 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace LuxenHotel.Models.Entities.Order;
+namespace LuxenHotel.Models.Entities.Orders;
 
 public class Payment
 {
@@ -11,7 +11,7 @@ public class Payment
 
     [Required]
     public int OrderId { get; set; }
-    public Order Order { get; set; }
+    public Orders Orders { get; set; }
 
     // Transaction ID from third-party payment providers
     [Required]

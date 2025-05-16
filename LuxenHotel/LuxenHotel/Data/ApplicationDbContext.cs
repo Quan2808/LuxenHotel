@@ -1,6 +1,6 @@
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Identity;
-using LuxenHotel.Models.Entities.Order;
+using LuxenHotel.Models.Entities.Orders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,7 @@ namespace LuxenHotel.Data
         public DbSet<Service> Services { get; set; }
         public DbSet<Combo> Combos { get; set; }
         
-        public DbSet<Order> Orders { get; set; }
+        public DbSet<Orders> Orders { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -87,39 +87,39 @@ namespace LuxenHotel.Data
         
         private void ConfigureOrder(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
                 .IsRequired(false) 
                 .OnDelete(DeleteBehavior.SetNull);
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .HasOne(o => o.Accommodation)
                 .WithMany()
                 .HasForeignKey(o => o.AccommodationId)
                 .OnDelete(DeleteBehavior.Restrict);
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .HasOne(o => o.Service)
                 .WithMany()
                 .HasForeignKey(o => o.ServiceId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .HasOne(o => o.Combo)
                 .WithMany()
                 .HasForeignKey(o => o.ComboId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .ToTable(t => t.HasCheckConstraint("CK_Order_ServiceOrCombo", 
                     "([ServiceId] IS NULL AND [ComboId] IS NOT NULL) OR ([ServiceId] IS NOT NULL AND [ComboId] IS NULL)"));
                 
             modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Order)
+                .HasOne(p => p.Orders)
                 .WithMany()
                 .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade); 
@@ -128,15 +128,15 @@ namespace LuxenHotel.Data
                 .HasIndex(p => p.TransactionId)
                 .IsUnique();
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .Property(o => o.Status)
                 .HasConversion<string>();
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .Property(o => o.PaymentMethod)
                 .HasConversion<string>();
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .Property(o => o.PaymentStatus)
                 .HasConversion<string>();
                 
@@ -144,7 +144,7 @@ namespace LuxenHotel.Data
                 .Property(p => p.Status)
                 .HasConversion<string>();
                 
-            modelBuilder.Entity<Order>()
+            modelBuilder.Entity<Orders>()
                 .Property(o => o.OrderCode)
                 .IsRequired()
                 .HasMaxLength(20);

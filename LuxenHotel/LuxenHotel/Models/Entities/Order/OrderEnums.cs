@@ -1,4 +1,4 @@
-﻿namespace LuxenHotel.Models.Entities.Order;
+﻿namespace LuxenHotel.Models.Entities.Orders;
 
 public enum OrderStatus
 {

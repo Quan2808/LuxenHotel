@@ -4,9 +4,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LuxenHotel.Models.Entities.Order;
+namespace LuxenHotel.Models.Entities.Orders;
 
-public class Order
+public class Orders
 {
     [Key]
     public int Id { get; set; }
