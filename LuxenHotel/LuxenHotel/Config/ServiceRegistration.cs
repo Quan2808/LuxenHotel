@@ -7,8 +7,8 @@ using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Services.Booking.Implementations;
 using LuxenHotel.Services.Booking.Interfaces;
 using LuxenHotel.Services.Identity;
-using LuxenHotel.Services.Order.Interfaces;
 using LuxenHotel.Services.Order.Implementations;
+using LuxenHotel.Services.Order.Interfaces;
 
 namespace LuxenHotel.Configuration
 {
@@ -28,6 +28,9 @@ namespace LuxenHotel.Configuration
 
             // Register PaymentService
             services.AddScoped<IPaymentService, PaymentService>();
+
+            // Register ComboService
+            services.AddScoped<IComboService, ComboService>();
 
             return services;
         }
