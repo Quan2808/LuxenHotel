@@ -1,8 +1,10 @@
 @model LuxenHotel.Models.ViewModels.OrderCreateViewModel
 @using LuxenHotel.Models.Entities.Booking
 
+
 @{
-ViewData["Title"] = "Create Order";
+    ViewData["Title"] = "Create Order";
+    var accommodation = (ViewData["Accommodations"] as List<Accommodation>)?.FirstOrDefault(a => a.Id == Model.AccommodationId);
 }
 
 <h1>Create Order</h1>
@@ -10,15 +12,14 @@ ViewData["Title"] = "Create Order";
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" asp-route-accommodationId="@Model.AccommodationId" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+            <input asp-for="AccommodationId" type="hidden" />
+
             <div class="form-group mb-3">
-                <label asp-for="AccommodationId" class="control-label"></label>
-                <select asp-for="AccommodationId" class="form-control" asp-items="@(new SelectList(ViewData["Accommodations"] as List<Accommodation>, "Id", "Name"))">
-                    <option value="">Select Accommodation</option>
-                </select>
-                <span asp-validation-for="AccommodationId" class="text-danger"></span>
+                <label class="control-label">Accommodation</label>
+                <input class="form-control" value="@(accommodation?.Name ?? "Unknown")" readonly />
             </div>
 
             <div class="form-group mb-3">
@@ -79,10 +80,10 @@ ViewData["Title"] = "Create Order";
                             <option value="0">Select Service</option>
                             @foreach (var service in ViewData["Services"] as List<Service>)
                             {
-                            <option value="@service.Id">@service.Name - @service.Price</option>
+                                <option value="@service.Id">@service.Name - @service.Price</option>
                             }
                         </select>
-                        <input type="number" name="serviceQuantities" class="form-control service-quantity mt-1" min="0" value="0" style="width: 100px;" />
+                        <input type="hidden" name="serviceQuantities" />
                     </div>
                 </div>
                 <button type="button" class="btn btn-secondary mt-2" onclick="addServiceRow()">Add Another Service</button>
@@ -96,10 +97,10 @@ ViewData["Title"] = "Create Order";
                             <option value="0">Select Combo</option>
                             @foreach (var combo in ViewData["Combos"] as List<Combo>)
                             {
-                            <option value="@combo.Id">@combo.Name - @combo.Price</option>
+                                <option value="@combo.Id">@combo.Name - @combo.Price</option>
                             }
                         </select>
-                        <input type="number" name="comboQuantities" class="form-control combo-quantity mt-1" min="0" value="0" style="width: 100px;" />
+                        <input type="hidden" name="comboQuantities"/>
                     </div>
                 </div>
                 <button type="button" class="btn btn-secondary mt-2" onclick="addComboRow()">Add Another Combo</button>
@@ -114,66 +115,66 @@ ViewData["Title"] = "Create Order";
 </div>
 
 @section Scripts {
-<partial name="_ValidationScriptsPartial" />
-<script>
-    function addServiceRow() {
-        const container = document.getElementById('services-container');
-        const newRow = document.createElement('div');
-        newRow.className = 'service-item mb-2';
-        newRow.innerHTML = `
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function addServiceRow() {
+            const container = document.getElementById('services-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'service-item mb-2';
+            newRow.innerHTML = `
                 <select name="selectedServiceIds" class="form-control service-select" onchange="updateServiceQuantity(this)">
                     <option value="0">Select Service</option>
                     @foreach (var service in ViewData["Services"] as List<Service>)
-        {
-        <option value="@service.Id">@service.Name - @service.Price</option>
-        }
+                    {
+                        <option value="@service.Id">@service.Name - @service.Price</option>
+                    }
                 </select>
                 <input type="number" name="serviceQuantities" class="form-control service-quantity mt-1" min="0" value="0" style="width: 100px;" />
             `;
-        container.appendChild(newRow);
-    }
+            container.appendChild(newRow);
+        }
 
-    function addComboRow() {
-        const container = document.getElementById('combos-container');
-        const newRow = document.createElement('div');
-        newRow.className = 'combo-item mb-2';
-        newRow.innerHTML = `
+        function addComboRow() {
+            const container = document.getElementById('combos-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'combo-item mb-2';
+            newRow.innerHTML = `
                 <select name="selectedComboIds" class="form-control combo-select" onchange="updateComboQuantity(this)">
                     <option value="0">Select Combo</option>
                     @foreach (var combo in ViewData["Combos"] as List<Combo>)
-        {
-        <option value="@combo.Id">@combo.Name - @combo.Price</option>
-        }
+                    {
+                        <option value="@combo.Id">@combo.Name - @combo.Price</option>
+                    }
                 </select>
                 <input type="number" name="comboQuantities" class="form-control combo-quantity mt-1" min="0" value="0" style="width: 100px;" />
             `;
-        container.appendChild(newRow);
-    }
+            container.appendChild(newRow);
+        }
 
-    function updateServiceQuantity(select) {
-        const quantityInput = select.parentElement.querySelector('.service-quantity');
-        if (select.value == "0") {
-            quantityInput.value = 0;
-            quantityInput.disabled = true;
-        } else {
-            quantityInput.disabled = false;
-            if (quantityInput.value == 0) {
-                quantityInput.value = 1;
+        function updateServiceQuantity(select) {
+            const quantityInput = select.parentElement.querySelector('.service-quantity');
+            if (select.value == "0") {
+                quantityInput.value = 0;
+                quantityInput.disabled = true;
+            } else {
+                quantityInput.disabled = false;
+                if (quantityInput.value == 0) {
+                    quantityInput.value = 1;
+                }
             }
         }
-    }
 
-    function updateComboQuantity(select) {
-        const quantityInput = select.parentElement.querySelector('.combo-quantity');
-        if (select.value == "0") {
-            quantityInput.value = 0;
-            quantityInput.disabled = true;
-        } else {
-            quantityInput.disabled = false;
-            if (quantityInput.value == 0) {
-                quantityInput.value = 1;
+        function updateComboQuantity(select) {
+            const quantityInput = select.parentElement.querySelector('.combo-quantity');
+            if (select.value == "0") {
+                quantityInput.value = 0;
+                quantityInput.disabled = true;
+            } else {
+                quantityInput.disabled = false;
+                if (quantityInput.value == 0) {
+                    quantityInput.value = 1;
+                }
             }
         }
-    }
-</script>
+    </script>
 }

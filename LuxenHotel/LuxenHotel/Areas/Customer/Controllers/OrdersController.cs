@@ -17,20 +17,41 @@ public class OrdersController : Controller
         _context = context;
     }
 
-    // GET: Orders/Create
-    public IActionResult Create()
-    {
-        ViewData["Accommodations"] = _context.Accommodations.ToList();
-        ViewData["Services"] = _context.Services.ToList();
-        ViewData["Combos"] = _context.Combos.ToList();
-        return View();
-    }
+    // GET: Orders/Create/5
+        [HttpGet]
+        [Route("Orders/Create/{accommodationId:int}")]
+        public async Task<IActionResult> Create(int accommodationId)
+        {
+            // Verify accommodation exists
+            var accommodation = await _context.Accommodations.FindAsync(accommodationId);
+            if (accommodation == null)
+            {
+                return NotFound();
+            }
 
-    // POST: Orders/Create
+            var viewModel = new OrderCreateViewModel
+            {
+                AccommodationId = accommodationId
+            };
+
+            ViewData["Accommodations"] = await _context.Accommodations.ToListAsync();
+            ViewData["Services"] = await _context.Services.ToListAsync();
+            ViewData["Combos"] = await _context.Combos.ToListAsync();
+            return View(viewModel);
+        }
+
+        // POST: Orders/Create/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
+        [Route("Orders/Create/{accommodationId:int}")]
+        public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
         {
+            // Ensure AccommodationId matches route parameter
+            if (viewModel.AccommodationId != accommodationId)
+            {
+                ModelState.AddModelError("AccommodationId", "Invalid accommodation ID.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -54,6 +75,10 @@ public class OrdersController : Controller
 
                     // Fetch accommodation for price calculation
                     order.Accommodation = await _context.Accommodations.FindAsync(order.AccommodationId);
+                    if (order.Accommodation == null)
+                    {
+                        return NotFound();
+                    }
 
                     // Add services
                     if (selectedServiceIds != null && selectedServiceIds.Length > 0)
@@ -112,9 +137,9 @@ public class OrdersController : Controller
             }
 
             // Reload dropdown data if validation fails
-            ViewData["Accommodations"] = _context.Accommodations.ToList();
-            ViewData["Services"] = _context.Services.ToList();
-            ViewData["Combos"] = _context.Combos.ToList();
+            ViewData["Accommodations"] = await _context.Accommodations.ToListAsync();
+            ViewData["Services"] = await _context.Services.ToListAsync();
+            ViewData["Combos"] = await _context.Combos.ToListAsync();
             return View(viewModel);
         }
 

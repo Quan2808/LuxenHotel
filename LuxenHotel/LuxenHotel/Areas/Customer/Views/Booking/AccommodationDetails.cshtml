@@ -160,7 +160,7 @@
                     @if (Model.Accommodation.Status ==
                                         LuxenHotel.Models.Entities.Booking.Accommodation.AccommodationStatus.Published)
                     {
-                        <a href="reservation-form-dark.html" class="btn btn-primary">
+                        <a asp-area="Customer" asp-controller="Orders" asp-action="Create" asp-route-accommodationId="@Model.Accommodation.Id" class="btn btn-primary">
                             <i class="fa fa-calendar"></i> BOOK NOW
                         </a>
                     }
