@@ -93,6 +93,22 @@ public class OrderService : IOrderService
         order.PaymentStatus = PaymentStatus.Pending;
         order.CreatedAt = DateTime.UtcNow;
 
+        if (order.OrderServices != null)
+        {
+            foreach (var os in order.OrderServices)
+            {
+                os.Order = null;
+            }
+        }
+
+        if (order.OrderCombos != null)
+        {
+            foreach (var oc in order.OrderCombos)
+            {
+                oc.Order = null;
+            }
+        }
+
         await _context.Orders.AddAsync(order);
         await _context.SaveChangesAsync();
 

@@ -360,16 +360,11 @@ namespace LuxenHotel.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AccommodationId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Orders");
                 });
@@ -622,14 +617,10 @@ namespace LuxenHotel.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LuxenHotel.Models.Entities.Identity.User", null)
+                    b.HasOne("LuxenHotel.Models.Entities.Identity.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("LuxenHotel.Models.Entities.Identity.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("Accommodation");
 

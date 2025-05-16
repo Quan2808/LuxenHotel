@@ -91,7 +91,7 @@ namespace LuxenHotel.Data
         private void ConfigureOrder(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Orders>()
-                .HasOne<User>()
+                .HasOne(o => o.User)
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
                 .IsRequired(false)

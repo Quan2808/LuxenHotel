@@ -1,0 +1,179 @@
+@model LuxenHotel.Models.ViewModels.OrderCreateViewModel
+@using LuxenHotel.Models.Entities.Booking
+
+@{
+ViewData["Title"] = "Create Order";
+}
+
+<h1>Create Order</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="AccommodationId" class="control-label"></label>
+                <select asp-for="AccommodationId" class="form-control" asp-items="@(new SelectList(ViewData["Accommodations"] as List<Accommodation>, "Id", "Name"))">
+                    <option value="">Select Accommodation</option>
+                </select>
+                <span asp-validation-for="AccommodationId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerName" class="control-label"></label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerEmail" class="control-label"></label>
+                <input asp-for="CustomerEmail" class="form-control" type="email" />
+                <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerPhone" class="control-label"></label>
+                <input asp-for="CustomerPhone" class="form-control" />
+                <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CheckInDate" class="control-label"></label>
+                <input asp-for="CheckInDate" class="form-control" type="date" />
+                <span asp-validation-for="CheckInDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CheckOutDate" class="control-label"></label>
+                <input asp-for="CheckOutDate" class="form-control" type="date" />
+                <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="NumberOfGuests" class="control-label"></label>
+                <input asp-for="NumberOfGuests" class="form-control" type="number" min="1" max="50" />
+                <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SpecialRequests" class="control-label"></label>
+                <textarea asp-for="SpecialRequests" class="form-control"></textarea>
+                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="PaymentMethod" class="control-label"></label>
+                <select asp-for="PaymentMethod" class="form-control" asp-items="Html.GetEnumSelectList<LuxenHotel.Models.Entities.Orders.PaymentMethod>()">
+                    <option value="">Select Payment Method</option>
+                </select>
+                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Services</label>
+                <div id="services-container">
+                    <div class="service-item mb-2">
+                        <select name="selectedServiceIds" class="form-control service-select" onchange="updateServiceQuantity(this)">
+                            <option value="0">Select Service</option>
+                            @foreach (var service in ViewData["Services"] as List<Service>)
+                            {
+                            <option value="@service.Id">@service.Name - @service.Price</option>
+                            }
+                        </select>
+                        <input type="number" name="serviceQuantities" class="form-control service-quantity mt-1" min="0" value="0" style="width: 100px;" />
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary mt-2" onclick="addServiceRow()">Add Another Service</button>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="control-label">Combos</label>
+                <div id="combos-container">
+                    <div class="combo-item mb-2">
+                        <select name="selectedComboIds" class="form-control combo-select" onchange="updateComboQuantity(this)">
+                            <option value="0">Select Combo</option>
+                            @foreach (var combo in ViewData["Combos"] as List<Combo>)
+                            {
+                            <option value="@combo.Id">@combo.Name - @combo.Price</option>
+                            }
+                        </select>
+                        <input type="number" name="comboQuantities" class="form-control combo-quantity mt-1" min="0" value="0" style="width: 100px;" />
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary mt-2" onclick="addComboRow()">Add Another Combo</button>
+            </div>
+
+            <div class="form-group mb-3">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script>
+    function addServiceRow() {
+        const container = document.getElementById('services-container');
+        const newRow = document.createElement('div');
+        newRow.className = 'service-item mb-2';
+        newRow.innerHTML = `
+                <select name="selectedServiceIds" class="form-control service-select" onchange="updateServiceQuantity(this)">
+                    <option value="0">Select Service</option>
+                    @foreach (var service in ViewData["Services"] as List<Service>)
+        {
+        <option value="@service.Id">@service.Name - @service.Price</option>
+        }
+                </select>
+                <input type="number" name="serviceQuantities" class="form-control service-quantity mt-1" min="0" value="0" style="width: 100px;" />
+            `;
+        container.appendChild(newRow);
+    }
+
+    function addComboRow() {
+        const container = document.getElementById('combos-container');
+        const newRow = document.createElement('div');
+        newRow.className = 'combo-item mb-2';
+        newRow.innerHTML = `
+                <select name="selectedComboIds" class="form-control combo-select" onchange="updateComboQuantity(this)">
+                    <option value="0">Select Combo</option>
+                    @foreach (var combo in ViewData["Combos"] as List<Combo>)
+        {
+        <option value="@combo.Id">@combo.Name - @combo.Price</option>
+        }
+                </select>
+                <input type="number" name="comboQuantities" class="form-control combo-quantity mt-1" min="0" value="0" style="width: 100px;" />
+            `;
+        container.appendChild(newRow);
+    }
+
+    function updateServiceQuantity(select) {
+        const quantityInput = select.parentElement.querySelector('.service-quantity');
+        if (select.value == "0") {
+            quantityInput.value = 0;
+            quantityInput.disabled = true;
+        } else {
+            quantityInput.disabled = false;
+            if (quantityInput.value == 0) {
+                quantityInput.value = 1;
+            }
+        }
+    }
+
+    function updateComboQuantity(select) {
+        const quantityInput = select.parentElement.querySelector('.combo-quantity');
+        if (select.value == "0") {
+            quantityInput.value = 0;
+            quantityInput.disabled = true;
+        } else {
+            quantityInput.disabled = false;
+            if (quantityInput.value == 0) {
+                quantityInput.value = 1;
+            }
+        }
+    }
+</script>
+}
