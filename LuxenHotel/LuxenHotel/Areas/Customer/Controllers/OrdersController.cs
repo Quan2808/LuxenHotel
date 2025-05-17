@@ -5,6 +5,7 @@ using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Models.Entities.Orders;
 using LuxenHotel.Models.ViewModels;
 using LuxenHotel.Models.ViewModels.Booking;
+using LuxenHotel.Models.ViewModels.Orders;
 using LuxenHotel.Services.Booking.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -89,6 +90,71 @@ public class OrdersController : Controller
         _logger.LogInformation("Retrieved {Count} orders for user {UserId}", await orders.CountAsync(), userId);
 
         return View(await PaginatedList<Orders>.CreateAsync(orders.AsNoTracking(), pageNumber ?? 1, pageSize));
+    }
+
+    [HttpGet]
+    [Route("Orders/Details/{id}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            _logger.LogWarning("User ID claim not found for authenticated user.");
+            return Unauthorized();
+        }
+
+        var order = await _context.Orders
+            .Include(o => o.Accommodation)
+            .Include(o => o.User)
+            .Include(o => o.OrderServices)
+                .ThenInclude(os => os.Service)
+            .Include(o => o.OrderCombos)
+                .ThenInclude(oc => oc.Combo)
+            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+        if (order == null)
+        {
+            _logger.LogWarning("Order with ID {OrderId} not found or not owned by user {UserId}.", id, userId);
+            return NotFound($"Order with ID {id} not found or you do not have permission to view it.");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        ViewData["UserFullName"] = user?.FullName;
+
+        var viewModel = new OrderDetailsViewModel
+        {
+            OrderCode = order.OrderCode,
+            CustomerName = order.CustomerName ?? order.User?.FullName ?? "N/A",
+            CustomerEmail = order.CustomerEmail ?? order.User?.Email ?? "N/A",
+            CustomerPhone = order.CustomerPhone ?? "N/A",
+            AccommodationName = order.Accommodation?.Name ?? "N/A",
+            TotalPrice = order.TotalPrice,
+            PaymentStatus = order.PaymentStatus.ToString(),
+            OrderStatus = order.Status.ToString(),
+            CheckInDate = order.CheckInDate,
+            CheckOutDate = order.CheckOutDate,
+            NumberOfGuests = order.NumberOfGuests,
+            SpecialRequests = order.SpecialRequests ?? "None",
+            CreatedAt = order.CreatedAt,
+            CancellationReason = order.CancellationReason ?? "N/A",
+            Services = order.OrderServices.Select(os => new OrderServiceViewModel
+            {
+                ServiceName = os.Service?.Name ?? "N/A",
+                Quantity = os.Quantity,
+                Price = os.Service?.Price ?? 0
+            }).ToList(),
+            Combos = order.OrderCombos.Select(oc => new OrderComboViewModel
+            {
+                ComboName = oc.Combo?.Name ?? "N/A",
+                Quantity = oc.Quantity,
+                Price = oc.Combo?.Price ?? 0
+            }).ToList(),
+        };
+
+        ViewBag.AccommodationPrice = order.Accommodation?.Price ?? 0;
+        _logger.LogInformation("Retrieved details for order {OrderCode} for user {UserId}.", order.OrderCode, userId);
+
+        return View(viewModel);
     }
 
     // GET: Orders/Create/5
@@ -574,12 +640,12 @@ public class OrdersController : Controller
             order.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyOrders));
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"An error occurred while cancelling the order: {ex.Message}");
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyOrders));
         }
     }
 

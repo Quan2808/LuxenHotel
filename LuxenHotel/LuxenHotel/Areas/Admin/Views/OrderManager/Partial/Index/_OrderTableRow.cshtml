@@ -74,14 +74,6 @@
                 <a href="/admin/orders/Edit/@Model.Id" class="menu-link px-3">Edit</a>
             </div>
             <!--end::Menu item-->
-            @if (Model.Status != LuxenHotel.Models.Entities.Orders.OrderStatus.Cancelled)
-            {
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
-                    <a href="/admin/orders/Cancel/@Model.Id" class="menu-link px-3">Cancel</a>
-                </div>
-                <!--end::Menu item-->
-            }
         </div>
         <!--end::Menu-->
     </td>

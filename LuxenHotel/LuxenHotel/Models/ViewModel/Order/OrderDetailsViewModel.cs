@@ -2,6 +2,7 @@ namespace LuxenHotel.Models.ViewModels.Orders
 {
     public class OrderDetailsViewModel
     {
+        public int OrderId { get; set; }
         public string OrderCode { get; set; }
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
@@ -14,6 +15,7 @@ namespace LuxenHotel.Models.ViewModels.Orders
         public DateTime CheckOutDate { get; set; }
         public int NumberOfGuests { get; set; }
         public string SpecialRequests { get; set; }
+        public string CancellationReason { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<OrderServiceViewModel> Services { get; set; } = new();
         public List<OrderComboViewModel> Combos { get; set; } = new();

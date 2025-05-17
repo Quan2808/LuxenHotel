@@ -3,57 +3,107 @@
     ViewData["Title"] = "My Orders";
 }
 
-<div class="container mt-4">
-    <h1>My Orders</h1>
+@section Styles {
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
 
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #337ab7;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .card-header h6 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .modal-content {
+            border-radius: 8px;
+        }
+
+        .modal-header {
+            background-color: #d9534f;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+        }
+
+        .modal-header .close:hover {
+            opacity: 1;
+        }
+
+        .form-control:focus {
+            border-color: #337ab7;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(51, 122, 183, .6);
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0;
+            margin: 0 2px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #337ab7;
+            border-color: #337ab7;
+            color: white !important;
+        }
+    </style>
+}
+
+<div class="container mt-5">
     <div class="mb-4">
-        <p>Welcome, @ViewData["UserFullName"] - Here are all your bookings with LuxenHotel</p>
+        <p class="lead">Welcome, @ViewData["UserFullName"] - View all your bookings with LuxenHotel</p>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center py-3">
-            <h6 class="m-0 font-weight-bold text-primary">All Orders</h6>
-        </div>
+    <div class="mb-4">
         <div class="card-body">
-            <div class="mb-3">
-                <form asp-action="MyOrders" method="get" class="form-inline">
-                    <div class="input-group">
-                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control"
-                            placeholder="Search by order code, accommodation name..." />
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="ordersTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Order Code</th>
                             <th>Accommodation</th>
-                            <th>
-                                <a asp-action="MyOrders" asp-route-sortOrder="@ViewData["DateSortParam"]"
-                                    asp-route-searchString="@ViewData["CurrentFilter"]">
-                                    Check-in Date
-                                </a>
-                            </th>
+                            <th>Check-in Date</th>
                             <th>Check-out Date</th>
-                            <th>
-                                <a asp-action="MyOrders" asp-route-sortOrder="@ViewData["StatusSortParam"]"
-                                    asp-route-searchString="@ViewData["CurrentFilter"]">
-                                    Status
-                                </a>
-                            </th>
-                            <th>
-                                <a asp-action="MyOrders" asp-route-sortOrder="@ViewData["PriceSortParam"]"
-                                    asp-route-searchString="@ViewData["CurrentFilter"]">
-                                    Total Price
-                                </a>
-                            </th>
+                            <th>Status</th>
+                            <th>Total Price</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -70,7 +120,7 @@
                             {
                                 <tr>
                                     <td>@order.OrderCode</td>
-                                    <td>@order.Accommodation.Name</td>
+                                    <td>@(order.Accommodation?.Name ?? "N/A")</td>
                                     <td>@order.CheckInDate.ToString("dd/MM/yyyy")</td>
                                     <td>@order.CheckOutDate.ToString("dd/MM/yyyy")</td>
                                     <td>
@@ -89,114 +139,84 @@
                                                 <span class="badge badge-danger">Cancelled</span>
                                                 break;
                                             default:
-                                                <span class="badge badge-secondary">@order.Status</span>
+                                                <span class="badge badge-default">@order.Status</span>
                                                 break;
                                         }
                                     </td>
                                     <td>@order.TotalPrice.ToString("N0") VND</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-info btn-sm">
+                                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-info btn-sm me-10">
                                                 <i class="fas fa-info-circle"></i> Details
                                             </a>
                                             @if (order.Status == LuxenHotel.Models.Entities.Orders.OrderStatus.Created)
                                             {
-                                                <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-warning btn-sm">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
                                                 <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
                                                     data-target="#cancelModal-@order.Id">
                                                     <i class="fas fa-times"></i> Cancel
                                                 </button>
                                             }
                                         </div>
-
-                                        <!-- Cancel Modal -->
-                                        <div class="modal fade" id="cancelModal-@order.Id" tabindex="-1" role="dialog"
-                                            aria-labelledby="cancelModalLabel-@order.Id" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="cancelModalLabel-@order.Id">Cancel Order
-                                                        </h5>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <form asp-action="Cancel" asp-route-id="@order.Id" method="post">
-                                                        <div class="modal-body">
-                                                            <p>Are you sure you want to cancel order
-                                                                <strong>@order.OrderCode</strong>?</p>
-                                                            <p>Please provide a reason for cancellation:</p>
-                                                            <textarea name="cancellationReason" class="form-control" rows="3"
-                                                        required></textarea>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger">Confirm
-                                                                Cancellation</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </td>
                                 </tr>
+                                <!-- Cancel Modal -->
+                                <div class="modal fade" id="cancelModal-@order.Id" tabindex="-1" role="dialog"
+                                    aria-labelledby="cancelModalLabel-@order.Id" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="cancelModalLabel-@order.Id">Cancel Order</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <form asp-action="Cancel" asp-route-id="@order.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to cancel order <strong>@order.OrderCode</strong>?
+                                                    </p>
+                                                    <p>Please provide a reason for cancellation:</p>
+                                                    <textarea name="reason" class="form-control" rows="4" required
+                                                placeholder="Enter cancellation reason"></textarea>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default"
+                                                        data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         }
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Pagination -->
-            @{
-                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
-                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
-            }
-
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
-                    Showing @Model.Count of @Model.TotalItems items
-                </div>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        <li class="page-item @prevDisabled">
-                            <a asp-action="MyOrders" asp-route-pageNumber="@(Model.PageIndex - 1)"
-                                asp-route-sortOrder="@ViewData["CurrentSort"]"
-                                asp-route-searchString="@ViewData["CurrentFilter"]" class="page-link @prevDisabled">
-                                Previous
-                            </a>
-                        </li>
-                        @for (int i = 1; i <= Model.TotalPages; i++)
-                        {
-                            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                                <a asp-action="MyOrders" asp-route-pageNumber="@i"
-                                    asp-route-sortOrder="@ViewData["CurrentSort"]"
-                                    asp-route-searchString="@ViewData["CurrentFilter"]" class="page-link">
-                                    @i
-                                </a>
-                            </li>
-                        }
-                        <li class="page-item @nextDisabled">
-                            <a asp-action="MyOrders" asp-route-pageNumber="@(Model.PageIndex + 1)"
-                                asp-route-sortOrder="@ViewData["CurrentSort"]"
-                                asp-route-searchString="@ViewData["CurrentFilter"]" class="page-link @nextDisabled">
-                                Next
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#ordersTable').addClass('table-responsive-sm');
+            $('#ordersTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                order: [[2, 'desc']], // Default sort by Check-in Date descending
+                columnDefs: [
+                    { targets: 6, orderable: false, searchable: false }, // Actions column
+                    { targets: [0, 1, 4], searchable: true } // Searchable columns
+                ],
+                language: {
+                    emptyTable: "You don't have any orders yet.",
+                    zeroRecords: "No matching orders found"
+                }
+            });
         });
     </script>
 }
