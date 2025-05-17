@@ -6,12 +6,14 @@ using LuxenHotel.Models.Entities.Orders;
 using LuxenHotel.Models.ViewModels;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxenHotel.Areas.Customer.Controllers;
 
+[Authorize]
 [Area("Customer")]
 public class OrdersController : Controller
 {
@@ -27,6 +29,66 @@ public class OrdersController : Controller
         _userManager = userManager;
         _context = context;
         _logger = logger;
+    }
+
+    [HttpGet]
+    [Route("Orders/MyOrders")]
+    public async Task<IActionResult> MyOrders(string sortOrder, string searchString, int? pageNumber)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            _logger.LogWarning("User ID claim not found for authenticated user.");
+            return Unauthorized();
+        }
+
+        // Set up sorting
+        ViewData["DateSortParam"] = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
+        ViewData["StatusSortParam"] = sortOrder == "Status" ? "status_desc" : "Status";
+        ViewData["PriceSortParam"] = sortOrder == "Price" ? "price_desc" : "Price";
+        ViewData["CurrentFilter"] = searchString;
+
+        // Get orders for the current user with all related entities
+        var orders = _context.Orders
+            .Include(o => o.Accommodation)
+            .Include(o => o.OrderServices)
+                .ThenInclude(os => os.Service)
+            .Include(o => o.OrderCombos)
+                .ThenInclude(oc => oc.Combo)
+            .Where(o => o.UserId == userId);
+
+        // Apply search filter if provided
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            orders = orders.Where(o =>
+                o.OrderCode.Contains(searchString) ||
+                o.Accommodation.Name.Contains(searchString) ||
+                o.CustomerName.Contains(searchString) ||
+                o.Status.ToString().Contains(searchString)
+            );
+        }
+
+        // Apply sorting
+        orders = sortOrder switch
+        {
+            "date_desc" => orders.OrderByDescending(o => o.CreatedAt),
+            "Status" => orders.OrderBy(o => o.Status),
+            "status_desc" => orders.OrderByDescending(o => o.Status),
+            "Price" => orders.OrderBy(o => o.TotalPrice),
+            "price_desc" => orders.OrderByDescending(o => o.TotalPrice),
+            _ => orders.OrderBy(o => o.CreatedAt)
+        };
+
+        // Set page size
+        int pageSize = 10;
+
+        // Get user details for additional information
+        var user = await _userManager.FindByIdAsync(userId);
+        ViewData["UserFullName"] = user?.FullName;
+
+        _logger.LogInformation("Retrieved {Count} orders for user {UserId}", await orders.CountAsync(), userId);
+
+        return View(await PaginatedList<Orders>.CreateAsync(orders.AsNoTracking(), pageNumber ?? 1, pageSize));
     }
 
     // GET: Orders/Create/5
@@ -94,14 +156,6 @@ public class OrdersController : Controller
     [Route("Orders/Create/{accommodationId:int}")]
     public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
     {
-        // Log incoming parameters
-        _logger.LogInformation("Received Create request for AccommodationId: {AccommodationId}", accommodationId);
-        _logger.LogInformation("SelectedServiceIds: {SelectedServiceIds}", selectedServiceIds == null ? "null" : string.Join(", ", selectedServiceIds));
-        _logger.LogInformation("ServiceQuantities: {ServiceQuantities}", serviceQuantities == null ? "null" : string.Join(", ", serviceQuantities));
-        _logger.LogInformation("SelectedComboIds: {SelectedComboIds}", selectedComboIds == null ? "null" : string.Join(", ", selectedComboIds));
-        _logger.LogInformation("ComboQuantities: {ComboQuantities}", comboQuantities == null ? "null" : string.Join(", ", comboQuantities));
-        _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(f => $"{f.Key}: {f.Value}")));
-
         // Ensure AccommodationId matches route parameter
         if (viewModel.AccommodationId != accommodationId)
         {
