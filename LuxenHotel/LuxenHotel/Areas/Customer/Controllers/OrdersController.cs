@@ -1,7 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using LuxenHotel.Data;
+using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Models.Entities.Orders;
 using LuxenHotel.Models.ViewModels;
+using LuxenHotel.Models.ViewModels.Booking;
+using LuxenHotel.Services.Booking.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,137 +16,310 @@ namespace LuxenHotel.Areas.Customer.Controllers;
 public class OrdersController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<User> _userManager;
+    private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(ApplicationDbContext context)
+    public OrdersController(
+     UserManager<User> userManager,
+     ApplicationDbContext context,
+     ILogger<OrdersController> logger)
     {
+        _userManager = userManager;
         _context = context;
+        _logger = logger;
     }
 
     // GET: Orders/Create/5
-        [HttpGet]
-        [Route("Orders/Create/{accommodationId:int}")]
-        public async Task<IActionResult> Create(int accommodationId)
+    [HttpGet]
+    [Route("Orders/Create/{accommodationId:int}")]
+    public async Task<IActionResult> Create(int accommodationId)
+    {
+        // Verify accommodation exists
+        var accommodation = await _context.Accommodations
+                .FirstOrDefaultAsync(a => a.Id == accommodationId);
+
+        if (accommodation == null)
         {
-            // Verify accommodation exists
-            var accommodation = await _context.Accommodations.FindAsync(accommodationId);
-            if (accommodation == null)
-            {
-                return NotFound();
-            }
-
-            var viewModel = new OrderCreateViewModel
-            {
-                AccommodationId = accommodationId
-            };
-
-            ViewData["Accommodations"] = await _context.Accommodations.ToListAsync();
-            ViewData["Services"] = await _context.Services.ToListAsync();
-            ViewData["Combos"] = await _context.Combos.ToListAsync();
-            return View(viewModel);
+            return NotFound();
         }
-
-        // POST: Orders/Create/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Route("Orders/Create/{accommodationId:int}")]
-        public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
+        var viewModel = new OrderCreateViewModel
         {
-            // Ensure AccommodationId matches route parameter
-            if (viewModel.AccommodationId != accommodationId)
-            {
-                ModelState.AddModelError("AccommodationId", "Invalid accommodation ID.");
-            }
+            AccommodationId = accommodationId,
+            CheckInDate = DateTime.Today.AddDays(1),
+            CheckOutDate = DateTime.Today.AddDays(2),
+        };
 
-            if (ModelState.IsValid)
+        if (User.Identity.IsAuthenticated)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(userId))
             {
-                try
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null)
                 {
-                    // Map ViewModel to Orders entity
-                    var order = new Orders
-                    {
-                        AccommodationId = viewModel.AccommodationId,
-                        CustomerName = viewModel.CustomerName,
-                        CustomerEmail = viewModel.CustomerEmail,
-                        CustomerPhone = viewModel.CustomerPhone,
-                        CheckInDate = viewModel.CheckInDate,
-                        CheckOutDate = viewModel.CheckOutDate,
-                        NumberOfGuests = viewModel.NumberOfGuests,
-                        SpecialRequests = viewModel.SpecialRequests,
-                        PaymentMethod = viewModel.PaymentMethod,
-                        CreatedAt = DateTime.UtcNow,
-                        Status = OrderStatus.Created,
-                        PaymentStatus = PaymentStatus.Pending
-                    };
-
-                    // Fetch accommodation for price calculation
-                    order.Accommodation = await _context.Accommodations.FindAsync(order.AccommodationId);
-                    if (order.Accommodation == null)
-                    {
-                        return NotFound();
-                    }
-
-                    // Add services
-                    if (selectedServiceIds != null && selectedServiceIds.Length > 0)
-                    {
-                        for (int i = 0; i < selectedServiceIds.Length; i++)
-                        {
-                            if (selectedServiceIds[i] > 0 && serviceQuantities[i] > 0)
-                            {
-                                var service = await _context.Services.FindAsync(selectedServiceIds[i]);
-                                if (service != null)
-                                {
-                                    order.OrderServices.Add(new OrderService
-                                    {
-                                        ServiceId = selectedServiceIds[i],
-                                        Quantity = serviceQuantities[i],
-                                        Service = service
-                                    });
-                                }
-                            }
-                        }
-                    }
-
-                    // Add combos
-                    if (selectedComboIds != null && selectedComboIds.Length > 0)
-                    {
-                        for (int i = 0; i < selectedComboIds.Length; i++)
-                        {
-                            if (selectedComboIds[i] > 0 && comboQuantities[i] > 0)
-                            {
-                                var combo = await _context.Combos.FindAsync(selectedComboIds[i]);
-                                if (combo != null)
-                                {
-                                    order.OrderCombos.Add(new OrderCombo
-                                    {
-                                        ComboId = selectedComboIds[i],
-                                        Quantity = comboQuantities[i],
-                                        Combo = combo
-                                    });
-                                }
-                            }
-                        }
-                    }
-
-                    // Calculate total price
-                    order.CalculateTotalPrice();
-
-                    // Add to context and save
-                    _context.Add(order);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    viewModel.CustomerName = user.FullName;
+                    viewModel.CustomerEmail = user.Email;
+                    viewModel.CustomerPhone = user.PhoneNumber;
                 }
-                catch (Exception ex)
+                else
                 {
-                    ModelState.AddModelError("", $"An error occurred while creating the order: {ex.Message}");
+                    // Log warning: User not found in database
+                    _logger.LogWarning("User with ID {UserId} not found.", userId);
                 }
             }
-
-            // Reload dropdown data if validation fails
-            ViewData["Accommodations"] = await _context.Accommodations.ToListAsync();
-            ViewData["Services"] = await _context.Services.ToListAsync();
-            ViewData["Combos"] = await _context.Combos.ToListAsync();
-            return View(viewModel);
+            else
+            {
+                // Log warning: User ID claim missing
+                _logger.LogWarning("User ID claim not found for authenticated user.");
+            }
         }
+
+        ViewData["Accommodations"] = await _context.Accommodations
+            .Where(a => a.Id == accommodationId)
+            .AsNoTracking()
+            .ToListAsync();
+        ViewData["Services"] = await _context.Services
+            .Where(s => s.AccommodationId == accommodationId)
+            .ToListAsync();
+        ViewData["Combos"] = await _context.Combos
+            .Where(s => s.AccommodationId == accommodationId)
+            .ToListAsync();
+
+        return View(viewModel);
+    }
+
+    // POST: Orders/Create/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Route("Orders/Create/{accommodationId:int}")]
+    public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
+    {
+        // Log incoming parameters
+        _logger.LogInformation("Received Create request for AccommodationId: {AccommodationId}", accommodationId);
+        _logger.LogInformation("SelectedServiceIds: {SelectedServiceIds}", selectedServiceIds == null ? "null" : string.Join(", ", selectedServiceIds));
+        _logger.LogInformation("ServiceQuantities: {ServiceQuantities}", serviceQuantities == null ? "null" : string.Join(", ", serviceQuantities));
+        _logger.LogInformation("SelectedComboIds: {SelectedComboIds}", selectedComboIds == null ? "null" : string.Join(", ", selectedComboIds));
+        _logger.LogInformation("ComboQuantities: {ComboQuantities}", comboQuantities == null ? "null" : string.Join(", ", comboQuantities));
+        _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(f => $"{f.Key}: {f.Value}")));
+
+        // Ensure AccommodationId matches route parameter
+        if (viewModel.AccommodationId != accommodationId)
+        {
+            ModelState.AddModelError("AccommodationId", "Invalid accommodation ID.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                // Fetch accommodation
+                var accommodation = await _context.Accommodations
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Id == accommodationId);
+
+                if (accommodation == null)
+                {
+                    _logger.LogWarning("Accommodation with ID {AccommodationId} not found.", accommodationId);
+                    ModelState.AddModelError("", "Accommodation not found.");
+                    return View(viewModel);
+                }
+
+                // Map ViewModel to Orders entity
+                var order = new Orders
+                {
+                    AccommodationId = viewModel.AccommodationId,
+                    CustomerName = viewModel.CustomerName,
+                    CustomerEmail = viewModel.CustomerEmail,
+                    CustomerPhone = viewModel.CustomerPhone,
+                    CheckInDate = viewModel.CheckInDate,
+                    CheckOutDate = viewModel.CheckOutDate,
+                    NumberOfGuests = viewModel.NumberOfGuests,
+                    SpecialRequests = viewModel.SpecialRequests,
+                    PaymentMethod = viewModel.PaymentMethod,
+                    CreatedAt = DateTime.UtcNow,
+                    Status = OrderStatus.Created,
+                    PaymentStatus = PaymentStatus.Pending,
+                    OrderServices = new List<OrderService>(),
+                    OrderCombos = new List<OrderCombo>()
+                };
+
+                // Associate user if authenticated
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        order.UserId = userId;
+                    }
+                }
+
+                // Track prices
+                Dictionary<int, int> servicePrices = new Dictionary<int, int>();
+                Dictionary<int, int> comboPrices = new Dictionary<int, int>();
+
+                // Add services
+                if (selectedServiceIds != null && selectedServiceIds.Length > 0 && serviceQuantities != null && serviceQuantities.Length > 0)
+                {
+                    _logger.LogInformation("Processing {ServiceCount} selected services", selectedServiceIds.Length);
+                    for (int i = 0; i < Math.Min(selectedServiceIds.Length, serviceQuantities.Length); i++)
+                    {
+                        if (selectedServiceIds[i] > 0 && serviceQuantities[i] > 0)
+                        {
+                            var service = await _context.Services
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(s => s.Id == selectedServiceIds[i]);
+
+                            if (service != null)
+                            {
+                                var orderService = new OrderService
+                                {
+                                    ServiceId = selectedServiceIds[i],
+                                    Quantity = serviceQuantities[i]
+                                };
+                                order.OrderServices.Add(orderService);
+                                servicePrices[selectedServiceIds[i]] = service.Price;
+                                _logger.LogInformation("Added service {ServiceId} with quantity {Quantity} to order",
+                                    selectedServiceIds[i], serviceQuantities[i]);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Service with ID {ServiceId} not found.", selectedServiceIds[i]);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Invalid service data at index {Index}: ServiceId={ServiceId}, Quantity={Quantity}",
+                                i, selectedServiceIds[i], serviceQuantities[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("No valid services selected or quantities provided.");
+                }
+
+                // Add combos
+                if (selectedComboIds != null && selectedComboIds.Length > 0 && comboQuantities != null && comboQuantities.Length > 0)
+                {
+                    _logger.LogInformation("Processing {ComboCount} selected combos", selectedComboIds.Length);
+                    for (int i = 0; i < Math.Min(selectedComboIds.Length, comboQuantities.Length); i++)
+                    {
+                        if (selectedComboIds[i] > 0 && comboQuantities[i] > 0)
+                        {
+                            var combo = await _context.Combos
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(c => c.Id == selectedComboIds[i]);
+
+                            if (combo != null)
+                            {
+                                var orderCombo = new OrderCombo
+                                {
+                                    ComboId = selectedComboIds[i],
+                                    Quantity = comboQuantities[i]
+                                };
+                                order.OrderCombos.Add(orderCombo);
+                                comboPrices[selectedComboIds[i]] = combo.Price;
+                                _logger.LogInformation("Added combo {ComboId} with quantity {Quantity} to order",
+                                    selectedComboIds[i], comboQuantities[i]);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Combo with ID {ComboId} not found.", selectedComboIds[i]);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Invalid combo data at index {Index}: ComboId={ComboId}, Quantity={Quantity}",
+                                i, selectedComboIds[i], comboQuantities[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("No valid combos selected or quantities provided.");
+                }
+
+                // Generate order code
+                order.OrderCode = Guid.NewGuid().ToString("N")[..10].ToUpper();
+
+                // Calculate total price
+                int accommodationPriceForCalculation = accommodation.Price;
+                int numberOfDays = Math.Max(1, (int)Math.Ceiling((order.CheckOutDate - order.CheckInDate).TotalDays));
+                int totalPrice = accommodationPriceForCalculation * numberOfDays;
+
+                foreach (var orderService in order.OrderServices)
+                {
+                    if (servicePrices.TryGetValue(orderService.ServiceId, out int servicePrice))
+                    {
+                        totalPrice += orderService.Quantity * servicePrice;
+                    }
+                }
+
+                foreach (var orderCombo in order.OrderCombos)
+                {
+                    if (comboPrices.TryGetValue(orderCombo.ComboId, out int comboPrice))
+                    {
+                        totalPrice += orderCombo.Quantity * comboPrice;
+                    }
+                }
+
+                order.TotalPrice = totalPrice;
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully created order with ID {OrderId} containing {ServiceCount} services and {ComboCount} combos",
+                    order.Id, order.OrderServices.Count, order.OrderCombos.Count);
+
+                return RedirectToAction(nameof(Details), new { id = order.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating order for AccommodationId {AccommodationId}.", accommodationId);
+                ModelState.AddModelError("", $"An error occurred while creating the order: {ex.Message}");
+            }
+        }
+
+        // Reload dropdown data if validation fails
+        ViewData["Accommodations"] = await _context.Accommodations
+            .Where(a => a.Id == accommodationId)
+            .AsNoTracking()
+            .ToListAsync();
+        ViewData["Services"] = await _context.Services
+            .Where(s => s.AccommodationId == accommodationId)
+            .AsNoTracking()
+            .ToListAsync();
+        ViewData["Combos"] = await _context.Combos
+            .Where(c => c.AccommodationId == accommodationId)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return View(viewModel);
+    }
+
+    // GET: Orders/Details/5
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var order = await _context.Orders
+            .Include(o => o.Accommodation)
+            .Include(o => o.OrderServices)
+                .ThenInclude(os => os.Service)
+            .Include(o => o.OrderCombos)
+                .ThenInclude(oc => oc.Combo)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        return View(order);
+    }
+
 
     // GET: Orders/Edit/5
     public async Task<IActionResult> Edit(int? id)

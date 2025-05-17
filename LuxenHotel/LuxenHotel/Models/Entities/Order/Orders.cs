@@ -64,22 +64,24 @@ public class Orders
     public List<OrderService> OrderServices { get; set; } = new();
     public List<OrderCombo> OrderCombos { get; set; } = new();
 
-    public void CalculateTotalPrice()
+    public void CalculateTotalPrice(int? accommodationPrice = null)
     {
-        int total = Accommodation?.Price ?? 0;
+        int basePrice = accommodationPrice ?? Accommodation?.Price ?? 0;
 
-        int numberOfDays = (int)Math.Ceiling((CheckOutDate - CheckInDate).TotalDays);
-        if (numberOfDays < 1) numberOfDays = 1;
-        total *= numberOfDays;
+        int numberOfDays = Math.Max(1, (int)Math.Ceiling((CheckOutDate - CheckInDate).TotalDays));
 
-        foreach (var os in OrderServices)
+        int total = basePrice * numberOfDays;
+
+        foreach (var orderService in OrderServices)
         {
-            total += os.Service?.Price * os.Quantity ?? 0;
+            int servicePrice = orderService.Service?.Price ?? 0;
+            total += orderService.Quantity * servicePrice;
         }
 
-        foreach (var oc in OrderCombos)
+        foreach (var orderCombo in OrderCombos)
         {
-            total += oc.Combo?.Price * oc.Quantity ?? 0;
+            int comboPrice = orderCombo.Combo?.Price ?? 0;
+            total += orderCombo.Quantity * comboPrice;
         }
 
         TotalPrice = total;
@@ -100,7 +102,7 @@ public class OrderService
     public Service Service { get; set; }
 
     [Required]
-    [Range(1, 100, ErrorMessage = "Số lượng phải lớn hơn 0")]
+    [Range(1, 100, ErrorMessage = "Quantity must be greater than 0")]
     public int Quantity { get; set; }
 }
 
@@ -119,6 +121,6 @@ public class OrderCombo
     public Combo Combo { get; set; }
 
     [Required]
-    [Range(1, 100, ErrorMessage = "Số lượng phải lớn hơn 0")]
+    [Range(1, 100, ErrorMessage = "Quantity must be greater than 0")]
     public int Quantity { get; set; }
 }
