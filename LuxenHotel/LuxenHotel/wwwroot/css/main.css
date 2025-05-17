@@ -2493,13 +2493,13 @@ ul.tabbed-area li.active a {
   letter-spacing: 2px !important;
 }
 
-
 #roomTable {
   width: 100%;
   border-collapse: collapse;
 }
 
-#roomTable th, #roomTable td {
+#roomTable th,
+#roomTable td {
   text-align: center;
   vertical-align: middle;
   padding: 10px;
@@ -2533,7 +2533,8 @@ ul.tabbed-area li.active a {
 }
 
 @media screen and (max-width: 768px) {
-  #roomTable th, #roomTable td {
+  #roomTable th,
+  #roomTable td {
     padding: 5px;
   }
 

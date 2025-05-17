@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxenHotel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250426165405_InitialIdentity")]
+    [Migration("20250517171303_InitialIdentity")]
     partial class InitialIdentity
     {
         /// <inheritdoc />
@@ -25,19 +25,19 @@ namespace LuxenHotel.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AccommodationCombo", b =>
+            modelBuilder.Entity("ComboService", b =>
                 {
-                    b.Property<int>("AccommodationsId")
+                    b.Property<int>("ComboId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CombosId")
+                    b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
-                    b.HasKey("AccommodationsId", "CombosId");
+                    b.HasKey("ComboId", "ServiceId");
 
-                    b.HasIndex("CombosId");
+                    b.HasIndex("ServiceId");
 
-                    b.ToTable("AccommodationCombo");
+                    b.ToTable("ComboService", (string)null);
                 });
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Accommodation", b =>
@@ -87,65 +87,6 @@ namespace LuxenHotel.Migrations
                     b.ToTable("Accommodations");
                 });
 
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Booking", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AccommodationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CheckInDate")
-                        .HasColumnType("datetime");
-
-                    b.Property<DateTime?>("CheckOutDate")
-                        .HasColumnType("datetime");
-
-                    b.Property<int?>("ComboId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("GuestContact")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("GuestName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServiceQuantitiesJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServicesJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccommodationId");
-
-                    b.HasIndex("ComboId");
-
-                    b.ToTable("Bookings");
-                });
-
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
                 {
                     b.Property<int>("Id")
@@ -154,14 +95,14 @@ namespace LuxenHotel.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AccommodationId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -171,33 +112,17 @@ namespace LuxenHotel.Migrations
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccommodationId");
+
                     b.ToTable("Combos");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.ComboService", b =>
-                {
-                    b.Property<int>("ComboId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ComboId", "ServiceId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("ComboServices");
                 });
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
@@ -311,6 +236,187 @@ namespace LuxenHotel.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.OrderCombo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ComboId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComboId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderCombo");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.OrderService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("OrderService");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.Orders", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccommodationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CheckOutDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfGuests")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OrderCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialRequests")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccommodationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentProvider")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ResponseData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -431,53 +537,30 @@ namespace LuxenHotel.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AccommodationCombo", b =>
+            modelBuilder.Entity("ComboService", b =>
                 {
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Accommodation", null)
-                        .WithMany()
-                        .HasForeignKey("AccommodationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", null)
                         .WithMany()
-                        .HasForeignKey("CombosId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Service", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Booking", b =>
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
                 {
                     b.HasOne("LuxenHotel.Models.Entities.Booking.Accommodation", "Accommodation")
-                        .WithMany("Bookings")
-                        .HasForeignKey("AccommodationId");
-
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", "Combo")
-                        .WithMany()
-                        .HasForeignKey("ComboId");
+                        .WithMany("Combos")
+                        .HasForeignKey("AccommodationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Accommodation");
-
-                    b.Navigation("Combo");
-                });
-
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.ComboService", b =>
-                {
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", "Combo")
-                        .WithMany("ComboServices")
-                        .HasForeignKey("ComboId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LuxenHotel.Models.Entities.Booking.Service", "Service")
-                        .WithMany("ComboServices")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Combo");
-
-                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
@@ -489,6 +572,73 @@ namespace LuxenHotel.Migrations
                         .IsRequired();
 
                     b.Navigation("Accommodation");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.OrderCombo", b =>
+                {
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Combo", "Combo")
+                        .WithMany()
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LuxenHotel.Models.Entities.Orders.Orders", "Order")
+                        .WithMany("OrderCombos")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Combo");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.OrderService", b =>
+                {
+                    b.HasOne("LuxenHotel.Models.Entities.Orders.Orders", "Order")
+                        .WithMany("OrderServices")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.Orders", b =>
+                {
+                    b.HasOne("LuxenHotel.Models.Entities.Booking.Accommodation", "Accommodation")
+                        .WithMany()
+                        .HasForeignKey("AccommodationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LuxenHotel.Models.Entities.Identity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Accommodation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.Payment", b =>
+                {
+                    b.HasOne("LuxenHotel.Models.Entities.Orders.Orders", "Orders")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -544,19 +694,16 @@ namespace LuxenHotel.Migrations
 
             modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Accommodation", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("Combos");
 
                     b.Navigation("Services");
                 });
 
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Combo", b =>
+            modelBuilder.Entity("LuxenHotel.Models.Entities.Orders.Orders", b =>
                 {
-                    b.Navigation("ComboServices");
-                });
+                    b.Navigation("OrderCombos");
 
-            modelBuilder.Entity("LuxenHotel.Models.Entities.Booking.Service", b =>
-                {
-                    b.Navigation("ComboServices");
+                    b.Navigation("OrderServices");
                 });
 #pragma warning restore 612, 618
         }

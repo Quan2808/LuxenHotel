@@ -2,13 +2,8 @@ using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
-using LuxenHotel.Utils;
+using LuxenHotel.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LuxenHotel.Services.Booking.Implementations
 {
@@ -21,6 +16,19 @@ namespace LuxenHotel.Services.Booking.Implementations
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        }
+
+        public async Task<List<AccommodationDropdownItem>> GetDropdownListAsync()
+        {
+            return await _context.Accommodations
+                .AsNoTracking()
+                .OrderBy(a => a.Name)
+                .Select(a => new AccommodationDropdownItem
+                {
+                    Id = a.Id,
+                    Name = a.Name
+                })
+                .ToListAsync();
         }
 
         public async Task<List<AccommodationViewModel>> ListAsync()
@@ -41,9 +49,32 @@ namespace LuxenHotel.Services.Booking.Implementations
             var accommodation = await _context.Accommodations
                 .AsNoTracking()
                 .Include(a => a.Services)
+                .Include(a => a.Combos)
+                    .ThenInclude(c => c.ComboServices)
                 .FirstOrDefaultAsync(m => m.Id == id.Value);
 
             return accommodation == null ? null : ToViewModel(accommodation);
+        }
+
+        public async Task<List<ServiceViewModel>> GetServicesForAccommodationAsync(int accommodationId)
+        {
+            var accommodation = await _context.Accommodations
+                .AsNoTracking()
+                .Include(a => a.Services)
+                .FirstOrDefaultAsync(a => a.Id == accommodationId);
+
+            if (accommodation == null || accommodation.Services == null)
+            {
+                return new List<ServiceViewModel>();
+            }
+
+            return accommodation.Services.Select(s => new ServiceViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Price = s.Price,
+                Description = s.Description
+            }).ToList();
         }
 
         public async Task CreateAsync(AccommodationViewModel viewModel)
@@ -76,6 +107,8 @@ namespace LuxenHotel.Services.Booking.Implementations
 
             var accommodation = await _context.Accommodations
                 .Include(a => a.Services)
+                .Include(a => a.Combos)
+                    .ThenInclude(c => c.ComboServices)
                 .FirstOrDefaultAsync(a => a.Id == id)
                 ?? throw new InvalidOperationException($"Accommodation with ID {id} not found.");
 
@@ -90,8 +123,13 @@ namespace LuxenHotel.Services.Booking.Implementations
 
             await UpdateMediaAsync(accommodation, viewModel);
 
+            // Extract services and combos to delete
             var servicesToDelete = ExtractServicesToDelete(viewModel);
+            var combosToDelete = ExtractCombosToDelete(viewModel);
+
+            // Update services and combos
             UpdateServices(accommodation, viewModel.Services, servicesToDelete);
+            UpdateCombos(accommodation, viewModel.Combos, combosToDelete);
 
             await _context.SaveChangesAsync();
         }
@@ -99,7 +137,6 @@ namespace LuxenHotel.Services.Booking.Implementations
         private int[] ExtractServicesToDelete(AccommodationViewModel viewModel)
         {
             // Check if the ServicesToDelete property exists in the viewModel
-            // This would need to be added to your AccommodationViewModel class
             if (viewModel.ServicesToDelete != null && viewModel.ServicesToDelete.Any())
             {
                 return viewModel.ServicesToDelete.ToArray();
@@ -123,20 +160,20 @@ namespace LuxenHotel.Services.Booking.Implementations
                 }
 
                 // Delete the files from the file system
-                FileUploadUtility.DeleteFiles(filesToDelete, _environment);
+                FileStorageService.DeleteFiles(filesToDelete, _environment);
             }
 
             // Handle media uploads
             if (viewModel.MediaFiles?.Any() == true)
             {
-                var mediaPaths = await FileUploadUtility.UploadFilesAsync(viewModel.MediaFiles, _environment);
+                var mediaPaths = await FileStorageService.UploadFilesAsync(viewModel.MediaFiles, _environment);
                 accommodation.UpdateMedia(mediaPaths);
             }
 
             // Handle thumbnail deletion
             if (viewModel.DeleteThumbnail && !string.IsNullOrEmpty(accommodation.Thumbnail))
             {
-                FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                FileStorageService.DeleteFile(accommodation.Thumbnail, _environment);
                 accommodation.Thumbnail = null;
             }
 
@@ -146,10 +183,10 @@ namespace LuxenHotel.Services.Booking.Implementations
                 // If we have an existing thumbnail, delete it first
                 if (!string.IsNullOrEmpty(accommodation.Thumbnail))
                 {
-                    FileUploadUtility.DeleteFile(accommodation.Thumbnail, _environment);
+                    FileStorageService.DeleteFile(accommodation.Thumbnail, _environment);
                 }
 
-                var thumbnailPath = await FileUploadUtility.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
+                var thumbnailPath = await FileStorageService.UploadSingleFileAsync(viewModel.ThumbnailFile, _environment);
                 if (thumbnailPath != null)
                 {
                     accommodation.Thumbnail = thumbnailPath;
@@ -211,25 +248,130 @@ namespace LuxenHotel.Services.Booking.Implementations
             }
         }
 
+        private int[] ExtractCombosToDelete(AccommodationViewModel viewModel)
+        {
+            // Check if the CombosToDelete property exists in the viewModel
+            if (viewModel.CombosToDelete != null && viewModel.CombosToDelete.Any())
+            {
+                return viewModel.CombosToDelete.ToArray();
+            }
+            return Array.Empty<int>();
+        }
+
+        private void UpdateCombos(Accommodation accommodation, IList<ComboViewModel>? combos, int[]? combosToDelete = null)
+        {
+            // Handle deletions if any combos are marked for deletion
+            if (combosToDelete != null && combosToDelete.Length > 0)
+            {
+                // Find and remove combos marked for deletion
+                foreach (var comboId in combosToDelete)
+                {
+                    var comboToRemove = accommodation.Combos.FirstOrDefault(c => c.Id == comboId);
+                    if (comboToRemove != null)
+                    {
+                        accommodation.Combos.Remove(comboToRemove);
+                    }
+                }
+            }
+
+            // Update existing combos and add new ones
+            if (combos?.Any() == true)
+            {
+                foreach (var comboViewModel in combos)
+                {
+                    // Skip empty combos
+                    if (string.IsNullOrEmpty(comboViewModel.Name))
+                        continue;
+
+                    // Case 1: Existing combo (has ID)
+                    if (comboViewModel.Id > 0)
+                    {
+                        // Find and update the existing combo
+                        var existingCombo = accommodation.Combos.FirstOrDefault(c => c.Id == comboViewModel.Id);
+                        if (existingCombo != null)
+                        {
+                            existingCombo.Name = comboViewModel.Name;
+                            existingCombo.Price = comboViewModel.Price;
+                            existingCombo.Description = comboViewModel.Description;
+                            existingCombo.Status = comboViewModel.Status;
+                            existingCombo.UpdatedAt = DateTime.UtcNow;
+
+                            // Update combo services
+                            UpdateComboServices(existingCombo, comboViewModel.SelectedServiceIds, accommodation);
+                        }
+                    }
+                    // Case 2: New combo (no ID)
+                    else
+                    {
+                        var newCombo = new Combo
+                        {
+                            Name = comboViewModel.Name,
+                            Price = comboViewModel.Price,
+                            Description = comboViewModel.Description,
+                            Status = comboViewModel.Status,
+                            CreatedAt = DateTime.UtcNow,
+                            Accommodation = accommodation
+                        };
+
+                        // Add services to the new combo
+                        UpdateComboServices(newCombo, comboViewModel.SelectedServiceIds, accommodation);
+
+                        accommodation.Combos.Add(newCombo);
+                    }
+                }
+            }
+        }
+
+        private void UpdateComboServices(Combo combo, List<int> selectedServiceIds, Accommodation accommodation)
+        {
+            // Clear existing services from the combo
+            combo.ComboServices.Clear();
+
+            // Add selected services
+            if (selectedServiceIds != null && selectedServiceIds.Any())
+            {
+                foreach (var serviceId in selectedServiceIds)
+                {
+                    // Find the service in the accommodation's services or from the database
+                    var service = accommodation.Services.FirstOrDefault(s => s.Id == serviceId);
+
+                    if (service != null)
+                    {
+                        combo.ComboServices.Add(service);
+                    }
+                }
+            }
+        }
+
         private AccommodationViewModel ToViewModel(Accommodation accommodation) => new()
         {
             Id = accommodation.Id,
             Name = accommodation.Name,
             Price = accommodation.Price,
             Description = accommodation.Description,
-            Media = accommodation.Media,
+            MaxOccupancy = accommodation.MaxOccupancy,
+            Area = accommodation.Area,
+            Status = accommodation.Status,
+            Media = accommodation.Media?.ToList() ?? new List<string>(),
             Thumbnail = accommodation.Thumbnail,
-            Services = accommodation.Services.Select(s => new ServiceViewModel
+            CreatedAt = accommodation.CreatedAt,
+            Services = accommodation.Services?.Select(s => new ServiceViewModel
             {
                 Id = s.Id,
                 Name = s.Name,
                 Price = s.Price,
                 Description = s.Description
-            }).ToList(),
-            Status = accommodation.Status,
-            MaxOccupancy = accommodation.MaxOccupancy,
-            Area = accommodation.Area,
-            CreatedAt = accommodation.CreatedAt
+            }).ToList() ?? new List<ServiceViewModel>(),
+            Combos = accommodation.Combos?.Select(c => new ComboViewModel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Price = c.Price,
+                Description = c.Description,
+                Status = c.Status,
+                CreatedAt = c.CreatedAt,
+                SelectedServiceIds = c.ComboServices?.Select(s => s.Id).ToList() ?? new List<int>()
+            }).ToList() ?? new List<ComboViewModel>()
         };
 
         public async Task DeleteAsync(int id)

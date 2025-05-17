@@ -26,6 +26,10 @@ public class IdentityController : Controller
     [HttpGet]
     public IActionResult Register()
     {
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Home");
+        }
         return View();
     }
 
@@ -81,6 +85,10 @@ public class IdentityController : Controller
     public IActionResult Login(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Home");
+        }
         return View();
     }
 

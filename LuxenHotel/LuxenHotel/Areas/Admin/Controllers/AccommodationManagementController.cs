@@ -1,12 +1,7 @@
-using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
-using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace LuxenHotel.Areas.Admin.Controllers
 {
@@ -50,7 +45,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                HandleInvalidModelState(viewModel);
+                HandleInvalidModelState();
                 return View("Save", viewModel);
             }
 
@@ -87,7 +82,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                HandleInvalidModelState(viewModel);
+                HandleInvalidModelState();
                 return View("Save", viewModel);
             }
 
@@ -117,12 +112,13 @@ namespace LuxenHotel.Areas.Admin.Controllers
             // Process MediaToDelete if it's a JSON string
             if (Request.Form["MediaToDelete"].Count > 0)
             {
-                string mediaToDeleteJson = Request.Form["MediaToDelete"];
+                string? mediaToDeleteJson = Request.Form["MediaToDelete"];
                 if (!string.IsNullOrEmpty(mediaToDeleteJson))
                 {
                     try
                     {
-                        List<string> mediaToDelete = JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson);
+                        List<string> mediaToDelete =
+                            JsonSerializer.Deserialize<List<string>>(mediaToDeleteJson) ?? new List<string>();
                         viewModel.MediaToDelete = mediaToDelete;
                     }
                     catch (JsonException ex)
@@ -152,22 +148,6 @@ namespace LuxenHotel.Areas.Admin.Controllers
         {
             AddNotification(message, NotificationType.Error);
             return RedirectToAction(nameof(Index));
-        }
-
-        private void HandleInvalidModelState(AccommodationViewModel viewModel)
-        {
-            AddNotification("Invalid input data", NotificationType.Error);
-            LogInfo("Invalid input data for creating accommodation");
-
-            var errors = ModelState.Values
-            .SelectMany(v => v.Errors)
-            .Select(e => e.ErrorMessage)
-            .ToList();
-
-            foreach (var error in errors)
-            {
-                AddNotification(error, NotificationType.Error);
-            }
         }
     }
 }

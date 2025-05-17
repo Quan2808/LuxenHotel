@@ -1,10 +1,7 @@
-using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.ViewModels.Booking;
 using LuxenHotel.Services.Booking.Interfaces;
-using LuxenHotel.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace LuxenHotel.Areas.Customer.Controllers;
 
@@ -12,17 +9,15 @@ namespace LuxenHotel.Areas.Customer.Controllers;
 public class BookingController : Controller
 {
 
-    private readonly ApplicationDbContext _context;
-    private readonly IWebHostEnvironment _environment;
     private readonly IAccommodationService _accommodationService;
+    private readonly IComboService _comboService;
 
-    public BookingController(IAccommodationService accommodationService,
-        ApplicationDbContext context,
-        IWebHostEnvironment environment)
+    public BookingController(
+        IAccommodationService accommodationService,
+        IComboService comboService)
     {
         _accommodationService = accommodationService;
-        _context = context;
-        _environment = environment;
+        _comboService = comboService;
     }
 
     [HttpGet]
@@ -36,55 +31,30 @@ public class BookingController : Controller
     [Route("Accommodations/{id}")]
     public async Task<IActionResult> AccommodationDetails(int? id)
     {
-        var viewModel = await _accommodationService.GetAsync(id);
-        if (viewModel == null)
+        if (!id.HasValue)
             return NotFound();
 
-        return View(viewModel);
-    }
+        var accommodation = await _accommodationService.GetAsync(id);
+        if (accommodation == null)
+            return NotFound();
 
-    // GET: Accommodation/Create
-    public IActionResult Create()
-    {
-        var viewModel = new AccommodationViewModel
-        {
-            Services = new List<ServiceViewModel> { new ServiceViewModel() } // Initialize with one empty service
-        };
-        return View(viewModel);
-    }
+        var combos = await _comboService.GetCombosByAccommodationIdAsync(id!.Value);
 
-    // POST: Accommodation/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AccommodationViewModel viewModel)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View(viewModel);
-        }
+        // Filter combos with Status = Published and non-empty Services
+        var publishedCombos = combos.Where(
+            c => c.Status == Combo.ComboStatus.Published &&
+            c.Services != null &&
+            c.Services.Any())
+            .ToList();
 
-        await _accommodationService.CreateAsync(viewModel);
+        var model = new AccommodationDetailsViewModel(accommodation, publishedCombos);
 
-        return RedirectToAction(nameof(Accommodations));
+        return View(model);
     }
 
     // Action xử lý đặt chỗ ở
     [HttpPost]
     public ActionResult BookAccommodations()
-    {
-        return View();
-    }
-
-    // Action hiển thị danh sách dịch vụ hoặc giao diện đặt dịch vụ
-    [HttpGet]
-    public ActionResult Services()
-    {
-        return View();
-    }
-
-    // Action xử lý đặt dịch vụ
-    [HttpPost]
-    public ActionResult BookServices()
     {
         return View();
     }
