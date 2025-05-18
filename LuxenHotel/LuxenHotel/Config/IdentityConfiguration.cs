@@ -1,6 +1,8 @@
+using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace LuxenHotel.Configuration
 {
@@ -25,6 +27,7 @@ namespace LuxenHotel.Configuration
             })
             // .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+            // .AddUserStore<UserStore<User, Role, ApplicationDbContext, string>>();
 
             // Configure authentication cookies
             services.ConfigureApplicationCookie(options =>

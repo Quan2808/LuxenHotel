@@ -9,6 +9,7 @@
         <NoWarn>$(NoWarn);CS8602</NoWarn>
         <NoWarn>$(NoWarn);CS8625</NoWarn>
         <NoWarn>$(NoWarn);CS8613</NoWarn>
+        <NoWarn>$(NoWarn);CS8601</NoWarn>
         <NoWarn>$(NoWarn);MVC1000</NoWarn>
     </PropertyGroup>
 
