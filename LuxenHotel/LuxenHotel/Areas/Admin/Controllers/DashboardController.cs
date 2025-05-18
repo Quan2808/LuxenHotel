@@ -126,23 +126,25 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 .ToListAsync();
 
             var result = accommodations.Select(accommodation =>
-            {
-                var accommodationOrders = orders
-                    .Where(o => o.AccommodationId == accommodation.Id)
-                    .ToList();
-
-                return new AccommodationOrderViewModel
                 {
-                    Accommodation = accommodation,
-                    TotalOrders = accommodationOrders.Count,
-                    Revenue = accommodationOrders
+                    var accommodationOrders = orders
+                        .Where(o => o.AccommodationId == accommodation.Id)
+                        .ToList();
+
+                    var completedOrders = accommodationOrders
                         .Where(o => o.Status == OrderStatus.Completed)
-                        .Sum(o => o.TotalPrice),
-                    Orders = accommodationOrders
-                };
-            })
-            .OrderByDescending(ao => ao.Accommodation.CreatedAt)
-            .ToList();
+                        .ToList();
+
+                    return new AccommodationOrderViewModel
+                    {
+                        Accommodation = accommodation,
+                        TotalOrders = completedOrders.Count,
+                        Revenue = completedOrders.Sum(o => o.TotalPrice),
+                        Orders = accommodationOrders
+                    };
+                })
+                .OrderByDescending(ao => ao.Revenue)
+                .ToList();
 
             return result;
         }

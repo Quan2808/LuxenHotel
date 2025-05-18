@@ -163,12 +163,66 @@
     </div>
 
     <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-9 mb-10">
-        <table class="table">
-           Table content here 
-        </table>
+        <!--begin::Table Widget 4-->
+        <div class="card card-flush h-xl-100">
+            <!--begin::Card header-->
+            <div class="card-header pt-7">
+                <!--begin::Title-->
+                @* <h3 class="card-title align-items-start flex-column">
+                    <span class="card-label fw-bold text-gray-800">Product Orders</span>
+                    <span class="text-gray-500 mt-1 fw-semibold fs-6">Avg. 57 orders per day</span>
+                </h3> *@
+
+                <h3 class="card-title align-items-start flex-column fw-bold text-gray-800">
+                    Top Accommodations by Revenue
+                </h3>
+                <!--end::Title-->
+            </div>
+            <!--end::Card header-->
+
+            <!--begin::Card body-->
+            <div class="card-body pt-2">
+                <!--begin::Table-->
+                <table class="table align-middle table-row-dashed fs-6 gy-3" id="kt_table_widget_4_table">
+                    <!--begin::Table head-->
+                    <thead>
+                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                        <th class="min-w-100px">Accommodation</th>
+                        <th class="text-center min-w-100px">Total Orders</th>
+                        <th class="text-end min-w-125px">Revenue</th>
+                    </tr>
+                    </thead>
+                    <!--end::Table head-->
+
+                    <!--begin::Table body-->
+                    <tbody class="fw-bold text-gray-600">
+
+                    <!-- Main table rows -->
+                    @foreach (var accommodationOrder in Model.AccommodationOrders)
+                    {
+                        <tr>
+                            <td>
+                                @accommodationOrder.Accommodation.Name
+                            </td>
+                            <td class="text-center text-gray-800">
+                                @accommodationOrder.TotalOrders
+                            </td>
+                            <td class="text-end">
+                                <span class="text-gray-800 fw-bolder">
+                                    @accommodationOrder.Revenue.ToString("N0") <i class="fa-solid fa-dong-sign"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                    <!--end::Table body-->
+                </table>
+                <!--end::Table-->
+            </div>
+            <!--end::Card body-->
+        </div>
     </div>
 </div>
-
 
 
 <div class="container-fluid px-4">
