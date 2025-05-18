@@ -7,49 +7,49 @@
     @Html.LibStyle("vis-timeline/vis-timeline.bundle.css")
 }
 
-@section Scripts{
+@section Scripts {
     <!-- JavaScript Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     @Html.JsScript("dashboard.js")
     @Html.LibScript("vis-timeline/vis-timeline.bundle.js")
 
     <script>
-    // Data preparation
-    const accommodationNames = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => a.Accommodation.Name).ToArray()));
-    const accommodationRevenues = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => (double)a.Revenue).ToArray()));
+        // Data preparation
+        const accommodationNames = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => a.Accommodation.Name).ToArray()));
+        const accommodationRevenues = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => (double)a.Revenue).ToArray()));
 
-    // Collect order statuses for pie chart
-    const allOrders = @Html.Raw(JsonSerializer.Serialize(
-                          Model.AccommodationOrders
-                              .SelectMany(a => a.Orders)
-                              .GroupBy(o => o.Status)
-                              .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
-                              .ToArray()
-                      ));
+        // Collect order statuses for pie chart
+        const allOrders = @Html.Raw(JsonSerializer.Serialize(
+                                                                                                                                                                                                                                            Model.AccommodationOrders
+                                                                                                                                                                                                                                                                            .SelectMany(a => a.Orders)
+                                                                                                                                                                                                                                                                            .GroupBy(o => o.Status)
+                                                                                                                                                                                                                                                                            .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                    .ToArray()
+                    ));
 
     // Timeline data
     const timelineOrders = @Html.Raw(JsonSerializer.Serialize(
-                               Model.AccommodationOrders.SelectMany(a => a.Orders)
-                                   .Select(o => new
-                                   {
-                                       id = o.Id,
-                                       content = o.OrderCode,
-                                       start = o.CheckInDate.ToString("yyyy-MM-dd"),
-                                       end = o.CheckOutDate.ToString("yyyy-MM-dd"),
-                                       title = $"{o.OrderCode} - {o.CustomerName} - {o.Status}",
-                                       group = o.AccommodationId,
-                                       className = $"status-{o.Status.ToString().ToLower()}"
-                                   })
-                                   .ToArray()
-                           ));
+                                                                                                                                                                                                                                                        Model.AccommodationOrders.SelectMany(a => a.Orders)
+                                                                                                                                                                                                                                                                                        .Select(o => new
+                                                                                                                                                    {
+                                                                                                                                                        id = o.Id,
+                                                                                                                                                                                                                                                                                                        content = o.OrderCode,
+                                                                                                                                                                                                                                                                                                        start = o.CheckInDate.ToString("yyyy-MM-dd"),
+                                                                                                                                                        end = o.CheckOutDate.ToString("yyyy-MM-dd"),
+                                                                                                                                                                                                                                                                                                        title = $"{o.OrderCode} - {o.CustomerName} - {o.Status}",
+                                                                                                                                                                                                                                                                                                        group = o.AccommodationId,
+                                                                                                                                                                                                                                                                                                        className = $"status-{o.Status.ToString().ToLower()}"
+                                                                                                                                                    })
+                .ToArray()
+                ));
 
     const timelineGroups = @Html.Raw(JsonSerializer.Serialize(
-                               Model.AccommodationOrders.Select(a => new
-                               {
-                                   id = a.Accommodation.Id,
-                                   content = a.Accommodation.Name
-                               }).ToArray()
-                           ));
+                                                                                                                                                                                                                                                        Model.AccommodationOrders.Select(a => new
+                                                                                                                                    {
+                                                                                                                                        id = a.Accommodation.Id,
+                                                                                                                                                                                                                                                                        content = a.Accommodation.Name
+                                                                                                                                    }).ToArray()
+                ));
 
     // Charts initialization
     document.addEventListener('DOMContentLoaded', function () {
@@ -72,7 +72,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return '$' + value.toLocaleString();
                             }
                         }
@@ -81,7 +81,7 @@
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return 'Revenue: $' + context.raw.toLocaleString();
                             }
                         }
@@ -90,71 +90,71 @@
             }
         });
 
-        // Order Status Chart
-        const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
-        new Chart(statusCtx, {
-            type: 'pie',
-            data: {
-                labels: allOrders.map(item => item.Status),
-                datasets: [{
-                    data: allOrders.map(item => item.Count),
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.5)',  // Completed
-                        'rgba(153, 102, 255, 0.5)', // Created
-                        'rgba(255, 159, 64, 0.5)',  // Pending
-                        'rgba(255, 99, 132, 0.5)'   // Cancelled
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.raw;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${context.label}: ${value} (${percentage}%)`;
+            // Order Status Chart
+            const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: allOrders.map(item => item.Status),
+                    datasets: [{
+                        data: allOrders.map(item => item.Count),
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.5)',  // Completed
+                            'rgba(153, 102, 255, 0.5)', // Created
+                            'rgba(255, 159, 64, 0.5)',  // Pending
+                            'rgba(255, 99, 132, 0.5)'   // Cancelled
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
-            }
+            });
+
+            // Timeline
+            const container = document.getElementById('ordersTimeline');
+
+            const groups = new vis.DataSet(timelineGroups);
+            const items = new vis.DataSet(timelineOrders);
+
+            const timeline = new vis.Timeline(container, items, groups, {
+                stack: true,
+                stackSubgroups: true,
+                horizontalScroll: true,
+                zoomKey: 'ctrlKey',
+                min: new Date().setMonth(new Date().getMonth() - 1),
+                max: new Date().setMonth(new Date().getMonth() + 2)
+            });
+
+            // Add CSS for timeline status styles
+            const style = document.createElement('style');
+            style.textContent = `
+                        .vis-item.status-completed { background-color: rgba(75, 192, 192, 0.7); border-color: rgba(75, 192, 192, 1); }
+                        .vis-item.status-created { background-color: rgba(153, 102, 255, 0.7); border-color: rgba(153, 102, 255, 1); }
+                        .vis-item.status-pending { background-color: rgba(255, 159, 64, 0.7); border-color: rgba(255, 159, 64, 1); }
+                        .vis-item.status-cancelled { background-color: rgba(255, 99, 132, 0.7); border-color: rgba(255, 99, 132, 1); }
+                    `;
+            document.head.appendChild(style);
         });
-
-        // Timeline
-        const container = document.getElementById('ordersTimeline');
-
-        const groups = new vis.DataSet(timelineGroups);
-        const items = new vis.DataSet(timelineOrders);
-
-        const timeline = new vis.Timeline(container, items, groups, {
-            stack: true,
-            stackSubgroups: true,
-            horizontalScroll: true,
-            zoomKey: 'ctrlKey',
-            min: new Date().setMonth(new Date().getMonth() - 1),
-            max: new Date().setMonth(new Date().getMonth() + 2)
-        });
-
-        // Add CSS for timeline status styles
-        const style = document.createElement('style');
-        style.textContent = `
-            .vis-item.status-completed { background-color: rgba(75, 192, 192, 0.7); border-color: rgba(75, 192, 192, 1); }
-            .vis-item.status-created { background-color: rgba(153, 102, 255, 0.7); border-color: rgba(153, 102, 255, 1); }
-            .vis-item.status-pending { background-color: rgba(255, 159, 64, 0.7); border-color: rgba(255, 159, 64, 1); }
-            .vis-item.status-cancelled { background-color: rgba(255, 99, 132, 0.7); border-color: rgba(255, 99, 132, 1); }
-        `;
-        document.head.appendChild(style);
-    });
-</script>
+    </script>
 }
 
 <div class="row gx-5 gx-xl-10 mb-xl-10">
@@ -180,34 +180,34 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-3" id="kt_table_widget_4_table">
                     <!--begin::Table head-->
                     <thead>
-                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                        <th class="min-w-100px">Accommodation</th>
-                        <th class="text-center min-w-100px">Total Orders</th>
-                        <th class="text-end min-w-125px">Revenue</th>
-                    </tr>
+                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                            <th class="min-w-100px">Accommodation</th>
+                            <th class="text-center min-w-100px">Total Orders</th>
+                            <th class="text-end min-w-125px">Revenue</th>
+                        </tr>
                     </thead>
                     <!--end::Table head-->
 
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
 
-                    <!-- Main table rows -->
-                    @foreach (var accommodationOrder in Model.AccommodationOrders)
-                    {
-                        <tr>
-                            <td>
-                                @accommodationOrder.Accommodation.Name
-                            </td>
-                            <td class="text-center text-gray-800">
-                                @accommodationOrder.TotalOrders
-                            </td>
-                            <td class="text-end">
-                                <span class="text-gray-800 fw-bolder">
-                                    @accommodationOrder.Revenue.ToString("N0") <i class="fa-solid fa-dong-sign"></i>
-                                </span>
-                            </td>
-                        </tr>
-                    }
+                        <!-- Main table rows -->
+                        @foreach (var accommodationOrder in Model.AccommodationOrders)
+                        {
+                            <tr>
+                                <td>
+                                    @accommodationOrder.Accommodation.Name
+                                </td>
+                                <td class="text-center text-gray-800">
+                                    @accommodationOrder.TotalOrders
+                                </td>
+                                <td class="text-end">
+                                    <span class="text-gray-800 fw-bolder">
+                                        @accommodationOrder.Revenue.ToString("N0") <i class="fa-solid fa-dong-sign"></i>
+                                    </span>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                     <!--end::Table body-->
                 </table>
@@ -226,72 +226,73 @@
         <div class="table-responsive">
             <table class="table align-middle table-row-dashed fs-6 gy-3">
                 <thead>
-                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                    <th>Order Code</th>
-                    <th>Created</th>
-                    <th>Customer</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
+                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                        <th>Order Code</th>
+                        <th>Created</th>
+                        <th>Customer</th>
+                        <th class="text-center">Total</th>
+                        <th class="text-center">Status</th>
+                        <th></th>
+                    </tr>
                 </thead>
                 <tbody>
-                @foreach (var order in Model.RecentOrders)
-                {
-                    <tr>
-                        <td class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">
-                            @order.Order.OrderCode
-                        </td>
-                        <td>
-                            <div>@order.TimeAgo</div>
-                            <small class="text-muted">@order.Order.CreatedAt.ToString("g")</small>
-                        </td>
-                        <td>
-                            <div class="d-flex">
-                                <div>
-                                    @if (!string.IsNullOrEmpty(order.UserName))
-                                    {
-                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.UserName</span>
-                                    }
-                                    else if (order.Order.User != null)
-                                    {
-                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.Order.User.UserName</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">N/A</span>
-                                    }
-                                    @if (!string.IsNullOrEmpty(order.Order.CustomerEmail))
-                                    {
-                                        <div class="text-muted fs-7 fw-bold">@order.Order.CustomerEmail</div>
-                                    }
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <tr>
+                            <td class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">
+                                @order.Order.OrderCode
+                            </td>
+                            <td>
+                                <div>@order.TimeAgo</div>
+                                <small class="text-muted">@order.Order.CreatedAt.ToString("g")</small>
+                            </td>
+                            <td>
+                                <div class="d-flex">
+                                    <div>
+                                        @if (!string.IsNullOrEmpty(order.UserName))
+                                        {
+                                            <span class="text-gray-800 fs-5 fw-bold mb-1">@order.UserName</span>
+                                        }
+                                        else if (order.Order.User != null)
+                                        {
+                                            <span class="text-gray-800 fs-5 fw-bold mb-1">@order.Order.User.UserName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(order.Order.CustomerEmail))
+                                        {
+                                            <div class="text-muted fs-7 fw-bold">@order.Order.CustomerEmail</div>
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="fw-bold">$@order.Order.TotalPrice.ToString("N0")</td>
-                        <td>
-                            @{
-                                string badgeClass = order.Order.Status switch
-                                {
-                                    OrderStatus.Completed => "badge-light-success",
-                                    OrderStatus.Cancelled => "badge-light-danger",
-                                    OrderStatus.Created => "badge-light-primary",
-                                    _ => "badge-light-secondary"
-                                };
-                            }
-                            <span class="badge @badgeClass">@order.Order.Status</span>
-                        </td>
-                        <td>
-                            <a href="admin/orders/@order.Order.OrderCode" class="btn btn-sm btn-outline-info">
-                                View Details
-                            </a>
-                           
-                        </td>
-                    </tr>
-                }
+                            </td>
+                            <td class="fw-bold text-center">@order.Order.TotalPrice.ToString("N0") <i
+                                    class="fa-solid fa-dong-sign"></i>
+                            </td>
+                            <td class="text-center">
+                                @{
+                                    string badgeClass = order.Order.Status switch
+                                    {
+                                        OrderStatus.Completed => "badge-light-success",
+                                        OrderStatus.Cancelled => "badge-light-danger",
+                                        OrderStatus.Created => "badge-light-primary",
+                                        _ => "badge-light-secondary"
+                                    };
+                                }
+                                <span class="badge @badgeClass">@order.Order.Status</span>
+                            </td>
+                            <td>
+                                <a href="admin/orders/@order.Order.OrderCode" class="btn btn-sm btn-outline-info">
+                                    View Details
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
