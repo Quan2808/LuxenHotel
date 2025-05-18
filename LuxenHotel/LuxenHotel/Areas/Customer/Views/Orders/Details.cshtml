@@ -114,7 +114,6 @@
                         <thead>
                             <tr>
                                 <th>Service Name</th>
-                                <th>Quantity</th>
                                 <th>Price (VND)</th>
                                 <th>Total (VND)</th>
                             </tr>
@@ -124,7 +123,6 @@
                             {
                                 <tr>
                                     <td>@service.ServiceName</td>
-                                    <td>@service.Quantity</td>
                                     <td>@service.Price.ToString("N0")</td>
                                     <td>@((service.Price * service.Quantity).ToString("N0"))</td>
                                 </tr>
@@ -142,7 +140,6 @@
                         <thead>
                             <tr>
                                 <th>Combo Name</th>
-                                <th>Quantity</th>
                                 <th>Price (VND)</th>
                                 <th>Total (VND)</th>
                             </tr>
@@ -152,9 +149,8 @@
                             {
                                 <tr>
                                     <td>@combo.ComboName</td>
-                                    <td>@combo.Quantity</td>
                                     <td>@combo.Price.ToString("N0")</td>
-                                    <td>@(combo.Price * combo.Quantity).ToString("N0")</td>
+                                    <td>@((combo.Price * combo.Quantity).ToString("N0"))</td>
                                 </tr>
                             }
                         </tbody>
