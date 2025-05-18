@@ -1,2 +1,386 @@
-<h1>Welcome to the Admin Dashboard</h1>
-<p>Manage users, settings, and reports here.</p>
+@using System.Text.Json
+@model LuxenHotel.Areas.Admin.Controllers.DashboardViewModel
+
+@section Styles
+{
+    @Html.LibStyle("vis-timeline/vis-timeline.bundle.css")
+}
+
+@section Scripts{
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    @Html.JsScript("dashboard.js")
+    @Html.LibScript("vis-timeline/vis-timeline.bundle.js")
+
+    <script>
+    // Data preparation
+    const accommodationNames = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => a.Accommodation.Name).ToArray()));
+    const accommodationRevenues = @Html.Raw(JsonSerializer.Serialize(Model.AccommodationOrders.Select(a => (double)a.Revenue).ToArray()));
+
+    // Collect order statuses for pie chart
+    const allOrders = @Html.Raw(JsonSerializer.Serialize(
+                          Model.AccommodationOrders
+                              .SelectMany(a => a.Orders)
+                              .GroupBy(o => o.Status)
+                              .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                              .ToArray()
+                      ));
+
+    // Timeline data
+    const timelineOrders = @Html.Raw(JsonSerializer.Serialize(
+                               Model.AccommodationOrders.SelectMany(a => a.Orders)
+                                   .Select(o => new
+                                   {
+                                       id = o.Id,
+                                       content = o.OrderCode,
+                                       start = o.CheckInDate.ToString("yyyy-MM-dd"),
+                                       end = o.CheckOutDate.ToString("yyyy-MM-dd"),
+                                       title = $"{o.OrderCode} - {o.CustomerName} - {o.Status}",
+                                       group = o.AccommodationId,
+                                       className = $"status-{o.Status.ToString().ToLower()}"
+                                   })
+                                   .ToArray()
+                           ));
+
+    const timelineGroups = @Html.Raw(JsonSerializer.Serialize(
+                               Model.AccommodationOrders.Select(a => new
+                               {
+                                   id = a.Accommodation.Id,
+                                   content = a.Accommodation.Name
+                               }).ToArray()
+                           ));
+
+    // Charts initialization
+    document.addEventListener('DOMContentLoaded', function () {
+        // Revenue by Accommodation Chart
+        const revenueCtx = document.getElementById('revenueByAccommodationChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: accommodationNames,
+                datasets: [{
+                    label: 'Revenue',
+                    data: accommodationRevenues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: $' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Order Status Chart
+        const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: allOrders.map(item => item.Status),
+                datasets: [{
+                    data: allOrders.map(item => item.Count),
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.5)',  // Completed
+                        'rgba(153, 102, 255, 0.5)', // Created
+                        'rgba(255, 159, 64, 0.5)',  // Pending
+                        'rgba(255, 99, 132, 0.5)'   // Cancelled
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${context.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Timeline
+        const container = document.getElementById('ordersTimeline');
+
+        const groups = new vis.DataSet(timelineGroups);
+        const items = new vis.DataSet(timelineOrders);
+
+        const timeline = new vis.Timeline(container, items, groups, {
+            stack: true,
+            stackSubgroups: true,
+            horizontalScroll: true,
+            zoomKey: 'ctrlKey',
+            min: new Date().setMonth(new Date().getMonth() - 1),
+            max: new Date().setMonth(new Date().getMonth() + 2)
+        });
+
+        // Add CSS for timeline status styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .vis-item.status-completed { background-color: rgba(75, 192, 192, 0.7); border-color: rgba(75, 192, 192, 1); }
+            .vis-item.status-created { background-color: rgba(153, 102, 255, 0.7); border-color: rgba(153, 102, 255, 1); }
+            .vis-item.status-pending { background-color: rgba(255, 159, 64, 0.7); border-color: rgba(255, 159, 64, 1); }
+            .vis-item.status-cancelled { background-color: rgba(255, 99, 132, 0.7); border-color: rgba(255, 99, 132, 1); }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+}
+
+<div class="row gx-5 gx-xl-10 mb-xl-10">
+    <!--Earnings Summary (Partial)-->
+    <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-10">
+        @Html.Partial("Partial/_EarningsSummary", Model)
+    </div>
+
+    <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-9 mb-10">
+        <table class="table">
+           Table content here 
+        </table>
+    </div>
+</div>
+
+
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <!-- Key Metrics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5>Expected Earnings</h5>
+                    <h2>$@Model.ExpectedEarnings.ToString("N0")</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>All non-cancelled orders</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h5>Sales This Month</h5>
+                    <h2>$@Model.SalesThisMonth.ToString("N0")</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>From completed orders</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h5>Average Daily Sales</h5>
+                    <h2>$@Model.AverageDailySales.ToString("N0")</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>This month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h5>Orders This Month</h5>
+                    <h2>@Model.OrdersThisMonth</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>Total bookings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Revenue by Accommodation Chart -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Revenue by Accommodation
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueByAccommodationChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status Distribution Chart -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Order Status Distribution
+                </div>
+                <div class="card-body">
+                    <canvas id="orderStatusChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-calendar me-1"></i>
+                    Orders Timeline
+                </div>
+                <div class="card-body">
+                    <div id="ordersTimeline" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Accommodations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-hotel me-1"></i>
+                    Top Accommodations by Revenue
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="accommodationsTable">
+                            <thead>
+                            <tr>
+                                <th>Accommodation</th>
+                                <th>Total Orders</th>
+                                <th>Revenue</th>
+                                <th>Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var accommodation in Model.AccommodationOrders)
+                            {
+                                <tr>
+                                    <td>@accommodation.Accommodation.Name</td>
+                                    <td>@accommodation.TotalOrders</td>
+                                    <td>$@accommodation.Revenue.ToString("N0")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#accommodation-@accommodation.Accommodation.Id" aria-expanded="false">
+                                            View Orders
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="p-0">
+                                        <div class="collapse" id="accommodation-@accommodation.Accommodation.Id">
+                                            <div class="p-3">
+                                                <h6>Orders for @accommodation.Accommodation.Name</h6>
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Order Code</th>
+                                                        <th>Customer</th>
+                                                        <th>Check-in</th>
+                                                        <th>Check-out</th>
+                                                        <th>Status</th>
+                                                        <th>Total</th>
+                                                        <th>Services/Combos</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach (var order in accommodation.Orders)
+                                                    {
+                                                        <tr>
+                                                            <td>@order.OrderCode</td>
+                                                            <td>@order.CustomerName</td>
+                                                            <td>@order.CheckInDate.ToShortDateString()</td>
+                                                            <td>@order.CheckOutDate.ToShortDateString()</td>
+                                                            <td>@order.Status</td>
+                                                            <td>$@order.TotalPrice.ToString("N0")</td>
+                                                            <td>
+                                                                @if (order.OrderServices.Any() || order.OrderCombos.Any())
+                                                                {
+                                                                    <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse"
+                                                                            data-bs-target="#order-extras-@order.Id" aria-expanded="false">
+                                                                        View
+                                                                    </button>
+                                                                    <div class="collapse" id="order-extras-@order.Id">
+                                                                        <div class="mt-2">
+                                                                            @if (order.OrderServices.Any())
+                                                                            {
+                                                                                <h6>Services:</h6>
+                                                                                <ul class="list-unstyled ps-3">
+                                                                                    @foreach (var service in order.OrderServices)
+                                                                                    {
+                                                                                        <li>@service.Service.Name (x@service.Quantity) - $@(service.Service.Price * service.Quantity)</li>
+                                                                                    }
+                                                                                </ul>
+                                                                            }
+                                                                            @if (order.OrderCombos.Any())
+                                                                            {
+                                                                                <h6>Combos:</h6>
+                                                                                <ul class="list-unstyled ps-3">
+                                                                                    @foreach (var combo in order.OrderCombos)
+                                                                                    {
+                                                                                        <li>@combo.Combo.Name (x@combo.Quantity) - $@(combo.Combo.Price * combo.Quantity)</li>
+                                                                                    }
+                                                                                </ul>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">None</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
