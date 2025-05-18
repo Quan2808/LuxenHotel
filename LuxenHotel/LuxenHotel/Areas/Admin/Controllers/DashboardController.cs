@@ -1,6 +1,7 @@
 using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Booking;
 using LuxenHotel.Models.Entities.Orders;
+using LuxenHotel.Models.ViewModels.Orders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -57,7 +58,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             // Calculate average daily sales
             decimal averageDailySalesThisMonth = CalculateAverageDailySales(ordersThisMonth, firstDayOfMonth, today);
-            decimal averageDailySalesLastMonth = CalculateAverageDailySales(ordersLastMonth, firstDayOfLastMonth, lastDayOfLastMonth);
+            decimal averageDailySalesLastMonth =
+                CalculateAverageDailySales(ordersLastMonth, firstDayOfLastMonth, lastDayOfLastMonth);
 
             // Fetch earnings by status in a single query
             var earningsByStatus = await _context.Orders
@@ -69,7 +71,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             var dashboardViewModel = new DashboardViewModel
             {
                 ExpectedEarnings = expectedEarningsThisMonth,
-                ExpectedEarningsChangePercentage = CalculateEarningsChangePercentage(expectedEarningsThisMonth, expectedEarningsLastMonth),
+                ExpectedEarningsChangePercentage =
+                    CalculateEarningsChangePercentage(expectedEarningsThisMonth, expectedEarningsLastMonth),
                 ConfirmedEarnings = earningsByStatus.GetValueOrDefault(OrderStatus.Confirmed, 0),
                 InProgressEarnings = earningsByStatus.GetValueOrDefault(OrderStatus.InProgress, 0),
                 CompletedEarnings = earningsByStatus.GetValueOrDefault(OrderStatus.Completed, 0),
@@ -79,8 +82,10 @@ namespace LuxenHotel.Areas.Admin.Controllers
                 OrdersLastMonth = ordersLastMonth.Count,
                 OrdersChangePercentage = CalculateOrdersChangePercentage(ordersThisMonth.Count, ordersLastMonth.Count),
                 AverageDailySales = averageDailySalesThisMonth,
-                AverageDailySalesChangePercentage = CalculateAverageDailySalesChangePercentage(averageDailySalesThisMonth, averageDailySalesLastMonth),
-                AccommodationOrders = await GetAccommodationOrders(orders)
+                AverageDailySalesChangePercentage =
+                    CalculateAverageDailySalesChangePercentage(averageDailySalesThisMonth, averageDailySalesLastMonth),
+                AccommodationOrders = await GetAccommodationOrders(orders),
+                RecentOrders = await GetRecentOrders()
             };
 
             return View(dashboardViewModel);
@@ -100,7 +105,8 @@ namespace LuxenHotel.Areas.Admin.Controllers
             return (double)((currentEarnings - previousEarnings) / previousEarnings) * 100.0;
         }
 
-        private static decimal CalculateAverageDailySales(IEnumerable<Orders> orders, DateTime startDate, DateTime endDate)
+        private static decimal CalculateAverageDailySales(IEnumerable<Orders> orders, DateTime startDate,
+            DateTime endDate)
         {
             int daysElapsed = (int)(endDate - startDate).TotalDays + 1;
             if (daysElapsed == 0)
@@ -148,6 +154,69 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             return result;
         }
+
+        private async Task<List<RecentOrderViewModel>> GetRecentOrders(int count = 10)
+        {
+            // Get most recent orders with all necessary related data
+            var recentOrders = await _context.Orders
+                .Include(o => o.Accommodation)
+                .Include(o => o.User)
+                .Include(o => o.OrderServices)
+                .ThenInclude(os => os.Service)
+                .Include(o => o.OrderCombos)
+                .ThenInclude(oc => oc.Combo)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+
+            var result = new List<RecentOrderViewModel>();
+
+            foreach (var order in recentOrders)
+            {
+                // Calculate time elapsed since order creation
+                TimeSpan elapsed = DateTime.UtcNow - order.CreatedAt;
+                string timeAgo;
+
+                if (elapsed.TotalMinutes < 60)
+                    timeAgo = $"{Math.Floor(elapsed.TotalMinutes)} minutes ago";
+                else if (elapsed.TotalHours < 24)
+                    timeAgo = $"{Math.Floor(elapsed.TotalHours)} hours ago";
+                else
+                    timeAgo = $"{Math.Floor(elapsed.TotalDays)} days ago";
+
+                // Calculate services and combos totals
+                int serviceTotal = order.OrderServices.Sum(os => os.Service.Price * os.Quantity);
+                int comboTotal = order.OrderCombos.Sum(oc => oc.Combo.Price * oc.Quantity);
+                int accommodationTotal = order.TotalPrice - serviceTotal - comboTotal;
+
+                // Create view model
+                var orderVM = new RecentOrderViewModel
+                {
+                    Order = order,
+                    TimeAgo = timeAgo,
+                    UserName = !string.IsNullOrEmpty(order.CustomerName)
+                        ? order.CustomerName
+                        : order.User?.UserName ?? "Guest",
+                    AccommodationTotal = accommodationTotal,
+                    Services = order.OrderServices.Select(os => new OrderServiceViewModel
+                    {
+                        ServiceName = os.Service?.Name ?? "N/A",
+                        Quantity = os.Quantity,
+                        Price = os.Service?.Price ?? 0
+                    }).ToList(),
+                    Combos = order.OrderCombos.Select(oc => new OrderComboViewModel
+                    {
+                        ComboName = oc.Combo?.Name ?? "N/A",
+                        Quantity = oc.Quantity,
+                        Price = oc.Combo?.Price ?? 0
+                    }).ToList()
+                };
+
+                result.Add(orderVM);
+            }
+
+            return result;
+        }
     }
 
     public class DashboardViewModel
@@ -165,6 +234,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
         public decimal InProgressEarnings { get; set; }
         public decimal CompletedEarnings { get; set; }
         public List<AccommodationOrderViewModel> AccommodationOrders { get; set; } = new();
+        public List<RecentOrderViewModel> RecentOrders { get; set; } = new();
     }
 
     public class AccommodationOrderViewModel
@@ -173,5 +243,16 @@ namespace LuxenHotel.Areas.Admin.Controllers
         public int TotalOrders { get; set; }
         public decimal Revenue { get; set; }
         public List<Orders> Orders { get; set; } = new();
+    }
+
+    public class RecentOrderViewModel
+    {
+        public Orders Order { get; set; }
+        public string TimeAgo { get; set; }
+        public string UserName { get; set; }
+        public int AccommodationTotal { get; set; }
+
+        public List<OrderServiceViewModel> Services { get; set; } = new();
+        public List<OrderComboViewModel> Combos { get; set; } = new();
     }
 }

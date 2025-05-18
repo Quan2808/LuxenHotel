@@ -1,4 +1,5 @@
 @using System.Text.Json
+@using LuxenHotel.Models.Entities.Orders
 @model LuxenHotel.Areas.Admin.Controllers.DashboardViewModel
 
 @section Styles
@@ -163,16 +164,9 @@
     </div>
 
     <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-9 mb-10">
-        <!--begin::Table Widget 4-->
         <div class="card card-flush h-xl-100">
             <!--begin::Card header-->
             <div class="card-header pt-7">
-                <!--begin::Title-->
-                @* <h3 class="card-title align-items-start flex-column">
-                    <span class="card-label fw-bold text-gray-800">Product Orders</span>
-                    <span class="text-gray-500 mt-1 fw-semibold fs-6">Avg. 57 orders per day</span>
-                </h3> *@
-
                 <h3 class="card-title align-items-start flex-column fw-bold text-gray-800">
                     Top Accommodations by Revenue
                 </h3>
@@ -224,217 +218,80 @@
     </div>
 </div>
 
-
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Dashboard</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
-
-    <!-- Key Metrics Cards -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h5>Expected Earnings</h5>
-                    <h2>$@Model.ExpectedEarnings.ToString("N0")</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span>All non-cancelled orders</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <h5>Sales This Month</h5>
-                    <h2>$@Model.SalesThisMonth.ToString("N0")</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span>From completed orders</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">
-                    <h5>Average Daily Sales</h5>
-                    <h2>$@Model.AverageDailySales.ToString("N0")</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span>This month</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info text-white mb-4">
-                <div class="card-body">
-                    <h5>Orders This Month</h5>
-                    <h2>@Model.OrdersThisMonth</h2>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span>Total bookings</span>
-                </div>
-            </div>
-        </div>
+<div class="card h-md-100">
+    <div class="card-header align-items-center border-0">
+        <h3 class="fw-bold text-gray-900 m-0">Recent Orders</h3>
     </div>
-
-    <!-- Charts Row -->
-    <div class="row">
-        <!-- Revenue by Accommodation Chart -->
-        <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar me-1"></i>
-                    Revenue by Accommodation
-                </div>
-                <div class="card-body">
-                    <canvas id="revenueByAccommodationChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Order Status Distribution Chart -->
-        <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie me-1"></i>
-                    Order Status Distribution
-                </div>
-                <div class="card-body">
-                    <canvas id="orderStatusChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Orders Timeline -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-calendar me-1"></i>
-                    Orders Timeline
-                </div>
-                <div class="card-body">
-                    <div id="ordersTimeline" style="height: 400px;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Accommodations -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-hotel me-1"></i>
-                    Top Accommodations by Revenue
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="accommodationsTable">
-                            <thead>
-                            <tr>
-                                <th>Accommodation</th>
-                                <th>Total Orders</th>
-                                <th>Revenue</th>
-                                <th>Details</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach (var accommodation in Model.AccommodationOrders)
-                            {
-                                <tr>
-                                    <td>@accommodation.Accommodation.Name</td>
-                                    <td>@accommodation.TotalOrders</td>
-                                    <td>$@accommodation.Revenue.ToString("N0")</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#accommodation-@accommodation.Accommodation.Id" aria-expanded="false">
-                                            View Orders
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="p-0">
-                                        <div class="collapse" id="accommodation-@accommodation.Accommodation.Id">
-                                            <div class="p-3">
-                                                <h6>Orders for @accommodation.Accommodation.Name</h6>
-                                                <table class="table table-sm">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Order Code</th>
-                                                        <th>Customer</th>
-                                                        <th>Check-in</th>
-                                                        <th>Check-out</th>
-                                                        <th>Status</th>
-                                                        <th>Total</th>
-                                                        <th>Services/Combos</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach (var order in accommodation.Orders)
-                                                    {
-                                                        <tr>
-                                                            <td>@order.OrderCode</td>
-                                                            <td>@order.CustomerName</td>
-                                                            <td>@order.CheckInDate.ToShortDateString()</td>
-                                                            <td>@order.CheckOutDate.ToShortDateString()</td>
-                                                            <td>@order.Status</td>
-                                                            <td>$@order.TotalPrice.ToString("N0")</td>
-                                                            <td>
-                                                                @if (order.OrderServices.Any() || order.OrderCombos.Any())
-                                                                {
-                                                                    <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse"
-                                                                            data-bs-target="#order-extras-@order.Id" aria-expanded="false">
-                                                                        View
-                                                                    </button>
-                                                                    <div class="collapse" id="order-extras-@order.Id">
-                                                                        <div class="mt-2">
-                                                                            @if (order.OrderServices.Any())
-                                                                            {
-                                                                                <h6>Services:</h6>
-                                                                                <ul class="list-unstyled ps-3">
-                                                                                    @foreach (var service in order.OrderServices)
-                                                                                    {
-                                                                                        <li>@service.Service.Name (x@service.Quantity) - $@(service.Service.Price * service.Quantity)</li>
-                                                                                    }
-                                                                                </ul>
-                                                                            }
-                                                                            @if (order.OrderCombos.Any())
-                                                                            {
-                                                                                <h6>Combos:</h6>
-                                                                                <ul class="list-unstyled ps-3">
-                                                                                    @foreach (var combo in order.OrderCombos)
-                                                                                    {
-                                                                                        <li>@combo.Combo.Name (x@combo.Quantity) - $@(combo.Combo.Price * combo.Quantity)</li>
-                                                                                    }
-                                                                                </ul>
-                                                                            }
-                                                                        </div>
-                                                                    </div>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="text-muted">None</span>
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle table-row-dashed fs-6 gy-3">
+                <thead>
+                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                    <th>Order Code</th>
+                    <th>Created</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var order in Model.RecentOrders)
+                {
+                    <tr>
+                        <td class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">
+                            @order.Order.OrderCode
+                        </td>
+                        <td>
+                            <div>@order.TimeAgo</div>
+                            <small class="text-muted">@order.Order.CreatedAt.ToString("g")</small>
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <div>
+                                    @if (!string.IsNullOrEmpty(order.UserName))
+                                    {
+                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.UserName</span>
+                                    }
+                                    else if (order.Order.User != null)
+                                    {
+                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.Order.User.UserName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(order.Order.CustomerEmail))
+                                    {
+                                        <div class="text-muted fs-7 fw-bold">@order.Order.CustomerEmail</div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-bold">$@order.Order.TotalPrice.ToString("N0")</td>
+                        <td>
+                            @{
+                                string badgeClass = order.Order.Status switch
+                                {
+                                    OrderStatus.Completed => "badge-light-success",
+                                    OrderStatus.Cancelled => "badge-light-danger",
+                                    OrderStatus.Created => "badge-light-primary",
+                                    _ => "badge-light-secondary"
+                                };
                             }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                            <span class="badge @badgeClass">@order.Order.Status</span>
+                        </td>
+                        <td>
+                            <a href="admin/orders/@order.Order.OrderCode" class="btn btn-sm btn-outline-info">
+                                View Details
+                            </a>
+                           
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
         </div>
-
     </div>
 </div>
+

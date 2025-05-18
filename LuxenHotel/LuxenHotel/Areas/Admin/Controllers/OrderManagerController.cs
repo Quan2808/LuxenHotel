@@ -180,9 +180,6 @@ public class OrderManagerController : AdminBaseController
                allowedStatuses.Contains(newStatus);
     }
 
-    /// <summary>
-    /// Validates business rules for status transitions
-    /// </summary>
     private (bool IsValid, string ErrorMessage) ValidateStatusTransition(Orders order, OrderStatus newStatus)
     {
         switch (newStatus)
