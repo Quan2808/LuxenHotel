@@ -86,6 +86,27 @@ public class Orders
 
         TotalPrice = total;
     }
+    
+    public string GetTimeElapsedSinceCreation()
+    {
+        TimeSpan elapsed = DateTime.UtcNow - CreatedAt;
+        string timeAgo;
+
+        if (elapsed.TotalMinutes < 60)
+        {
+            timeAgo = $"{Math.Floor(elapsed.TotalMinutes)} minutes ago";
+        }
+        else if (elapsed.TotalHours < 24)
+        {
+            timeAgo = $"{Math.Floor(elapsed.TotalHours)} hours ago";
+        }
+        else
+        {
+            timeAgo = $"{Math.Floor(elapsed.TotalDays)} days ago";
+        }
+
+        return timeAgo;
+    }
 }
 
 public class OrderService

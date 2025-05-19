@@ -1,0 +1,107 @@
+﻿@model LuxenHotel.Models.Entities.Orders.Orders
+
+<div class="card mb-5 mb-xl-8">
+    <!--begin::Card header-->
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="card-label fw-bold fs-3 mb-1">Order #@Model.OrderCode</span>
+            <span class="text-muted mt-1 fw-semibold fs-7">Created @Model.GetTimeElapsedSinceCreation()</span>
+        </h3>
+    </div>
+    <!--end::Card header-->
+    <!--begin::Card body-->
+    <div class="card-body py-3">
+        <!--begin::Summary-->
+        <div class="d-flex flex-column">
+            <!--begin::Details-->
+            <div class="pb-5 fs-6">
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Accommodation</div>
+                <div class="text-gray-600">
+                    @if (Model.Accommodation != null)
+                    {
+                        <a href="/Accommodations/Details/@Model.AccommodationId" class="text-gray-600 text-hover-primary">
+                            @Model.Accommodation.Name
+                        </a>
+                    }
+                    else
+                    {
+                        @:Not available
+                    }
+                </div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Check-In Date</div>
+                <div class="text-gray-600">@Model.CheckInDate.ToString("MMMM dd, yyyy")</div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Check-Out Date</div>
+                <div class="text-gray-600">@Model.CheckOutDate.ToString("MMMM dd, yyyy")</div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Number of Guests</div>
+                <div class="text-gray-600">@Model.NumberOfGuests</div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Total Price</div>
+                <div class="text-gray-600">@Model.TotalPrice.ToString("C0")</div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Payment Status</div>
+                <div class="text-gray-600">
+                    <span class="badge badge-light-@Model.PaymentStatus.ToString().ToLower()">
+                        @Model.PaymentStatus
+                    </span>
+                </div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Order Status</div>
+                <div class="text-gray-600">
+                    <span class="badge badge-light-@Model.Status.ToString().ToLower()">
+                        @Model.Status
+                    </span>
+                </div>
+                <!--end::Details item-->
+                <!--begin::Details item-->
+                <div class="fw-bold mt-5">Payment Method</div>
+                <div class="text-gray-600">@Model.PaymentMethod</div>
+                <!--end::Details item-->
+                @if (!string.IsNullOrEmpty(Model.SpecialRequests))
+                {
+                    <!--begin::Details item-->
+                    <div class="fw-bold mt-5">Special Requests</div>
+                    <div class="text-gray-600">@Model.SpecialRequests</div>
+                    <!--end::Details item-->
+                }
+                @if (Model.OrderServices.Any() || Model.OrderCombos.Any())
+                {
+                    <!--begin::Details item-->
+                    <div class="fw-bold mt-5">Additional Services & Combos</div>
+                    <div class="text-gray-600">
+                        <ul class="list-unstyled">
+                            @foreach (var service in Model.OrderServices)
+                            {
+                                <li>@service.Service?.Name (Qty: @service.Quantity) - @((service.Service?.Price * service.Quantity)?.ToString("C0") ?? "N/A")</li>
+                            }
+                            @foreach (var combo in Model.OrderCombos)
+                            {
+                                <li>@combo.Combo?.Name (Qty: @combo.Quantity) - @((combo.Combo?.Price * combo.Quantity)?.ToString("C0") ?? "N/A")</li>
+                            }
+                        </ul>
+                    </div>
+                    <!--end::Details item-->
+                }
+                @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                {
+                    <!--begin::Details item-->
+                    <div class="fw-bold mt-5">Cancellation Reason</div>
+                    <div class="text-gray-600">@Model.CancellationReason</div>
+                    <!--end::Details item-->
+                }
+            </div>
+            <!--end::Details-->
+        </div>
+        <!--end::Summary-->
+    </div>
+    <!--end::Card body-->
+</div>
