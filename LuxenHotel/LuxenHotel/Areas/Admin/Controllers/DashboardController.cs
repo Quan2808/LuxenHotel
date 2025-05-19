@@ -42,10 +42,10 @@ namespace LuxenHotel.Areas.Admin.Controllers
 
             // Calculate earnings using in-memory data
             decimal expectedEarningsThisMonth = ordersThisMonth
-                .Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Created)
+                .Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Created &&  o.CreatedAt >= firstDayOfMonth)
                 .Sum(o => o.TotalPrice);
             decimal expectedEarningsLastMonth = ordersLastMonth
-                .Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Created)
+                .Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Created &&  o.CreatedAt < firstDayOfMonth)
                 .Sum(o => o.TotalPrice);
 
             // Calculate sales for both months

@@ -140,19 +140,7 @@ public class IdentityController : Controller
                     return Redirect(returnUrl);
                 }
 
-                // Redirect based on role
-                if (roles.Contains("Admin"))
-                {
-                    return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
-                }
-                else if (roles.Contains("Staff"))
-                {
-                    return RedirectToAction("Index", "Dashboard", new { area = "Staff" });
-                }
-                else
-                {
-                    return RedirectToAction("Index", "Home", new { area = "Customer" });
-                }
+                return RedirectToAction("Index", "Home", new { area = "Customer" });
             }
 
             ModelState.AddModelError(string.Empty, "The username/email or password you entered is incorrect. Please try again.");

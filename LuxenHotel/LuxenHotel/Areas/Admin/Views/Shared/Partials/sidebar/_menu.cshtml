@@ -76,7 +76,7 @@
   </div>
 
   <!-- Users -->
-  <div data-kt-menu-trigger="click" class="menu-item">
+  <div data-kt-menu-trigger="click" class="menu-item @(controller == "UserManager" ? "here show" : "")">
     <a class="menu-link" asp-area="Admin" asp-controller="UserManager" asp-action="Index">
       <span class="menu-icon">
         <i class="fa-solid fa-users ps-1"></i>
