@@ -20,36 +20,36 @@
 
         // Collect order statuses for pie chart
         const allOrders = @Html.Raw(JsonSerializer.Serialize(
-                                                                                                                                                                                                                                            Model.AccommodationOrders
-                                                                                                                                                                                                                                                                            .SelectMany(a => a.Orders)
-                                                                                                                                                                                                                                                                            .GroupBy(o => o.Status)
-                                                                                                                                                                                                                                                                            .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
-                    .ToArray()
-                    ));
+                              Model.AccommodationOrders
+                                  .SelectMany(a => a.Orders)
+                                  .GroupBy(o => o.Status)
+                                  .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                                  .ToArray()
+                          ));
 
     // Timeline data
     const timelineOrders = @Html.Raw(JsonSerializer.Serialize(
-                                                                                                                                                                                                                                                        Model.AccommodationOrders.SelectMany(a => a.Orders)
-                                                                                                                                                                                                                                                                                        .Select(o => new
-                                                                                                                                                    {
-                                                                                                                                                        id = o.Id,
-                                                                                                                                                                                                                                                                                                        content = o.OrderCode,
-                                                                                                                                                                                                                                                                                                        start = o.CheckInDate.ToString("yyyy-MM-dd"),
-                                                                                                                                                        end = o.CheckOutDate.ToString("yyyy-MM-dd"),
-                                                                                                                                                                                                                                                                                                        title = $"{o.OrderCode} - {o.CustomerName} - {o.Status}",
-                                                                                                                                                                                                                                                                                                        group = o.AccommodationId,
-                                                                                                                                                                                                                                                                                                        className = $"status-{o.Status.ToString().ToLower()}"
-                                                                                                                                                    })
-                .ToArray()
-                ));
+                               Model.AccommodationOrders.SelectMany(a => a.Orders)
+                                   .Select(o => new
+                                   {
+                                       id = o.Id,
+                                       content = o.OrderCode,
+                                       start = o.CheckInDate.ToString("yyyy-MM-dd"),
+                                       end = o.CheckOutDate.ToString("yyyy-MM-dd"),
+                                       title = $"{o.OrderCode} - {o.CustomerName} - {o.Status}",
+                                       group = o.AccommodationId,
+                                       className = $"status-{o.Status.ToString().ToLower()}"
+                                   })
+                                   .ToArray()
+                           ));
 
     const timelineGroups = @Html.Raw(JsonSerializer.Serialize(
-                                                                                                                                                                                                                                                        Model.AccommodationOrders.Select(a => new
-                                                                                                                                    {
-                                                                                                                                        id = a.Accommodation.Id,
-                                                                                                                                                                                                                                                                        content = a.Accommodation.Name
-                                                                                                                                    }).ToArray()
-                ));
+                               Model.AccommodationOrders.Select(a => new
+                               {
+                                   id = a.Accommodation.Id,
+                                   content = a.Accommodation.Name
+                               }).ToArray()
+                           ));
 
     // Charts initialization
     document.addEventListener('DOMContentLoaded', function () {
@@ -180,34 +180,34 @@
                 <table class="table align-middle table-row-dashed fs-6 gy-3" id="kt_table_widget_4_table">
                     <!--begin::Table head-->
                     <thead>
-                        <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                            <th class="min-w-100px">Accommodation</th>
-                            <th class="text-center min-w-100px">Total Orders</th>
-                            <th class="text-end min-w-125px">Revenue</th>
-                        </tr>
+                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                        <th class="min-w-100px">Accommodation</th>
+                        <th class="text-center min-w-100px">Total Orders</th>
+                        <th class="text-end min-w-125px">Revenue</th>
+                    </tr>
                     </thead>
                     <!--end::Table head-->
 
                     <!--begin::Table body-->
                     <tbody class="fw-bold text-gray-600">
 
-                        <!-- Main table rows -->
-                        @foreach (var accommodationOrder in Model.AccommodationOrders)
-                        {
-                            <tr>
-                                <td>
-                                    @accommodationOrder.Accommodation.Name
-                                </td>
-                                <td class="text-center text-gray-800">
-                                    @accommodationOrder.TotalOrders
-                                </td>
-                                <td class="text-end">
-                                    <span class="text-gray-800 fw-bolder">
-                                        @accommodationOrder.Revenue.ToString("N0") <i class="fa-solid fa-dong-sign"></i>
-                                    </span>
-                                </td>
-                            </tr>
-                        }
+                    <!-- Main table rows -->
+                    @foreach (var accommodationOrder in Model.AccommodationOrders)
+                    {
+                        <tr>
+                            <td>
+                                @accommodationOrder.Accommodation.Name
+                            </td>
+                            <td class="text-center text-gray-800">
+                                @accommodationOrder.TotalOrders
+                            </td>
+                            <td class="text-end">
+                                <span class="text-gray-800 fw-bolder">
+                                    @accommodationOrder.Revenue.ToString("N0") <i class="fa-solid fa-dong-sign"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    }
                     </tbody>
                     <!--end::Table body-->
                 </table>
@@ -226,71 +226,74 @@
         <div class="table-responsive">
             <table class="table align-middle table-row-dashed fs-6 gy-3">
                 <thead>
-                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
-                        <th>Order Code</th>
-                        <th>Created</th>
-                        <th>Customer</th>
-                        <th class="text-center">Total</th>
-                        <th class="text-center">Status</th>
-                        <th></th>
-                    </tr>
+                <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                    <th>Order Code</th>
+                    <th>Created</th>
+                    <th>Customer</th>
+                    <th class="text-center">Total</th>
+                    <th class="text-center">Status</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var order in Model.RecentOrders)
-                    {
-                        <tr>
-                            <td class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">
-                                @order.Order.OrderCode
-                            </td>
-                            <td>
-                                <div>@order.TimeAgo</div>
-                                <small class="text-muted">@order.Order.CreatedAt.ToString("g")</small>
-                            </td>
-                            <td>
-                                <div class="d-flex">
-                                    <div>
-                                        @if (!string.IsNullOrEmpty(order.UserName))
-                                        {
-                                            <span class="text-gray-800 fs-5 fw-bold mb-1">@order.UserName</span>
-                                        }
-                                        else if (order.Order.User != null)
-                                        {
-                                            <span class="text-gray-800 fs-5 fw-bold mb-1">@order.Order.User.UserName</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">N/A</span>
-                                        }
-                                        @if (!string.IsNullOrEmpty(order.Order.CustomerEmail))
-                                        {
-                                            <div class="text-muted fs-7 fw-bold">@order.Order.CustomerEmail</div>
-                                        }
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="fw-bold text-center">@order.Order.TotalPrice.ToString("N0") <i
-                                    class="fa-solid fa-dong-sign"></i>
-                            </td>
-                            <td class="text-center">
-                                @{
-                                    string badgeClass = order.Order.Status switch
+                @foreach (var order in Model.RecentOrders)
+                {
+                    <tr>
+                        <td class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">
+                            @order.Order.OrderCode
+                        </td>
+                        <td>
+                            <div>@order.TimeAgo</div>
+                            <small class="text-muted">@order.Order.CreatedAt.ToString("g")</small>
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <div>
+                                    @if (!string.IsNullOrEmpty(order.UserName))
                                     {
-                                        OrderStatus.Completed => "badge-light-success",
-                                        OrderStatus.Cancelled => "badge-light-danger",
-                                        OrderStatus.Created => "badge-light-primary",
-                                        _ => "badge-light-secondary"
-                                    };
-                                }
-                                <span class="badge @badgeClass">@order.Order.Status</span>
-                            </td>
-                            <td>
-                                <a href="admin/orders/@order.Order.OrderCode" class="btn btn-sm btn-outline-info">
-                                    View Details
-                                </a>
+                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.UserName</span>
+                                    }
+                                    else if (order.Order.User != null)
+                                    {
+                                        <span class="text-gray-800 fs-5 fw-bold mb-1">@order.Order.User.UserName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(order.Order.CustomerEmail))
+                                    {
+                                        <div class="text-muted fs-7 fw-bold">@order.Order.CustomerEmail</div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-bold text-center">
+                            @order.Order.TotalPrice.ToString("N0")
+                            <i
+                                class="fa-solid fa-dong-sign">
+                            </i>
+                        </td>
+                        <td class="text-center">
+                            @{
+                                string badgeClass = order.Order.Status switch
+                                {
+                                    OrderStatus.Completed => "badge-light-success",
+                                    OrderStatus.Cancelled => "badge-light-danger",
+                                    OrderStatus.Created => "badge-light-primary",
+                                    _ => "badge-light-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass">@order.Order.Status</span>
+                        </td>
+                        <td>
+                            <a href="admin/orders/@order.Order.OrderCode" class="btn btn-sm btn-outline-info">
+                                View Details
+                            </a>
 
-                            </td>
-                        </tr>
-                    }
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>

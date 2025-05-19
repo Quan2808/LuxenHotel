@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using LuxenHotel.Data;
 using LuxenHotel.Models.Entities.Identity;
 using LuxenHotel.Models.Entities.Orders;
@@ -91,6 +92,7 @@ public class UserManagerController : AdminBaseController
             Roles = roles.ToList(),
             Orders = orders
         };
+
         SetPageTitle("User Details");
         return View(userViewModel);
     }

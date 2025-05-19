@@ -3,8 +3,10 @@
 @foreach (var item in Model)
 {
     <tr data-accommodation-id="@item.Id">
-        <td class="text-gray-800 text-hover-primary mb-1">
-            @item.FullName
+        <td >
+            <a class="text-gray-800 text-hover-primary mb-1" asp-controller="UserManager" asp-action="Details" asp-route-id="@item.Id">
+                @item.FullName
+            </a>
         </td>
         <td class="text-gray-600 mb-1">
             @item.Email
