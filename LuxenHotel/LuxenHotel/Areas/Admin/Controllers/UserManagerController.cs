@@ -30,24 +30,31 @@ public class UserManagerController : AdminBaseController
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
-        var users = await _userManager.Users.ToListAsync();
-        var userViewModels = new List<UserListViewModel>();
-
-        foreach (var user in users)
+        try
         {
-            var roles = await _userManager.GetRolesAsync(user);
-            userViewModels.Add(new UserListViewModel
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FullName = user.FullName,
-                Roles = string.Join(", ", roles)
-            });
-        }
+            var users = await _context.Users.ToListAsync();
+            var userViewModels = new List<UserListViewModel>();
 
-        return View(userViewModels);
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userViewModels.Add(new UserListViewModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    FullName = user.FullName,
+                    Roles = string.Join(", ", roles)
+                });
+            }
+
+            return View(userViewModels);
+        }
+        catch (Exception ex)
+        {
+            return View(new List<UserListViewModel>());
+        }
     }
 
     // GET: UserManager/Details/5

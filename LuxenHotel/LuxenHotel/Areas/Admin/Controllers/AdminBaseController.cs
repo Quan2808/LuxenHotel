@@ -9,7 +9,7 @@ namespace LuxenHotel.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public abstract class AdminBaseController : Controller
     {
-        private readonly ILogger<AdminBaseController> _logger;
+        public readonly ILogger<AdminBaseController> _logger;
 
         // Constructor để inject ILogger
         protected AdminBaseController(ILogger<AdminBaseController> logger)
