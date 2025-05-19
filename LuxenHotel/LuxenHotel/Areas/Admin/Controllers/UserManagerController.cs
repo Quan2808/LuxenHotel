@@ -48,7 +48,7 @@ public class UserManagerController : AdminBaseController
                     Roles = string.Join(", ", roles)
                 });
             }
-
+            SetPageTitle("User Listing");
             return View(userViewModels);
         }
         catch (Exception ex)
@@ -91,7 +91,7 @@ public class UserManagerController : AdminBaseController
             Roles = roles.ToList(),
             Orders = orders
         };
-
+        SetPageTitle("User Details");
         return View(userViewModel);
     }
 }
