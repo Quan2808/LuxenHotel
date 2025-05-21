@@ -74,7 +74,8 @@ public class PaymentController : Controller
             _vnPayLibrary.AddRequestData("vnp_Amount", vnp_Amount);
             _vnPayLibrary.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             _vnPayLibrary.AddRequestData("vnp_CurrCode", "VND");
-            _vnPayLibrary.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
+            _vnPayLibrary.AddRequestData("vnp_IpAddr",
+                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
             _vnPayLibrary.AddRequestData("vnp_Locale", "vn");
             _vnPayLibrary.AddRequestData("vnp_OrderInfo", vnp_OrderInfo);
             _vnPayLibrary.AddRequestData("vnp_OrderType", VnPayConfig.OrderType);
@@ -91,7 +92,8 @@ public class PaymentController : Controller
             // Create payment URL
             string paymentUrl = _vnPayLibrary.CreateRequestUrl(VnPayConfig.PayUrl, VnPayConfig.SecretKey);
 
-            _logger.LogInformation("Redirecting to VNPay for order {OrderId} with transaction {TransactionId}", order.Id, vnp_TxnRef);
+            _logger.LogInformation("Redirecting to VNPay for order {OrderId} with transaction {TransactionId}",
+                order.Id, vnp_TxnRef);
 
             return Redirect(paymentUrl);
         }
@@ -184,6 +186,44 @@ public class PaymentController : Controller
             _logger.LogError(ex, "Error processing VNPay payment return");
             TempData["ErrorMessage"] = "An error occurred while processing your payment. Please contact support.";
             return RedirectToAction("Index", "Home");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CancelPayment(int orderId)
+    {
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        if (order == null)
+        {
+            _logger.LogWarning("Order with ID {OrderId} not found for cancellation", orderId);
+            TempData["ErrorMessage"] = "Order not found. Please contact support.";
+            return RedirectToAction("Index", "Home");
+        }
+
+        try
+        {
+            // Update order to reflect cancellation
+            order.PaymentStatus = PaymentStatus.Failed;
+            order.Status = OrderStatus.Cancelled;
+            order.CancellationReason = "Payment cancelled by user in payment processing stage.";
+            order.UpdatedAt = DateTime.UtcNow;
+
+            _logger.LogInformation(
+                "Order {OrderId} cancelled by user during payment processing. Cancellation reason: {CancellationReason}",
+                order.Id, order.CancellationReason);
+            TempData["ErrorMessage"] = "Payment was cancelled. Your order has been updated accordingly.";
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Orders", new { id = orderId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing cancellation for order {OrderId}", order.Id);
+            TempData["ErrorMessage"] = "An error occurred while cancelling your payment. Please contact support.";
+            return RedirectToAction("Details", "Orders", new { id = orderId });
         }
     }
 }

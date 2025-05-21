@@ -12,11 +12,7 @@ public enum OrderStatus
 public enum PaymentMethod
 {
     Cash,
-    CreditCard,
     VNPay,
-    PayPal,
-    MoMo,
-    BankTransfer
 }
 
 public enum PaymentStatus
