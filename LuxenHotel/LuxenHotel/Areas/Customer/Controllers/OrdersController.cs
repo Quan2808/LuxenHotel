@@ -43,53 +43,23 @@ public class OrdersController : Controller
             return Unauthorized();
         }
 
-        // Set up sorting
-        ViewData["DateSortParam"] = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
-        ViewData["StatusSortParam"] = sortOrder == "Status" ? "status_desc" : "Status";
-        ViewData["PriceSortParam"] = sortOrder == "Price" ? "price_desc" : "Price";
-        ViewData["CurrentFilter"] = searchString;
+        var orders = await _context.Orders
+                .Include(o => o.Accommodation)
+                .Include(o => o.OrderServices)
+                .ThenInclude(os => os.Service)
+                .Include(o => o.OrderCombos)
+                .ThenInclude(oc => oc.Combo)
+                .Where(o => o.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
 
-        // Get orders for the current user with all related entities
-        var orders = _context.Orders
-            .Include(o => o.Accommodation)
-            .Include(o => o.OrderServices)
-            .ThenInclude(os => os.Service)
-            .Include(o => o.OrderCombos)
-            .ThenInclude(oc => oc.Combo)
-            .Where(o => o.UserId == userId);
-
-        // Apply search filter if provided
-        if (!string.IsNullOrEmpty(searchString))
-        {
-            orders = orders.Where(o =>
-                o.OrderCode.Contains(searchString) ||
-                o.Accommodation.Name.Contains(searchString) ||
-                o.CustomerName.Contains(searchString) ||
-                o.Status.ToString().Contains(searchString)
-            );
-        }
-
-        // Apply sorting
-        orders = sortOrder switch
-        {
-            "date_desc" => orders.OrderByDescending(o => o.CreatedAt),
-            "Status" => orders.OrderBy(o => o.Status),
-            "status_desc" => orders.OrderByDescending(o => o.Status),
-            "Price" => orders.OrderBy(o => o.TotalPrice),
-            "price_desc" => orders.OrderByDescending(o => o.TotalPrice),
-            _ => orders.OrderBy(o => o.CreatedAt)
-        };
-
-        // Set page size
-        int pageSize = 10;
-
-        // Get user details for additional information
         var user = await _userManager.FindByIdAsync(userId);
         ViewData["UserFullName"] = user?.FullName;
 
-        _logger.LogInformation("Retrieved {Count} orders for user {UserId}", await orders.CountAsync(), userId);
+        _logger.LogInformation("Retrieved {Count} orders for user {UserId}", orders.Count, userId);
 
-        return View(await PaginatedList<Orders>.CreateAsync(orders.AsNoTracking(), pageNumber ?? 1, pageSize));
+        // Return all orders and let DataTables handle the pagination
+        return View(orders);
     }
 
     [HttpGet]
@@ -395,6 +365,7 @@ public class OrdersController : Controller
                 logger.LogWarning($"Price for {itemType} with ID {{ItemId}} not found.", itemId);
             }
         }
+
         return total;
     }
 
@@ -407,8 +378,8 @@ public class OrdersController : Controller
         Func<int, int, TOrderItem> createOrderItem,
         string itemType,
         ILogger logger)
-    where TOrderItem : class
-    where TEntity : class?
+        where TOrderItem : class
+        where TEntity : class?
     {
         if (selectedIds != null && selectedIds.Length > 0 && quantities != null && quantities.Length > 0)
         {
@@ -427,6 +398,7 @@ public class OrdersController : Controller
                         {
                             prices[selectedIds[i]] = (int)priceProperty.GetValue(entity);
                         }
+
                         logger.LogInformation($"Added {itemType} {{Id}} with quantity {{Quantity}} to order",
                             selectedIds[i], quantities[i]);
                     }
