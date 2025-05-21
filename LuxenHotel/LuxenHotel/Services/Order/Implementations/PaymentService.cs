@@ -265,11 +265,7 @@ public class PaymentService : IPaymentService
     {
         string prefix = method switch
         {
-            PaymentMethod.CreditCard => "CC",
             PaymentMethod.VNPay => "VNP",
-            PaymentMethod.PayPal => "PP",
-            PaymentMethod.MoMo => "MM",
-            PaymentMethod.BankTransfer => "BT",
             PaymentMethod.Cash => "CASH",
             _ => "TXN"
         };

@@ -1,0 +1,85 @@
+﻿@model PaymentReturnModel
+@{
+    ViewData["Title"] = Model.IsSuccess ? "Payment Successful" : "Payment Failed";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header @(Model.IsSuccess ? "bg-success" : "bg-danger") text-white">
+                    <h3 class="mb-0">@(Model.IsSuccess ? "Payment Successful" : "Payment Failed")</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.IsSuccess)
+                    {
+                        <div class="text-center mb-4">
+                            <i class="fa fa-check-circle text-success" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Thank you for your payment!</h4>
+                            <p>Your booking has been confirmed.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center mb-4">
+                            <i class="fa fa-times-circle text-danger" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Payment Failed</h4>
+                            <p>Unfortunately, your payment could not be processed.</p>
+                        </div>
+                    }
+
+                    <div class="payment-details">
+                        <h5>Payment Details</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <td>@Model.TransactionId</td>
+                                </tr>
+                                <tr>
+                                    <th>Amount</th>
+                                    <td>@Model.Amount.ToString("N0") VND</td>
+                                </tr>
+                                <tr>
+                                    <th>Order Info</th>
+                                    <td>@Model.OrderInfo</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>
+                                        @if (Model.IsSuccess)
+                                        {
+                                            <span class="badge bg-success">Success</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Failed (Code: @Model.ResponseCode)</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        @if (Model.IsSuccess)
+                        {
+                            <a href="/orders/myorders" class="btn btn-primary">
+                                View My Bookings
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Orders")" class="btn btn-primary">
+                                Try Again
+                            </a>
+                        }
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                            Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

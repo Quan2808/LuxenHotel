@@ -1,0 +1,54 @@
+@model LuxenHotel.Models.Entities.Orders.Orders
+@{
+    ViewData["Title"] = "Payment Processing";
+    var order = ViewData["Order"] as LuxenHotel.Models.Entities.Orders.Orders;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Payment Confirmation</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p class="mb-0">You're about to be redirected to VNPay to complete your payment.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Order Summary</h5>
+                            <p><strong>Order Code:</strong> @order.OrderCode</p>
+                            <p><strong>Accommodation:</strong> @order.Accommodation.Name</p>
+                            <p><strong>Check-in:</strong> @order.CheckInDate.ToString("dddd, MMMM d, yyyy")</p>
+                            <p><strong>Check-out:</strong> @order.CheckOutDate.ToString("dddd, MMMM d, yyyy")</p>
+                            <p><strong>Number of Guests:</strong> @order.NumberOfGuests</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Payment Details</h5>
+                            <p><strong>Customer:</strong> @order.CustomerName</p>
+                            <p><strong>Email:</strong> @order.CustomerEmail</p>
+                            <p><strong>Phone:</strong> @order.CustomerPhone</p>
+                            <p><strong>Total Amount:</strong> @order.TotalPrice.ToString("N0") VND</p>
+                            <p><strong>Payment Method:</strong> VNPay</p>
+                        </div>
+                    </div>
+
+                    <form asp-action="VnPayCheckout" asp-controller="Payment" asp-area="Customer" method="post">
+                        <input type="hidden" name="orderId" value="@order.Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Proceed to Payment <i class="fa fa-arrow-right ms-2"></i>
+                            </button>
+                            <a href="@Url.Action("Details", "Orders", new { id = order.Id })"
+                                class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

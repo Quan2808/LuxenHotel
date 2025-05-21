@@ -23,9 +23,9 @@ public class OrdersController : Controller
     private readonly ILogger<OrdersController> _logger;
 
     public OrdersController(
-     UserManager<User> userManager,
-     ApplicationDbContext context,
-     ILogger<OrdersController> logger)
+        UserManager<User> userManager,
+        ApplicationDbContext context,
+        ILogger<OrdersController> logger)
     {
         _userManager = userManager;
         _context = context;
@@ -53,9 +53,9 @@ public class OrdersController : Controller
         var orders = _context.Orders
             .Include(o => o.Accommodation)
             .Include(o => o.OrderServices)
-                .ThenInclude(os => os.Service)
+            .ThenInclude(os => os.Service)
             .Include(o => o.OrderCombos)
-                .ThenInclude(oc => oc.Combo)
+            .ThenInclude(oc => oc.Combo)
             .Where(o => o.UserId == userId);
 
         // Apply search filter if provided
@@ -107,9 +107,9 @@ public class OrdersController : Controller
             .Include(o => o.Accommodation)
             .Include(o => o.User)
             .Include(o => o.OrderServices)
-                .ThenInclude(os => os.Service)
+            .ThenInclude(os => os.Service)
             .Include(o => o.OrderCombos)
-                .ThenInclude(oc => oc.Combo)
+            .ThenInclude(oc => oc.Combo)
             .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
         if (order == null)
@@ -164,12 +164,13 @@ public class OrdersController : Controller
     {
         // Verify accommodation exists
         var accommodation = await _context.Accommodations
-                .FirstOrDefaultAsync(a => a.Id == accommodationId);
+            .FirstOrDefaultAsync(a => a.Id == accommodationId);
 
         if (accommodation == null)
         {
             return NotFound();
         }
+
         var viewModel = new OrderCreateViewModel
         {
             AccommodationId = accommodationId,
@@ -220,7 +221,8 @@ public class OrdersController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Route("Orders/Create/{accommodationId:int}")]
-    public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel, int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
+    public async Task<IActionResult> Create(int accommodationId, OrderCreateViewModel viewModel,
+        int[] selectedServiceIds, int[] serviceQuantities, int[] selectedComboIds, int[] comboQuantities)
     {
         // Ensure AccommodationId matches route parameter
         if (viewModel.AccommodationId != accommodationId)
@@ -277,87 +279,29 @@ public class OrdersController : Controller
                 Dictionary<int, int> servicePrices = new Dictionary<int, int>();
                 Dictionary<int, int> comboPrices = new Dictionary<int, int>();
 
-                // Add services
-                if (selectedServiceIds != null && selectedServiceIds.Length > 0 && serviceQuantities != null && serviceQuantities.Length > 0)
-                {
-                    _logger.LogInformation("Processing {ServiceCount} selected services", selectedServiceIds.Length);
-                    for (int i = 0; i < Math.Min(selectedServiceIds.Length, serviceQuantities.Length); i++)
-                    {
-                        if (selectedServiceIds[i] > 0 && serviceQuantities[i] > 0)
-                        {
-                            var service = await _context.Services
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(s => s.Id == selectedServiceIds[i]);
+                // Process services
+                await ProcessOrderItems(
+                    selectedServiceIds,
+                    serviceQuantities,
+                    order.OrderServices,
+                    servicePrices,
+                    id => _context.Services.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id),
+                    (id, quantity) => new OrderService { ServiceId = id, Quantity = quantity },
+                    "service",
+                    _logger
+                );
 
-                            if (service != null)
-                            {
-                                var orderService = new OrderService
-                                {
-                                    ServiceId = selectedServiceIds[i],
-                                    Quantity = serviceQuantities[i]
-                                };
-                                order.OrderServices.Add(orderService);
-                                servicePrices[selectedServiceIds[i]] = service.Price;
-                                _logger.LogInformation("Added service {ServiceId} with quantity {Quantity} to order",
-                                    selectedServiceIds[i], serviceQuantities[i]);
-                            }
-                            else
-                            {
-                                _logger.LogWarning("Service with ID {ServiceId} not found.", selectedServiceIds[i]);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Invalid service data at index {Index}: ServiceId={ServiceId}, Quantity={Quantity}",
-                                i, selectedServiceIds[i], serviceQuantities[i]);
-                        }
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("No valid services selected or quantities provided.");
-                }
-
-                // Add combos
-                if (selectedComboIds != null && selectedComboIds.Length > 0 && comboQuantities != null && comboQuantities.Length > 0)
-                {
-                    _logger.LogInformation("Processing {ComboCount} selected combos", selectedComboIds.Length);
-                    for (int i = 0; i < Math.Min(selectedComboIds.Length, comboQuantities.Length); i++)
-                    {
-                        if (selectedComboIds[i] > 0 && comboQuantities[i] > 0)
-                        {
-                            var combo = await _context.Combos
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(c => c.Id == selectedComboIds[i]);
-
-                            if (combo != null)
-                            {
-                                var orderCombo = new OrderCombo
-                                {
-                                    ComboId = selectedComboIds[i],
-                                    Quantity = comboQuantities[i]
-                                };
-                                order.OrderCombos.Add(orderCombo);
-                                comboPrices[selectedComboIds[i]] = combo.Price;
-                                _logger.LogInformation("Added combo {ComboId} with quantity {Quantity} to order",
-                                    selectedComboIds[i], comboQuantities[i]);
-                            }
-                            else
-                            {
-                                _logger.LogWarning("Combo with ID {ComboId} not found.", selectedComboIds[i]);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Invalid combo data at index {Index}: ComboId={ComboId}, Quantity={Quantity}",
-                                i, selectedComboIds[i], comboQuantities[i]);
-                        }
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("No valid combos selected or quantities provided.");
-                }
+                // Process combos
+                await ProcessOrderItems(
+                    selectedComboIds,
+                    comboQuantities,
+                    order.OrderCombos,
+                    comboPrices,
+                    id => _context.Combos.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id),
+                    (id, quantity) => new OrderCombo { ComboId = id, Quantity = quantity },
+                    "combo",
+                    _logger
+                );
 
                 // Generate order code
                 order.OrderCode = Guid.NewGuid().ToString("N")[..10].ToUpper();
@@ -367,29 +311,42 @@ public class OrdersController : Controller
                 int numberOfDays = Math.Max(1, (int)Math.Ceiling((order.CheckOutDate - order.CheckInDate).TotalDays));
                 int totalPrice = accommodationPriceForCalculation * numberOfDays;
 
-                foreach (var orderService in order.OrderServices)
-                {
-                    if (servicePrices.TryGetValue(orderService.ServiceId, out int servicePrice))
-                    {
-                        totalPrice += orderService.Quantity * servicePrice;
-                    }
-                }
+                // Calculate service total
+                totalPrice += CalculateOrderItemsTotal(
+                    order.OrderServices,
+                    servicePrices,
+                    item => item.ServiceId,
+                    item => item.Quantity,
+                    "service",
+                    _logger
+                );
 
-                foreach (var orderCombo in order.OrderCombos)
-                {
-                    if (comboPrices.TryGetValue(orderCombo.ComboId, out int comboPrice))
-                    {
-                        totalPrice += orderCombo.Quantity * comboPrice;
-                    }
-                }
+                // Calculate combo total
+                totalPrice += CalculateOrderItemsTotal(
+                    order.OrderCombos,
+                    comboPrices,
+                    item => item.ComboId,
+                    item => item.Quantity,
+                    "combo",
+                    _logger
+                );
 
                 order.TotalPrice = totalPrice;
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Successfully created order with ID {OrderId} containing {ServiceCount} services and {ComboCount} combos",
+                _logger.LogInformation(
+                    "Successfully created order with ID {OrderId} containing {ServiceCount} services and {ComboCount} combos",
                     order.Id, order.OrderServices.Count, order.OrderCombos.Count);
 
+                // Check if VNPay is selected and redirect to payment processor
+                if (order.PaymentMethod == PaymentMethod.VNPay)
+                {
+                    _logger.LogInformation("Redirecting to VNPay payment gateway for order {OrderId}", order.Id);
+                    return RedirectToAction("ProcessPayment", "Payment", new { area = "Customer", orderId = order.Id });
+                }
+
+                // Otherwise, show the order details
                 return RedirectToAction(nameof(Details), new { id = order.Id });
             }
             catch (Exception ex)
@@ -416,7 +373,84 @@ public class OrdersController : Controller
         return View(viewModel);
     }
 
+    private int CalculateOrderItemsTotal<TOrderItem>(
+        IEnumerable<TOrderItem> orderItems,
+        Dictionary<int, int> prices,
+        Func<TOrderItem, int> getItemId,
+        Func<TOrderItem, int> getQuantity,
+        string itemType,
+        ILogger logger)
+    {
+        int total = 0;
+        foreach (var item in orderItems)
+        {
+            int itemId = getItemId(item);
+            if (prices.TryGetValue(itemId, out int itemPrice))
+            {
+                int quantity = getQuantity(item);
+                total += quantity * itemPrice;
+            }
+            else
+            {
+                logger.LogWarning($"Price for {itemType} with ID {{ItemId}} not found.", itemId);
+            }
+        }
+        return total;
+    }
+
+    private async Task ProcessOrderItems<TOrderItem, TEntity>(
+        int[] selectedIds,
+        int[] quantities,
+        List<TOrderItem> orderItems,
+        Dictionary<int, int> prices,
+        Func<int, Task<TEntity>> fetchEntity,
+        Func<int, int, TOrderItem> createOrderItem,
+        string itemType,
+        ILogger logger)
+    where TOrderItem : class
+    where TEntity : class?
+    {
+        if (selectedIds != null && selectedIds.Length > 0 && quantities != null && quantities.Length > 0)
+        {
+            logger.LogInformation($"Processing {{Count}} selected {itemType}s", selectedIds.Length);
+            for (int i = 0; i < Math.Min(selectedIds.Length, quantities.Length); i++)
+            {
+                if (selectedIds[i] > 0 && quantities[i] > 0)
+                {
+                    var entity = await fetchEntity(selectedIds[i]);
+                    if (entity != null)
+                    {
+                        var orderItem = createOrderItem(selectedIds[i], quantities[i]);
+                        orderItems.Add(orderItem);
+                        var priceProperty = entity.GetType().GetProperty("Price");
+                        if (priceProperty != null)
+                        {
+                            prices[selectedIds[i]] = (int)priceProperty.GetValue(entity);
+                        }
+                        logger.LogInformation($"Added {itemType} {{Id}} with quantity {{Quantity}} to order",
+                            selectedIds[i], quantities[i]);
+                    }
+                    else
+                    {
+                        logger.LogWarning($"{itemType} with ID {{Id}} not found.", selectedIds[i]);
+                    }
+                }
+                else
+                {
+                    logger.LogWarning(
+                        $"Invalid {itemType} data at index {{Index}}: Id={{Id}}, Quantity={{Quantity}}",
+                        i, selectedIds[i], quantities[i]);
+                }
+            }
+        }
+        else
+        {
+            logger.LogInformation($"No valid {itemType}s selected or quantities provided.");
+        }
+    }
+
     // GET: Orders/Details/5
+    [HttpGet]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -427,9 +461,9 @@ public class OrdersController : Controller
         var order = await _context.Orders
             .Include(o => o.Accommodation)
             .Include(o => o.OrderServices)
-                .ThenInclude(os => os.Service)
+            .ThenInclude(os => os.Service)
             .Include(o => o.OrderCombos)
-                .ThenInclude(oc => oc.Combo)
+            .ThenInclude(oc => oc.Combo)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null)
@@ -437,7 +471,39 @@ public class OrdersController : Controller
             return NotFound();
         }
 
-        return View(order);
+        // Map Orders to OrderDetailsViewModel
+        var viewModel = new OrderDetailsViewModel
+        {
+            OrderId = order.Id,
+            OrderCode = order.OrderCode,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            CustomerPhone = order.CustomerPhone,
+            AccommodationName = order.Accommodation?.Name,
+            TotalPrice = order.TotalPrice,
+            PaymentStatus = order.PaymentStatus.ToString(),
+            OrderStatus = order.Status.ToString(),
+            CheckInDate = order.CheckInDate,
+            CheckOutDate = order.CheckOutDate,
+            NumberOfGuests = order.NumberOfGuests,
+            SpecialRequests = order.SpecialRequests,
+            CancellationReason = order.CancellationReason,
+            CreatedAt = order.CreatedAt,
+            Services = order.OrderServices.Select(os => new OrderServiceViewModel
+            {
+                ServiceName = os.Service?.Name, // Assuming Service has a Name property
+                Quantity = os.Quantity,
+                Price = os.Service?.Price ?? 0 // Assuming Service has a Price property
+            }).ToList(),
+            Combos = order.OrderCombos.Select(oc => new OrderComboViewModel
+            {
+                ComboName = oc.Combo?.Name, // Assuming Combo has a Name property
+                Quantity = oc.Quantity,
+                Price = oc.Combo?.Price ?? 0 // Assuming Combo has a Price property
+            }).ToList()
+        };
+
+        return View(viewModel);
     }
 
 

@@ -80,7 +80,7 @@ namespace LuxenHotel
                     name: "vnpayReturn",
                     areaName: "Customer",
                     pattern: "vnpay/return",
-                    defaults: new { controller = "Product", action = "Return" });
+                    defaults: new { controller = "Payment", action = "PaymentReturn" });
 
                 // Customer Area: Short route for HomeController
                 endpoints.MapAreaControllerRoute(

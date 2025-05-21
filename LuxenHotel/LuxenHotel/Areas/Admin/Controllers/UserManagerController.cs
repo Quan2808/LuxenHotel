@@ -52,7 +52,7 @@ public class UserManagerController : AdminBaseController
             SetPageTitle("User Listing");
             return View(userViewModels);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return View(new List<UserListViewModel>());
         }
